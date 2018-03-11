@@ -5,7 +5,7 @@ module JWTSessions
     protected
 
     def authenticate_request!
-      invalid_authentication unless payload && Token.valid_payload?(payload)
+      invalid_authentication unless Token.valid_payload?(payload)
       check_csrf
     end
 
@@ -14,7 +14,7 @@ module JWTSessions
     end
 
     def get_from_payload(key)
-      payload && payload[key]
+      payload[key]
     end
 
     def token_type
@@ -53,9 +53,12 @@ module JWTSessions
 
     private
 
-    # TODO: raise error if nil
     def payload
-      @payload ||= Token.decode(@token).first if @token
+      @payload ||= begin
+        payload = Token.decode(@token)&.first
+        raise Errors::Unauthorized, 'undefined payload' unless payload
+        payload
+      end
     end
   end
 end

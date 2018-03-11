@@ -10,7 +10,24 @@ module JWTSessions
       end
 
       def get_csrf(uid)
-        instance.get("#{JWTSessions.tokens_prefix}_#{uid}")
+        instance.get("#{JWTSessions.token_prefix}_#{uid}")
+      end
+
+      def set_refresh(token)
+        refresh_key = "#{JWTSessions::token_prefix}refresh_#{token[:uid]}"
+        instance.hmset(refresh_key,
+                       :expires_at, token[:expires_at],
+                       :salt, token[:salt],
+                       :uid, token[:uid])
+        instance.expireat(refresh_key, token[:expires_at].to_i)
+      end
+
+      def get_refresh(uid)
+        instance.hmget("#{JWTSessions::token_prefix}refresh_#{uid}", :expires_at, :salt, :uid)
+      end
+
+      def destroy_refresh(uid)
+        instance.del("#{JWTSessions::token_prefix}refresh_#{uid}")
       end
     end
   end

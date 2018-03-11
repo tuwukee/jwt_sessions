@@ -14,15 +14,17 @@ module JWTSessions
 
   DEFAULT_SETTONGS_KEYS = %i[redis_host
                              redis_db_name
-                             tokens_prefix
+                             token_prefix
                              algorithm
                              encryption_key
-                             expiration_time].freeze
+                             exp_time
+                             refresh_exp_time].freeze
   DEFAULT_REDIS_HOST = 'redis://127.0.0.1:6379'
   DEFAULT_REDIS_DB_NAME = 'jwtokens'
-  DEFAULT_TOKENS_PREFIX = 'jwt_'
+  DEFAULT_TOKEN_PREFIX = 'jwt_'
   DEFAULT_ALGORITHM = 'HS256'
-  DEFAULT_EXPIRATION_TIME = 3600 # 1 hour in seconds
+  DEFAULT_EXP_TIME = 3600 # 1 hour in seconds
+  DEFAULT_REFRESH_EXP_TIME = 604800 # 1 week in seconds
 
   DEFAULT_SETTONGS_KEYS.each do |setting|
     define_method(setting) do
