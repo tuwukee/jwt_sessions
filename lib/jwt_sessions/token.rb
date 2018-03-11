@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'jwt'
 
 module JWTSessions
@@ -10,9 +11,11 @@ module JWTSessions
 
     def self.decode(token)
       JWT.decode(token, JWTSessions.encryption_key, true, { algorithm: JWTSessions.algorithm })
+    rescue StandardError
+      raise DecodeError
     end
 
-    def self.valid_payload(payload)
+    def self.valid_payload?(payload)
       !expired(payload)
     end
 

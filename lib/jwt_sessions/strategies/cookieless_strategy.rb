@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module JWTSessions
   module Strategies
     class CookielessStrategy
@@ -7,11 +8,11 @@ module JWTSessions
         refresh: 'X-Refresh-Token'
       }.freeze
 
-      def self.resolve(request, token_type = :access)
+      def self.resolve(request_headers, token_type = :access)
         header = TOKEN_TYPE_HEADERS[token_type]
         token = nil
         if header
-          auth_header = request.headers[header]
+          auth_header = request_headers[header]
           token = auth_header.split(' ').last if auth_header
         end
         raise Errors::Unauthorized, "#{token_type} token not found" unless token

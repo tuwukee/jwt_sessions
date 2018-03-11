@@ -2,6 +2,8 @@
 
 require 'jwt_sessions/errors'
 require 'jwt_sessions/token'
+require 'jwt_sessions/token_store'
+require 'jwt_sessions/refresh_token'
 require 'jwt_sessions/strategies/cookie_based_strategy'
 require 'jwt_sessions/strategies/cookieless_strategy'
 require 'jwt_sessions/authorization'
@@ -17,7 +19,7 @@ module JWTSessions
                              encryption_key
                              expiration_time].freeze
   DEFAULT_REDIS_HOST = 'redis://127.0.0.1:6379'
-  DEFAULT_REDIS_DB_NAME = 'jwt_tokens'
+  DEFAULT_REDIS_DB_NAME = 'jwtokens'
   DEFAULT_TOKENS_PREFIX = 'jwt_'
   DEFAULT_ALGORITHM = 'HS256'
   DEFAULT_EXPIRATION_TIME = 3600 # 1 hour in seconds

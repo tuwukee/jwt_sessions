@@ -1,0 +1,4 @@
+*.gem
+spec/dummy_api/db/*.sqlite3
+spec/dummy_api/log/*.log
+spec/dummy_api/tmp/
