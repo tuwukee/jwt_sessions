@@ -5,6 +5,12 @@ module JWTSessions
     protected
 
     def authenticate_request!
+      begin
+        cookieless_auth
+      rescue Errors::Unauthorized
+        cookie_based_auth
+      end
+
       invalid_authentication unless Token.valid_payload?(payload)
       check_csrf
     end

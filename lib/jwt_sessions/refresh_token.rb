@@ -1,28 +1,20 @@
 # frozen_string_literal: true
 
-require 'securerandom'
-
 module JWTSessions
   class RefreshToken
-    CSRF_LENGTH = 32
-    attr_reader :expires_at, :uid
-    attr_accessor :salt
+    attr_reader :expires_at, :uid, :token
 
     class << self
-      def create(uid)
-        token = {
-          expires_at: Time.now + JWTSessions.refresh_exp_time,
-          salt: SecureRandom.base64(CSRF_LENGTH),
-          uid: uid
-        }
-        TokenStore.set_refresh(token)
-        new(token.values)
+      def create(uid, salt, access_token_uid, access_expiration)
+        refresh_expiration = Time.now + JWTSessions.refresh_exp_time
+        persist_in_store(uid, salt, access_token_uid, access_expiration, refresh_expiration)
+        new(uid, refresh_expiration)
       end
 
       def find(uid)
         token_attrs = TokenStore.get_refresh(uid)
         raise Errors::Unauthorized, 'Refresh token not found' if token_attrs.empty?
-        new(token_attrs)
+        new(uid, token_attrs[:refresh_expires_at])
       end
 
       def destroy(uid)
@@ -30,18 +22,26 @@ module JWTSessions
       end
     end
 
-    def initialize(attrs)
-      @expires_at, @salt, @uid = attrs
+    def initialize(uid, expires_at)
+      @uid = uid
+      @expires_at = expires_at
+      @token = Token.encode(uid: uid, exp: expires_at.to_i)
     end
 
-    def update_salt
+    def update_salt(new_salt)
+      TokenStore.update_refresh_salt(uid, new_salt)
+    end
+
+    private
+
+    def persist_in_store(uid, salt, access_token_uid, access_expiration, refresh_expiration)
       token = {
-        expires_at: expires_at,
-        salt: SecureRandom.base64(CSRF_LENGTH),
-        uid: uid
+        access_expires_at: access_expiration,
+        refresh_expires_at: refresh_expiration,
+        salt: salt,
+        access_uid: access_token_uid
       }
-      TokenStore.set_refresh(token)
-      self.salt = token[:salt]
+      TokenStore.set_refresh(uid, token)
     end
   end
 end

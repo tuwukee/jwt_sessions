@@ -13,21 +13,50 @@ module JWTSessions
         instance.get("#{JWTSessions.token_prefix}_#{uid}")
       end
 
-      def set_refresh(token)
-        refresh_key = "#{JWTSessions::token_prefix}refresh_#{token[:uid]}"
-        instance.hmset(refresh_key,
-                       :expires_at, token[:expires_at],
-                       :salt, token[:salt],
-                       :uid, token[:uid])
-        instance.expireat(refresh_key, token[:expires_at].to_i)
+      def set_refresh(uid, token)
+        key = refresh_key(uid)
+        instance.hmset(key,
+                       :access_expires_at, token.fetch(:access_expires_at),
+                       :refresh_expires_at, token.fetch(:refresh_expires_at),
+                       :salt, token.fetch(:salt),
+                       :access_uid, token.fetch(:uid))
+        instance.expireat(key, token[:refresh_expires_at].to_i)
       end
 
       def get_refresh(uid)
-        instance.hmget("#{JWTSessions::token_prefix}refresh_#{uid}", :expires_at, :salt, :uid)
+        instance.hmget(refresh_key(uid), :access_expires_at, :refresh_expires_at, :salt, :access_uid)
+      end
+
+      def update_refresh_salt(uid, new_salt)
+        instance.hset(refresh_key(uid), :salt, new_salt)
       end
 
       def destroy_refresh(uid)
-        instance.del("#{JWTSessions::token_prefix}refresh_#{uid}")
+        instance.del(refresh_key(uid))
+      end
+
+      def set_access(uid, salt, exp)
+        key = access_key(uid)
+        instance.set(key, salt)
+        instance.expireat(key, exp)
+      end
+
+      def get_access(uid)
+        instance.get(access_key(uid))
+      end
+
+      def destroy_access(uid)
+        instance.del(access_key(uid))
+      end
+
+      private
+
+      def access_key(uid)
+        "#{JWTSessions.token_prefix}_#{uid}"
+      end
+
+      def refresh_key(uid)
+        "#{JWTSessions::token_prefix}refresh_#{uid}"
       end
     end
   end
