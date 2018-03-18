@@ -14,6 +14,7 @@ class TestJWTSessions < Minitest::Test
   end
 
   def test_encryption_key
+    JWTSessions.encryption_key = nil
     assert_raises JWTSessions::Errors::Malconfigured do
       JWTSessions.encryption_key
     end

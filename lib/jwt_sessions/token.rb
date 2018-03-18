@@ -4,27 +4,31 @@ require 'jwt'
 
 module JWTSessions
   class Token
-    def self.encode(payload)
-      exp_payload = meta.merge(payload)
-      JWT.encode(exp_payload, JWTSessions.encryption_key, JWTSessions.algorithm)
-    end
+    class << self
+      def encode(payload)
+        exp_payload = meta.merge(payload)
+        JWT.encode(exp_payload, JWTSessions.encryption_key, JWTSessions.algorithm)
+      end
 
-    def self.decode(token)
-      JWT.decode(token, JWTSessions.encryption_key, true, { algorithm: JWTSessions.algorithm })
-    rescue StandardError
-      raise DecodeError
-    end
+      def decode(token)
+        JWT.decode(token, JWTSessions.encryption_key, true, { algorithm: JWTSessions.algorithm })
+      rescue StandardError
+        raise Errors::Unauthorized, 'cannot decode the token'
+      end
 
-    def self.valid_payload?(payload)
-      !expired(payload)
-    end
+      def valid_payload?(payload)
+        !expired?(payload)
+      end
 
-    def self.meta
-      { exp: Time.now.to_i + JWTSessions.expiration_time.to_i }
-    end
+      def meta
+        { exp: Time.now.to_i + JWTSessions.exp_time.to_i }
+      end
 
-    def self.expired(payload)
-      Time.at(payload['exp']) < Time.now
+      def expired?(payload)
+        Time.at(payload['exp']) < Time.now
+      rescue StandardError
+        raise Errors::Unauthorized, 'invalid payload expiration time'
+      end
     end
   end
 end

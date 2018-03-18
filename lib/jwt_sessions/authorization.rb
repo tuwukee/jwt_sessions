@@ -60,11 +60,7 @@ module JWTSessions
     private
 
     def payload
-      @payload ||= begin
-        payload = Token.decode(@token)&.first
-        raise Errors::Unauthorized, 'undefined payload' unless payload
-        payload
-      end
+      @payload ||= Token.decode(@token).first
     end
   end
 end
