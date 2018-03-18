@@ -12,7 +12,8 @@ Gem::Specification.new do |s|
   s.homepage    = 'http://rubygems.org/gems/jwt_sessions'
   s.license     = 'MIT'
 
-  s.files         = Dir['*', 'lib/**/*']
+  s.files         = Dir['*', 'lib/**/*', 'LICENSE', 'README.md']
+  s.test_files    = Dir['test/units/*', 'test/units/**/*']
   s.require_paths = ['lib']
 
   s.add_dependency 'jwt', '~>1.4'

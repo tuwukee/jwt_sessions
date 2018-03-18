@@ -23,7 +23,7 @@ module JWTSessions
 
     def masked_csrf(refresh_payload)
       token = retrieve_refresh_token(refresh_payload)
-      CsrfToken.new(token.csrf).token
+      CSRFToken.new(token.csrf).token
     end
 
     def all
@@ -71,7 +71,7 @@ module JWTSessions
     end
 
     def create_csrf_token
-      @_csrf = CsrfToken.create
+      @_csrf = CSRFToken.create
       @csrf_token = @_csrf.token
     end
 

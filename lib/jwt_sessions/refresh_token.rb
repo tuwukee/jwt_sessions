@@ -16,10 +16,10 @@ module JWTSessions
         raise Errors::Unauthorized, 'Refresh token not found' if token_attrs.empty?
         new(uid, token_attrs[:refresh_expires_at])
       end
+    end
 
-      def destroy(uid)
-        TokenStore.destroy_refresh(uid)
-      end
+    def destroy
+      TokenStore.destroy_refresh(uid)
     end
 
     def initialize(uid, expires_at)
