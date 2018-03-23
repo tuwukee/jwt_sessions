@@ -71,7 +71,7 @@ module JWTSessions
     end
 
     def create_csrf_token
-      @_csrf = CSRFToken.create
+      @_csrf = CSRFToken.new
       @csrf_token = @_csrf.token
     end
 
