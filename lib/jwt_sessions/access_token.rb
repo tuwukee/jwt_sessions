@@ -14,7 +14,7 @@ module JWTSessions
     class << self
       def create(auth_id, csrf, payload)
         new(auth_id, csrf, payload).tap do |inst|
-          TokenStore.set_access(inst.uid, { auth_id: inst.auth_id, csrf: inst.csrf, expiration: inst.expiration })
+          TokenStore.set_access(inst.uid, { auth_id: inst.auth_id, csrf: inst.csrf, exp: inst.expiration })
         end
       end
 

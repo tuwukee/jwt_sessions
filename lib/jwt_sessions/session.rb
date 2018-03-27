@@ -73,8 +73,8 @@ module JWTSessions
       @csrf_token = @_csrf.token
     end
 
-    def craete_refresh_token
-      @_refresh = RefreshToken.create(auth_uid, @_csrf.encoded, @_access.uid, @_access.expiration)
+    def create_refresh_token
+      @_refresh = RefreshToken.create(auth_id, @_csrf.encoded, @_access.uid, @_access.expiration)
       @refresh_token = @_refresh.token
     end
 

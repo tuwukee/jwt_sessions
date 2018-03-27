@@ -35,10 +35,10 @@ module JWTSessions
         instance.del(refresh_key(uid))
       end
 
-      def set_access(uid, salt, exp)
+      def set_access(uid, payload)
         key = access_key(uid)
-        instance.set(key, salt)
-        instance.expireat(key, exp)
+        instance.set(key, payload)
+        instance.expireat(key, payload[:exp])
       end
 
       def get_access(uid)

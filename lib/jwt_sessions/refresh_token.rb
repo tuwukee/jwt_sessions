@@ -6,6 +6,7 @@ module JWTSessions
 
     def initialize(auth_id, csrf, access_uid, access_expiration, uid = nil, expiration = nil)
       @auth_id           = auth_id
+      @csrf              = csrf
       @access_uid        = access_uid
       @access_expiration = access_expiration
       @uid               = uid || SecureRandom.uuid
@@ -21,9 +22,14 @@ module JWTSessions
       end
 
       def create(auth_id, csrf, access_uid, access_expiration)
-        new(auth_id, csrf, access_uid, access_expiration).tap do
-          persist_in_store(auth_id, uid, csrf, access_token_uid, access_expiration, refresh_expiration)
-        end
+        inst = new(auth_id, csrf, access_uid, access_expiration)
+        inst.send(:persist_in_store, auth_id,
+                                     inst.uid,
+                                     csrf,
+                                     access_uid,
+                                     access_expiration,
+                                     inst.expiration)
+        inst
       end
 
       def find(auth_id, uid)
