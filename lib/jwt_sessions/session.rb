@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'securerandom'
-
 module JWTSessions
   class Session
     attr_reader :access_token, :refresh_token, :csrf_token
@@ -42,8 +40,8 @@ module JWTSessions
     private
 
     def retrieve_refresh_token(payload)
-      id = refresh_payload['id']
-      @_refresh = RefreshToken.find(id, auth_id)
+      uid = refresh_payload['token_uid']
+      @_refresh = RefreshToken.find(uid, auth_id)
       raise Errors::Unauthorized unless @_refresh
       @_refresh
     end
@@ -54,7 +52,7 @@ module JWTSessions
 
     def check_refresh_on_time
       expiration = @_refresh.access_expiration
-      yield @_refresh.id, auth_id, expiration if expiration > Time.now
+      yield @_refresh.uid, auth_id, expiration if expiration > Time.now
     end
 
     def issue_tokens_after_refresh
@@ -66,7 +64,7 @@ module JWTSessions
     end
 
     def update_refresh_token
-      @_refresh.update_token(@_access.id, @_access.expires_at, @_csrf.salt)
+      @_refresh.update_token(@_access.uid, @_access.expiration, @_csrf.encoded)
       @refresh_token = @_refresh.token
     end
 
@@ -76,23 +74,13 @@ module JWTSessions
     end
 
     def craete_refresh_token
-      @_refresh = RefreshToken.create(auth_uid, @_csrf.salt, @_access.id, @_access.expires_at)
+      @_refresh = RefreshToken.create(auth_uid, @_csrf.encoded, @_access.uid, @_access.expiration)
       @refresh_token = @_refresh.token
     end
 
     def create_access_token
-      @_access = AccessToken.create(@_csrf.salt, payload)
+      @_access = AccessToken.create(auth_id, @_csrf.encoded, payload)
       @access_token = @_access.token
-      token_payload = payload.merge(token_uid: access_token_uid, exp: access_expiration)
-      TokenStore.set_access(access_token_uid, salt, access_expiration)
-      Token.encode(token_payload)
-    end
-
-    def masked_auth_token(session)
-      one_time_pad = SecureRandom.random_bytes(RefreshToken::CSRF_LENGTH)
-      encrypted_csrf_token = xor_byte_strings(one_time_pad, Base64.strict_decode64(session[:_csrf_token]))
-      masked_token = one_time_pad + encrypted_csrf_token
-      Base64.strict_encode64(masked_token)
     end
   end
 end

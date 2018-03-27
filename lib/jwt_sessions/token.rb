@@ -21,7 +21,7 @@ module JWTSessions
       end
 
       def meta
-        { exp: Time.now.to_i + JWTSessions.exp_time.to_i }
+        { exp: JWTSessions.access_expiration }
       end
 
       def expired?(payload)

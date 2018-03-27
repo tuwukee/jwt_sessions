@@ -13,8 +13,8 @@ module JWTSessions
         instance.get("#{JWTSessions.token_prefix}_#{uid}")
       end
 
-      def set_refresh(uid, token)
-        key = refresh_key(uid)
+      def set_refresh(auth_id, uid, token)
+        key = refresh_key(auth_id, uid)
         instance.hmset(key,
                        :access_expires_at, token.fetch(:access_expires_at),
                        :refresh_expires_at, token.fetch(:refresh_expires_at),
@@ -55,8 +55,8 @@ module JWTSessions
         "#{JWTSessions.token_prefix}_#{uid}"
       end
 
-      def refresh_key(uid)
-        "#{JWTSessions::token_prefix}refresh_#{uid}"
+      def refresh_key(auth_id, uid)
+        "#{JWTSessions::token_prefix}refresh_#{auth_id}_#{uid}"
       end
     end
   end

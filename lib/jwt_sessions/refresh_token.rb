@@ -2,30 +2,39 @@
 
 module JWTSessions
   class RefreshToken
-    attr_reader :expires_at, :uid, :token
+    attr_reader :expiration, :uid, :token, :auth_id, :csrf, :access_uid, :access_expiration
 
-    def initialize(uid, expires_at)
-      @uid = uid
-      @expires_at = expires_at
-      @token = Token.encode(uid: uid, exp: expires_at.to_i)
+    def initialize(auth_id, csrf, access_uid, access_expiration, uid = nil, expiration = nil)
+      @auth_id           = auth_id
+      @access_uid        = access_uid
+      @access_expiration = access_expiration
+      @uid               = uid || SecureRandom.uuid
+      @expiration        = expiration || JWTSessions.refresh_expiration
+      @token             = Token.encode(uid: uid, exp: expiration.to_i)
     end
 
     class << self
-      def create(uid, salt, access_token_uid, access_expiration)
-        refresh_expiration = Time.now + JWTSessions.refresh_exp_time
-        persist_in_store(uid, salt, access_token_uid, access_expiration, refresh_expiration)
-        new(uid, refresh_expiration)
+      def all(auth_id)
+        TokenStore.all_refresh_tokens(auth_id).map do |uid, token_attrs|
+          new(auth_id, token_attrs[:csrf], token_attrs[:access_uid], token_attrs[:access_expiration], uid, token_attrs[:expiration])
+        end
       end
 
-      def find(uid)
-        token_attrs = TokenStore.get_refresh(uid)
+      def create(auth_id, csrf, access_uid, access_expiration)
+        new(auth_id, csrf, access_uid, access_expiration).tap do
+          persist_in_store(auth_id, uid, csrf, access_token_uid, access_expiration, refresh_expiration)
+        end
+      end
+
+      def find(auth_id, uid)
+        token_attrs = TokenStore.get_refresh(auth_id, uid)
         raise Errors::Unauthorized, 'Refresh token not found' if token_attrs.empty?
-        new(uid, token_attrs[:refresh_expires_at])
+        new(auth_id, token_attrs[:csrf], token_attrs[:access_uid], token_attrs[:access_expiration], uid, token_attrs[:expiration])
       end
     end
 
-    def update_salt(new_salt)
-      TokenStore.update_refresh_salt(uid, new_salt)
+    def update_token(access_uid, access_expiration, csrf)
+      TokenStore.update_refresh(auth_id, uid, access_uid, access_expiration, csrf)
     end
 
     def destroy
@@ -34,14 +43,15 @@ module JWTSessions
 
     private
 
-    def persist_in_store(uid, salt, access_token_uid, access_expiration, refresh_expiration)
+    def persist_in_store(auth_id, csrf, access_uid, access_expiration, uid, expiration)
       token = {
-        access_expires_at: access_expiration,
-        refresh_expires_at: refresh_expiration,
-        salt: salt,
-        access_uid: access_token_uid
+        auth_id:           auth_id,
+        access_expiration: access_expiration,
+        expiration:        expiration,
+        csrf:              csrf,
+        access_uid:        access_uid
       }
-      TokenStore.set_refresh(uid, token)
+      TokenStore.set_refresh(auth_id, uid, token)
     end
   end
 end

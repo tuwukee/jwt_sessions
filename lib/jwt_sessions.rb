@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'securerandom'
+
 require 'jwt_sessions/errors'
 require 'jwt_sessions/token'
 require 'jwt_sessions/token_store'
@@ -43,6 +45,14 @@ module JWTSessions
   def encryption_key
     raise Errors::Malconfigured, 'encryption_key is not specified' unless @encryption_key
     @encryption_key
+  end
+
+  def access_expiration
+    Time.now.to_i + exp_time.to_i
+  end
+
+  def refresh_expiration
+    Time.now.to_i + refresh_exp_time.to_i
   end
 
   def encryption_key=(key)
