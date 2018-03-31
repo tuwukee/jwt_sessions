@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'jwt_sessions/version'
 
 Gem::Specification.new do |s|

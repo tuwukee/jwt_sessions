@@ -5,7 +5,6 @@ module JWTSessions
     attr_reader :access_token, :refresh_token, :csrf_token
     attr_accessor :payload, :store
 
-    # auth_id is a unique identifier of a token issuer aka user
     def initialize(payload = {}, store = JWTSessions.token_store)
       @store   = store
       @payload = payload
@@ -25,7 +24,12 @@ module JWTSessions
       CSRFToken.new(csrf).token
     end
 
-    def refresh(uid, &block)
+    def refresh(refresh_token, &block)
+      uid = JWTSessions::Token.decode(refresh_token).first['uid']
+      refresh_by_uid(uid, &block)
+    end
+
+    def refresh_by_uid(uid, &block)
       retrieve_refresh_token(uid)
       check_refresh_on_time(&block) if block_given?
 
