@@ -1,25 +1,28 @@
 module JWTSessions
   class AccessToken
-    attr_reader :token, :payload, :uid, :expiration, :token, :auth_id, :csrf
+    attr_reader :token, :payload, :uid, :expiration, :token, :csrf
 
-    def initialize(auth_id, csrf, payload, uid = nil, expiration = nil)
-      @auth_id    = auth_id
+    def initialize(csrf, payload, store, uid = SecureRandom.uuid, expiration = JWTSessions.access_expiration)
       @csrf       = csrf
-      @uid        = uid || SecureRandom.uuid
-      @expiration = expiration || JWTSessions.access_expiration
+      @uid        = uid
+      @expiration = expiration
       @payload    = payload
-      @token      = Token.encode(payload.merge(token_uid: uid, exp: expiration))
+      @token      = Token.encode(payload.merge(uid: uid, exp: expiration.to_i))
+    end
+
+    def destroy
+      store.destroy_access(uid)
     end
 
     class << self
-      def create(auth_id, csrf, payload)
-        new(auth_id, csrf, payload).tap do |inst|
-          TokenStore.set_access(inst.uid, { auth_id: inst.auth_id, csrf: inst.csrf, exp: inst.expiration })
+      def create(csrf, payload, store)
+        new(csrf, payload, store).tap do |inst|
+          store.persist_access(inst.uid, inst.csrf, inst.expiration)
         end
       end
 
-      def destroy(uid)
-        TokenStore.destroy_access(uid)
+      def destroy(uid, store)
+        store.destroy_access(uid)
       end
     end
   end

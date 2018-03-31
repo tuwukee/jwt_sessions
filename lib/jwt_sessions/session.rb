@@ -3,11 +3,11 @@
 module JWTSessions
   class Session
     attr_reader :access_token, :refresh_token, :csrf_token
-    attr_accessor :payload, :auth_id
+    attr_accessor :payload, :store
 
     # auth_id is a unique identifier of a token issuer aka user
-    def initialize(auth_id, payload = {})
-      @auth_id = auth_id
+    def initialize(payload = {}, store = JWTSessions.token_store)
+      @store   = store
       @payload = payload
     end
 
@@ -19,31 +19,25 @@ module JWTSessions
       tokens_hash
     end
 
-    def masked_csrf(refresh_payload)
-      token = retrieve_refresh_token(refresh_payload)
-      CSRFToken.new(token.csrf).token
+    def masked_csrf(uid)
+      csrf = store.fetch_access(uid)
+      raise Errors::Unauthorized, 'Access token not found' if csrf.nil?
+      CSRFToken.new(csrf).token
     end
 
-    def all
-      RefreshToken.all(auth_id)
-    end
-
-    def refresh(refresh_payload, &block)
-      retrieve_refresh_token
+    def refresh(uid, &block)
+      retrieve_refresh_token(uid)
       check_refresh_on_time(&block) if block_given?
 
-      AccessToken.destroy(@_refresh.access_token_id)
+      AccessToken.destroy(@_refresh.access_uid, store)
 
       issue_tokens_after_refresh
     end
 
     private
 
-    def retrieve_refresh_token(payload)
-      uid = refresh_payload['token_uid']
-      @_refresh = RefreshToken.find(uid, auth_id)
-      raise Errors::Unauthorized unless @_refresh
-      @_refresh
+    def retrieve_refresh_token(uid)
+      @_refresh = RefreshToken.find(uid, store)
     end
 
     def tokens_hash
@@ -52,7 +46,7 @@ module JWTSessions
 
     def check_refresh_on_time
       expiration = @_refresh.access_expiration
-      yield @_refresh.uid, auth_id, expiration if expiration > Time.now
+      yield @_refresh.uid, expiration if expiration > Time.now
     end
 
     def issue_tokens_after_refresh
@@ -64,7 +58,7 @@ module JWTSessions
     end
 
     def update_refresh_token
-      @_refresh.update_token(@_access.uid, @_access.expiration, @_csrf.encoded)
+      @_refresh.update(@_access.uid, @_access.expiration, @_csrf.encoded)
       @refresh_token = @_refresh.token
     end
 
@@ -74,12 +68,12 @@ module JWTSessions
     end
 
     def create_refresh_token
-      @_refresh = RefreshToken.create(auth_id, @_csrf.encoded, @_access.uid, @_access.expiration)
+      @_refresh = RefreshToken.create(@_csrf.encoded, @_access.uid, @_access.expiration, store)
       @refresh_token = @_refresh.token
     end
 
     def create_access_token
-      @_access = AccessToken.create(auth_id, @_csrf.encoded, payload)
+      @_access = AccessToken.create(@_csrf.encoded, payload, store)
       @access_token = @_access.token
     end
   end
