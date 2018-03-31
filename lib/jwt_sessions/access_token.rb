@@ -1,6 +1,6 @@
 module JWTSessions
   class AccessToken
-    attr_reader :token, :payload, :uid, :expiration, :token, :csrf
+    attr_reader :token, :payload, :uid, :expiration, :csrf
 
     def initialize(csrf, payload, store, uid = SecureRandom.uuid, expiration = JWTSessions.access_expiration)
       @csrf       = csrf

@@ -17,7 +17,7 @@ require 'jwt_sessions/version'
 module JWTSessions
   extend self
 
-  attr_setter :token_store
+  attr_writer :token_store
 
   DEFAULT_SETTINGS_KEYS = %i[redis_host
                              redis_port

@@ -6,10 +6,10 @@ module JWTSessions
   class RedisTokenStore
     class << self
       def instance(redis_host, redis_port, redis_db_name, prefix)
-        @_tokens_store ||= Redis.new(url: "redis://#{rudis_host}:#{redis_port}/#{redis_db_name}")
+        @_tokens_store ||= Redis.new(url: "redis://#{redis_host}:#{redis_port}/#{redis_db_name}")
         @_token_prefix ||= prefix
 
-        new(@_tokens_store, @_tokens_prefix)
+        new(@_tokens_store, @_token_prefix)
       end
 
       def clear
@@ -20,12 +20,16 @@ module JWTSessions
       private
 
       def new(store, prefix)
-        @store  = store
-        @prefix = prefix
+        super(store, prefix)
       end
     end
 
     attr_reader :store, :prefix
+
+    def initialize(store, prefix)
+      @store  = store
+      @prefix = prefix
+    end
 
     def fetch_access(uid)
       store.get(access_key(uid))

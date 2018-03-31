@@ -2,7 +2,7 @@
 
 module JWTSessions
   class RefreshToken
-    attr_reader :expiration, :uid, :token, :csrf, :access_uid, :access_expiration
+    attr_reader :expiration, :uid, :token, :csrf, :access_uid, :access_expiration, :store
 
     def initialize(csrf, access_uid, access_expiration, store, uid = SecureRandom.uuid, expiration = JWTSessions.refresh_expiration)
       @csrf              = csrf
