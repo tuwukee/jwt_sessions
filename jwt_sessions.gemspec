@@ -19,4 +19,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'jwt', '~>1.4'
   s.add_dependency 'redis', '~>3'
+
+  s.add_development_dependency 'pry'
 end

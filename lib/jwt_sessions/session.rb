@@ -50,7 +50,7 @@ module JWTSessions
 
     def check_refresh_on_time
       expiration = @_refresh.access_expiration
-      yield @_refresh.uid, expiration if expiration > Time.now
+      yield @_refresh.uid, expiration if expiration.to_i > Time.now.to_i
     end
 
     def issue_tokens_after_refresh

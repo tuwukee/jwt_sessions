@@ -42,7 +42,7 @@ module JWTSessions
     end
 
     def fetch_refresh(uid)
-      store.hmget(refresh_key(uid), :access_expiration, :access_uid, :csrf, :expiration)
+      store.hmget(refresh_key(uid), :csrf, :access_uid, :access_expiration, :expiration)
     end
 
     def persist_refresh(uid, access_expiration, access_uid, csrf, expiration)

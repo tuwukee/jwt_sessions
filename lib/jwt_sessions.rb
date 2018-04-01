@@ -36,14 +36,19 @@ module JWTSessions
 
 
   DEFAULT_SETTINGS_KEYS.each do |setting|
+    var_name = :"@#{setting}"
+
     define_method(setting) do
-      instance_variable_get(:"@#{setting}") ||
-        instance_variable_set(:"@#{setting}",
+      if instance_variables.include?(var_name)
+        instance_variable_get(var_name)
+      else
+        instance_variable_set(var_name,
                               const_get("DEFAULT_#{setting.upcase}"))
+      end
     end
 
     define_method("#{setting}=") do |val|
-      instance_variable_set(:"@#{setting}", val)
+      instance_variable_set(var_name, val)
     end
   end
 
