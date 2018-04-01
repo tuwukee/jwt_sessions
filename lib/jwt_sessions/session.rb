@@ -5,9 +5,9 @@ module JWTSessions
     attr_reader :access_token, :refresh_token, :csrf_token
     attr_accessor :payload, :store
 
-    def initialize(payload = {}, store = JWTSessions.token_store)
-      @store   = store
-      @payload = payload
+    def initialize(options = {})
+      @store   = options.fetch(:store, JWTSessions.token_store)
+      @payload = options.fetch(:payload, {})
     end
 
     def login
@@ -18,27 +18,52 @@ module JWTSessions
       tokens_hash
     end
 
-    def masked_csrf(uid)
-      csrf = store.fetch_access(uid)
-      raise Errors::Unauthorized, 'Access token not found' if csrf.nil?
-      CSRFToken.new(csrf).token
+    def valid_csrf?(access_token, csrf_token)
+      csrf(access_token).valid_authenticity_token?(csrf_token)
+    end
+
+    def masked_csrf(access_token)
+      csrf(access_token).token
     end
 
     def refresh(refresh_token, &block)
-      uid = JWTSessions::Token.decode(refresh_token).first['uid']
-      refresh_by_uid(uid, &block)
-    end
-
-    def refresh_by_uid(uid, &block)
-      retrieve_refresh_token(uid)
-      check_refresh_on_time(&block) if block_given?
-
-      AccessToken.destroy(@_refresh.access_uid, store)
-
-      issue_tokens_after_refresh
+      refresh_token_data(refresh_token)
+      refresh_by_uid(&block)
     end
 
     private
+
+    def refresh_by_uid(&block)
+      check_refresh_on_time(&block) if block_given?
+      AccessToken.destroy(@_refresh.access_uid, store)
+      issue_tokens_after_refresh
+    end
+
+    def csrf(access_token)
+      token_data = access_token_data(access_token)
+      raise Errors::Unauthorized, 'Access token not found' if token_data.empty?
+      CSRFToken.new(token_data[:csrf])
+    end
+
+    def access_token_data(token)
+      uid = token_uid(token, :access)
+      store.fetch_access(uid)
+    end
+
+    def refresh_token_data(token)
+      uid = token_uid(token, :refresh)
+      retrieve_refresh_token(uid)
+    end
+
+    def token_uid(token, type)
+      token_payload = JWTSessions::Token.decode(refresh_token).first
+      uid           = token_payload.fetch('uid', nil)
+      if uid.nil?
+        message = "#{type.to_s.capitalize} token payload does not contain token uid"
+        raise Errors::InvalidPayload, message
+      end
+      uid
+    end
 
     def retrieve_refresh_token(uid)
       @_refresh = RefreshToken.find(uid, store)

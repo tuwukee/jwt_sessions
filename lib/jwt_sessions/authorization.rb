@@ -2,6 +2,8 @@
 
 module JWTSessions
   module Authorization
+    CSRF_SAFE_METHODS = ['GET', 'HEAD'].freeze
+
     protected
 
     def authenticate_request!
@@ -23,20 +25,24 @@ module JWTSessions
       payload[key]
     end
 
-    def token_type
-      :access
-    end
-
     def check_csrf
-      invalid_authentication if @_csrf_check && !valid_csrf_token?(retrieve_csrf)
+      invalid_authentication if should_check_csrf? && @_csrf_check && !valid_csrf_token?(retrieve_csrf)
     end
 
-    def retrieve_csrf
-      TokenStore.get_csrf(payload['uid']) if @token
+    def should_check_csrf?
+      !CSRF_SAFE_METHODS.include?(request_method)
     end
 
-    def valid_csrf_token?(csrf_token)
-      raise Errors::Malconfigured, 'valid_csrf_token? is not implemented'
+    def token_header
+      raise Errors::Malconfigured, 'token_header is not implemented'
+    end
+
+    def token_cookie
+      raise Errors::Malconfigured, 'token_cookie is not implemented'
+    end
+
+    def csrf_header
+      raise Errors::Malconfigured, 'csrf_header is not implemented'
     end
 
     def request_headers
@@ -47,20 +53,47 @@ module JWTSessions
       raise Errors::Malconfigured, 'request_cookies is not implemented'
     end
 
+    def request_method
+      raise Errors::Malconfigured, 'request_method is not implemented'
+    end
+
+    def valid_csrf_token?(csrf_token)
+      JWTSessions::Session.new.valid_csrf?(@_raw_token, csrf_token)
+    end
+
     def cookieless_auth
       @_csrf_check = false
-      @token = Strategies::CookielessStrategy.resolve(request_headers, token_type)
+      @_raw_token = token_from_headers
     end
 
     def cookie_based_auth
       @_csrf_check = true
-      @token = Strategies::CookieBasedStrategy.resolve(request_cookies, token_type)
+      @_raw_token = token_from_cookies
     end
 
     private
 
+    def retrieve_csrf
+      token = requset_headers[csrf_header]
+      raise Errors::Unauthorized, 'CSRF token is not found' unless token
+      token
+    end
+
+    def token_from_headers
+      raw_token = request_headers[token_header]
+      token = raw_token.split(' ')[-1]
+      raise Errors::Unauthorized, 'Token is not found among request headers' unless token
+      token
+    end
+
+    def token_from_cookies
+      token = request_cookies[token_cookie]
+      raise Errors::Unauthorized, 'Token is not found among cookies' unless token
+      token
+    end
+
     def payload
-      @payload ||= Token.decode(@token).first
+      @_payload ||= Token.decode(@token).first
     end
   end
 end

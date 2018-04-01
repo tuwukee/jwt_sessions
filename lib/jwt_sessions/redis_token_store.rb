@@ -32,7 +32,9 @@ module JWTSessions
     end
 
     def fetch_access(uid)
-      store.get(access_key(uid))
+      csrf = store.get(access_key(uid))
+      return {} if csrf.nil?
+      { csrf: csrf }
     end
 
     def persist_access(uid, csrf, expiration)
@@ -42,7 +44,10 @@ module JWTSessions
     end
 
     def fetch_refresh(uid)
-      store.hmget(refresh_key(uid), :csrf, :access_uid, :access_expiration, :expiration)
+      keys   = [:csrf, :access_uid, :access_expiration, :expiration]
+      values = store.hmget(refresh_key(uid), *keys)
+      return {} if values.empty?
+      keys.each_with_index.inject({}) { |acc, (key, index)| acc[key] = values[index]; acc }
     end
 
     def persist_refresh(uid, access_expiration, access_uid, csrf, expiration)

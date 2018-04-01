@@ -8,8 +8,6 @@ require 'jwt_sessions/redis_token_store'
 require 'jwt_sessions/refresh_token'
 require 'jwt_sessions/csrf_token'
 require 'jwt_sessions/access_token'
-require 'jwt_sessions/strategies/cookie_based_strategy'
-require 'jwt_sessions/strategies/cookieless_strategy'
 require 'jwt_sessions/session'
 require 'jwt_sessions/authorization'
 require 'jwt_sessions/version'
@@ -53,7 +51,7 @@ module JWTSessions
   end
 
   def token_store
-    @token_store ||= RedisTokenStore.instance(redis_host, redis_port, redis_db_name, token_prefix)
+    RedisTokenStore.instance(redis_host, redis_port, redis_db_name, token_prefix)
   end
 
   def encryption_key

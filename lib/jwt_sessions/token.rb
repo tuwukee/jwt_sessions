@@ -11,9 +11,11 @@ module JWTSessions
       end
 
       def decode(token)
-        JWT.decode(token, JWTSessions.encryption_key, true, { algorithm: JWTSessions.algorithm })
+        JWT.decode(token, JWTSessions.encryption_key, true, { algorithm: JWTSessions.algorithm, verify_expiration: false })
+      rescue JWT::DecodeError => e
+        raise Errors::Unauthorized, e.message
       rescue StandardError
-        raise Errors::Unauthorized, 'cannot decode the token'
+        raise Errors::Unauthorized, 'could not decode a token'
       end
 
       def valid_payload?(payload)

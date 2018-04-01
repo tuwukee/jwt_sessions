@@ -24,12 +24,12 @@ module JWTSessions
       def find(uid, store)
         token_attrs = store.fetch_refresh(uid)
         raise Errors::Unauthorized, 'Refresh token not found' if token_attrs.empty?
-        new(token_attrs[0],
-            token_attrs[1],
-            token_attrs[2],
+        new(token_attrs[:csrf],
+            token_attrs[:access_uid],
+            token_attrs[:access_expiration],
             store,
             uid,
-            token_attrs[3])
+            token_attrs[:expiration])
       end
 
       def destroy(uid, store)
