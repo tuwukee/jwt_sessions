@@ -2,20 +2,25 @@
 
 module JWTSessions
   module Authorization
-    CSRF_SAFE_METHODS = ['GET', 'HEAD'].freeze
+    CSRF_SAFE_METHODS = %w[GET HEAD].freeze
+    TOKEN_TYPES = %w[access refresh].freeze
 
     protected
 
-    def authenticate_request!
-      begin
-        cookieless_auth
-      rescue Errors::Unauthorized
-        cookie_based_auth
-      end
+    TOKEN_TYPES.each do |token_type|
+      define_method("authenticate_#{token_type}_request!") do
+        begin
+          cookieless_auth(token_type)
+        rescue Errors::Unauthorized
+          cookie_based_auth(token_type)
+        end
 
-      invalid_authentication unless Token.valid_payload?(payload)
-      check_csrf
+        invalid_authentication unless Token.valid_payload?(payload)
+        check_csrf
+      end
     end
+
+    private
 
     def invalid_authentication
       raise Errors::Unauthorized
@@ -31,18 +36,6 @@ module JWTSessions
 
     def should_check_csrf?
       !CSRF_SAFE_METHODS.include?(request_method)
-    end
-
-    def token_header
-      raise Errors::Malconfigured, 'token_header is not implemented'
-    end
-
-    def token_cookie
-      raise Errors::Malconfigured, 'token_cookie is not implemented'
-    end
-
-    def csrf_header
-      raise Errors::Malconfigured, 'csrf_header is not implemented'
     end
 
     def request_headers
@@ -61,17 +54,15 @@ module JWTSessions
       JWTSessions::Session.new.valid_csrf?(@_raw_token, csrf_token)
     end
 
-    def cookieless_auth
+    def cookieless_auth(token_type)
       @_csrf_check = false
-      @_raw_token = token_from_headers
+      @_raw_token = token_from_headers(JWTSessions.cookie_by(token_type))
     end
 
-    def cookie_based_auth
+    def cookie_based_auth(token_type)
       @_csrf_check = true
-      @_raw_token = token_from_cookies
+      @_raw_token = token_from_cookies(JWTSession.header_by(token_type))
     end
-
-    private
 
     def retrieve_csrf
       token = requset_headers[csrf_header]
@@ -79,14 +70,14 @@ module JWTSessions
       token
     end
 
-    def token_from_headers
+    def token_from_headers(token_type)
       raw_token = request_headers[token_header]
       token = raw_token.split(' ')[-1]
       raise Errors::Unauthorized, 'Token is not found among request headers' unless token
       token
     end
 
-    def token_from_cookies
+    def token_from_cookies(token_type)
       token = request_cookies[token_cookie]
       raise Errors::Unauthorized, 'Token is not found among cookies' unless token
       token

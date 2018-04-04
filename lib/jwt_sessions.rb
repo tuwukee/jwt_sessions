@@ -17,20 +17,30 @@ module JWTSessions
 
   attr_writer :token_store
 
-  DEFAULT_SETTINGS_KEYS = %i[redis_host
-                             redis_port
-                             redis_db_name
-                             token_prefix
+  DEFAULT_SETTINGS_KEYS = %i[access_cookie
+                             access_exp_time
+                             access_header
                              algorithm
-                             exp_time
-                             refresh_exp_time].freeze
+                             csrf_header
+                             redis_db_name
+                             redis_host
+                             redis_port
+                             refresh_cookie
+                             refresh_exp_time
+                             refresh_header
+                             token_prefix].freeze
   DEFAULT_REDIS_HOST = '127.0.0.1'
   DEFAULT_REDIS_PORT = '6379'
   DEFAULT_REDIS_DB_NAME = 'jwtokens'
   DEFAULT_TOKEN_PREFIX = 'jwt_'
   DEFAULT_ALGORITHM = 'HS256'
-  DEFAULT_EXP_TIME = 3600 # 1 hour in seconds
+  DEFAULT_ACCESS_EXP_TIME = 3600 # 1 hour in seconds
   DEFAULT_REFRESH_EXP_TIME = 604800 # 1 week in seconds
+  DEFAULT_ACCESS_COOKIE = 'jwt_access'
+  DEFAULT_ACCESS_HEADER = 'Authorization'
+  DEFAULT_REFRESH_COOKIE= 'jwt_refresh'
+  DEFAULT_REFRESH_HEADER = 'X-Refresh-Token'
+  DEFAULT_CSRF_HEADER = 'X-CSRF-Token'
 
 
   DEFAULT_SETTINGS_KEYS.each do |setting|
@@ -60,7 +70,7 @@ module JWTSessions
   end
 
   def access_expiration
-    Time.now.to_i + exp_time.to_i
+    Time.now.to_i + access_exp_time.to_i
   end
 
   def refresh_expiration
@@ -69,5 +79,13 @@ module JWTSessions
 
   def encryption_key=(key)
     @encryption_key = key
+  end
+
+  def header_by(token_type)
+    send("#{token_type}_header")
+  end
+
+  def cookie_by(token_type)
+    send("#{token_type}_cookie")
   end
 end
