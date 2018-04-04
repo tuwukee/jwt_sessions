@@ -39,7 +39,7 @@ module JWTSessions
   DEFAULT_REFRESH_EXP_TIME = 604800 # 1 week in seconds
   DEFAULT_ACCESS_COOKIE = 'jwt_access'
   DEFAULT_ACCESS_HEADER = 'Authorization'
-  DEFAULT_REFRESH_COOKIE= 'jwt_refresh'
+  DEFAULT_REFRESH_COOKIE = 'jwt_refresh'
   DEFAULT_REFRESH_HEADER = 'X-Refresh-Token'
   DEFAULT_CSRF_HEADER = 'X-CSRF-Token'
 

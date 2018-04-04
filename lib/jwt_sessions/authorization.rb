@@ -52,29 +52,29 @@ module JWTSessions
 
     def cookieless_auth(token_type)
       @_csrf_check = false
-      @_raw_token = token_from_headers(JWTSessions.cookie_by(token_type))
+      @_raw_token = token_from_headers(token_type)
     end
 
     def cookie_based_auth(token_type)
       @_csrf_check = true
-      @_raw_token = token_from_cookies(JWTSession.header_by(token_type))
+      @_raw_token = token_from_cookies(token_type)
     end
 
     def retrieve_csrf
-      token = requset_headers[csrf_header]
+      token = requset_headers[JWTSessions.csrf_header]
       raise Errors::Unauthorized, 'CSRF token is not found' unless token
       token
     end
 
     def token_from_headers(token_type)
-      raw_token = request_headers[token_header]
+      raw_token = request_headers[JWTSessions.header_by(token_type)]
       token = raw_token.split(' ')[-1]
       raise Errors::Unauthorized, 'Token is not found among request headers' unless token
       token
     end
 
     def token_from_cookies(token_type)
-      token = request_cookies[token_cookie]
+      token = request_cookies[JWTSessions.cookie_by(token_type)]
       raise Errors::Unauthorized, 'Token is not found among cookies' unless token
       token
     end

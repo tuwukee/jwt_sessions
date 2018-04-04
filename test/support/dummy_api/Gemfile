@@ -25,7 +25,7 @@ gem 'bcrypt', '~> 3.1.7'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
 
-gem 'jwt_sessions', git: 'https://github.com/tuwukee/jwt_sessions.git', branch: 'rails-integration', ref: '5ce6adcef3d589ae4914698cdccaf7580a6fa7c9'
+gem 'jwt_sessions', git: 'https://github.com/tuwukee/jwt_sessions.git', branch: 'rails-integration-2'
 
 group :development, :test do
   gem 'pry-byebug', '~> 3.4'

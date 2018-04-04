@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  authenticate_access_request!
+  before_action :authenticate_access_request!
 
   def show
   end
