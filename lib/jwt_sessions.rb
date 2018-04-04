@@ -10,6 +10,7 @@ require 'jwt_sessions/csrf_token'
 require 'jwt_sessions/access_token'
 require 'jwt_sessions/session'
 require 'jwt_sessions/authorization'
+require 'jwt_sessions/rails_authorization'
 require 'jwt_sessions/version'
 
 module JWTSessions

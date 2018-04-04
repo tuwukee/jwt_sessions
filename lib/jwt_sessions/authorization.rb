@@ -26,10 +26,6 @@ module JWTSessions
       raise Errors::Unauthorized
     end
 
-    def get_from_payload(key)
-      payload[key]
-    end
-
     def check_csrf
       invalid_authentication if should_check_csrf? && @_csrf_check && !valid_csrf_token?(retrieve_csrf)
     end
