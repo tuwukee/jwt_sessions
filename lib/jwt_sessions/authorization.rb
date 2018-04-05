@@ -80,7 +80,11 @@ module JWTSessions
     end
 
     def payload
-      @_payload ||= Token.decode(@token).first
+      @_payload ||= Token.decode(@_raw_token).first
+    end
+
+    def token
+      @_raw_token
     end
   end
 end

@@ -3,7 +3,7 @@ module JWTSessions
     include Authorization
 
     def request_headers
-      request.headers
+      ActionDispatch::Http::Headers.from_hash(request.headers)
     end
 
     def request_cookies
