@@ -67,7 +67,7 @@ module JWTSessions
     end
 
     def token_from_headers(token_type)
-      raw_token = request_headers[JWTSessions.header_by(token_type)]
+      raw_token = request_headers[JWTSessions.header_by(token_type)] || ''
       token = raw_token.split(' ')[-1]
       raise Errors::Unauthorized, 'Token is not found among request headers' unless token
       token
