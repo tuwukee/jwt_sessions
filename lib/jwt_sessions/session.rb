@@ -3,11 +3,12 @@
 module JWTSessions
   class Session
     attr_reader :access_token, :refresh_token, :csrf_token
-    attr_accessor :payload, :store
+    attr_accessor :payload, :store, :refresh_payload
 
     def initialize(options = {})
-      @store   = options.fetch(:store, JWTSessions.token_store)
-      @payload = options.fetch(:payload, {})
+      @store           = options.fetch(:store, JWTSessions.token_store)
+      @refresh_payload = options.fetch(:refresh_payload, {})
+      @payload         = options.fetch(:payload, {})
     end
 
     def login
@@ -56,7 +57,7 @@ module JWTSessions
     end
 
     def token_uid(token, type)
-      token_payload = JWTSessions::Token.decode(refresh_token).first
+      token_payload = JWTSessions::Token.decode(token).first
       uid           = token_payload.fetch('uid', nil)
       if uid.nil?
         message = "#{type.to_s.capitalize} token payload does not contain token uid"
@@ -97,7 +98,7 @@ module JWTSessions
     end
 
     def create_refresh_token
-      @_refresh = RefreshToken.create(@_csrf.encoded, @_access.uid, @_access.expiration, store)
+      @_refresh = RefreshToken.create(@_csrf.encoded, @_access.uid, @_access.expiration, store, @refresh_payload)
       @refresh_token = @_refresh.token
     end
 

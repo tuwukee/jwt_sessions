@@ -47,7 +47,7 @@ module JWTSessions
     end
 
     def valid_csrf_token?(csrf_token)
-      JWTSessions::Session.new.valid_csrf?(@_raw_token, csrf_token)
+      JWTSessions::Session.new.valid_csrf?(found_token, csrf_token)
     end
 
     def cookieless_auth(token_type)
@@ -79,12 +79,12 @@ module JWTSessions
       token
     end
 
-    def payload
-      @_payload ||= Token.decode(@_raw_token).first
+    def found_token
+      @_raw_token
     end
 
-    def token
-      @_raw_token
+    def payload
+      @_payload ||= Token.decode(found_token).first
     end
   end
 end
