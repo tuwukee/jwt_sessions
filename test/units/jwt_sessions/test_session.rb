@@ -36,13 +36,13 @@ class TestSession < Minitest::Test
   end
 
   def test_refresh_with_block_expired
-    JWTSessions.exp_time = 0
+    JWTSessions.access_exp_time = 0
     @session = JWTSessions::Session.new(payload: payload)
     @tokens = session.login
     refreshed_tokens = session.refresh(tokens[:refresh]) do
       raise JWTSessions::Errors::Unauthorized
     end
-    JWTSessions.exp_time = 3600
+    JWTSessions.access_exp_time = 3600
     decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
     assert_equal EXPECTED_KEYS, refreshed_tokens.keys.sort
     assert_equal payload[:test], decoded_access['test']

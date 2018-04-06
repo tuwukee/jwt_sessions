@@ -4,19 +4,19 @@ module JWTSessions
   class RefreshToken
     attr_reader :expiration, :uid, :token, :csrf, :access_uid, :access_expiration, :store
 
-    def initialize(csrf, access_uid, access_expiration, store, uid = SecureRandom.uuid, expiration = JWTSessions.refresh_expiration)
+    def initialize(csrf, access_uid, access_expiration, store, payload = {}, uid = SecureRandom.uuid, expiration = JWTSessions.refresh_expiration)
       @csrf              = csrf
       @access_uid        = access_uid
       @access_expiration = access_expiration
       @uid               = uid
       @expiration        = expiration
       @store             = store
-      @token             = Token.encode(uid: uid, exp: expiration.to_i)
+      @token             = Token.encode(payload.merge(uid: uid, exp: expiration.to_i))
     end
 
     class << self
-      def create(csrf, access_uid, access_expiration, store)
-        inst = new(csrf, access_uid, access_expiration, store)
+      def create(csrf, access_uid, access_expiration, store, payload)
+        inst = new(csrf, access_uid, access_expiration, store, payload)
         inst.send(:persist_in_store)
         inst
       end
@@ -28,6 +28,7 @@ module JWTSessions
             token_attrs[:access_uid],
             token_attrs[:access_expiration],
             store,
+            {},
             uid,
             token_attrs[:expiration])
       end

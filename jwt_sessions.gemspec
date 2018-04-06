@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+$LOAD_PATH.push File.expand_path('../lib', __FILE__)
 
 require 'jwt_sessions/version'
 
@@ -13,7 +14,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'http://rubygems.org/gems/jwt_sessions'
   s.license     = 'MIT'
 
-  s.files         = Dir['*', 'lib/**/*', 'LICENSE', 'README.md']
+  s.files         = Dir['lib/**/*', 'LICENSE', 'README.md']
   s.test_files    = Dir['test/units/*', 'test/units/**/*']
   s.require_paths = ['lib']
 
