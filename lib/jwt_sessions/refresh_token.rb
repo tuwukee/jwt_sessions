@@ -39,6 +39,9 @@ module JWTSessions
     end
 
     def update(access_uid, access_expiration, csrf)
+      @csrf              = csrf
+      @access_uid        = access_uid
+      @access_expiration = access_expiration
       store.update_refresh(uid, access_uid, access_expiration, csrf)
     end
 

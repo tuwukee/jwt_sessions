@@ -45,8 +45,8 @@ module JWTSessions
 
     def fetch_refresh(uid)
       keys   = [:csrf, :access_uid, :access_expiration, :expiration]
-      values = store.hmget(refresh_key(uid), *keys)
-      return {} if values.empty?
+      values = store.hmget(refresh_key(uid), *keys).compact
+      return {} if values.length != keys.length
       keys.each_with_index.inject({}) { |acc, (key, index)| acc[key] = values[index]; acc }
     end
 

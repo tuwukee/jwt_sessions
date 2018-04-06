@@ -4,7 +4,7 @@ require 'minitest/autorun'
 require 'jwt_sessions'
 
 class TestSession < Minitest::Test
-  attr_accessor :session, :payload, :tokens
+  attr_reader :session, :payload, :tokens
   EXPECTED_KEYS = [:access, :csrf, :refresh].freeze
 
   def setup

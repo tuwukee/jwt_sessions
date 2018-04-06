@@ -12,7 +12,7 @@ module JWTSessions
     end
 
     def valid_authenticity_token?(encoded_masked_token)
-      if encoded_masked_token.nil? || encoded_masked_token.empty? || !encoded_masked_token.is_a?(String)
+      if !encoded_masked_token.is_a?(String) || encoded_masked_token.empty?
         return false
       end
 
@@ -22,9 +22,9 @@ module JWTSessions
         return false
       end
 
-      if masked_token.length == AUTHENTICITY_TOKEN_LENGTH
+      if masked_token.length == CSRF_LENGTH
         secure_compare(masked_token, raw_token)
-      elsif masked_token.length == AUTHENTICITY_TOKEN_LENGTH * 2
+      elsif masked_token.length == CSRF_LENGTH * 2
         csrf_token = unmask_token(masked_token)
         secure_compare(csrf_token, raw_token)
       else
