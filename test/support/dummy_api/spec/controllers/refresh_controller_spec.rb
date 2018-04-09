@@ -31,5 +31,47 @@ describe RefreshController do
         expect(response_json.keys.sort).to eq ['access', 'csrf', 'refresh']
       end
     end
+
+    context 'failure' do
+      let(:refresh_cookie) { @tokens[:refresh] }
+      let(:csrf_token) { @tokens[:csrf] }
+
+
+      it 'requires CSRF for cookie based auth' do
+        request.cookies[JWTSessions.refresh_cookie] = refresh_cookie
+        post :create
+        expect(response.code).to eq '401'
+      end
+
+      it 'tokens are absent' do
+        post :create
+        expect(response.code).to eq '401'
+      end
+
+      it do
+        request.cookies[JWTSessions.refresh_cookie] = 123
+        post :create
+        expect(response.code).to eq '401'
+      end
+
+      it do
+        request.cookies[JWTSessions.refresh_cookie] = 'abc'
+        request.headers[JWTSessions.csrf_header] = csrf_token
+        post :create
+        expect(response.code).to eq '401'
+      end
+
+      it do
+        request.cookies[JWTSessions.refresh_header] = '123abc'
+        post :create
+        expect(response.code).to eq '401'
+      end
+
+      it do
+        request.headers[JWTSessions.csrf_header] = csrf_token
+        post :create
+        expect(response.code).to eq '401'
+      end
+    end
   end
 end
