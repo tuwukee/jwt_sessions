@@ -3,5 +3,5 @@ Rails.application.routes.draw do
   post :login, to: 'login#create'
   post :refresh, to: 'refresh#create'
 
-  resources :users, only: :show
+  resources :users, only: [:show, :create]
 end

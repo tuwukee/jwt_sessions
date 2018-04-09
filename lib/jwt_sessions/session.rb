@@ -19,8 +19,8 @@ module JWTSessions
       tokens_hash
     end
 
-    def valid_csrf?(access_token, csrf_token)
-      csrf(access_token).valid_authenticity_token?(csrf_token)
+    def valid_csrf?(token, csrf_token, token_type = :access)
+      send(:"valid_#{token_type}_csrf?", token, csrf_token)
     end
 
     def masked_csrf(access_token)
@@ -34,6 +34,14 @@ module JWTSessions
 
     private
 
+    def valid_access_csrf?(access_token, csrf_token)
+      csrf(access_token).valid_authenticity_token?(csrf_token)
+    end
+
+    def valid_refresh_csrf?(refresh_token, csrf_token)
+      refresh_csrf(refresh_token).valid_authenticity_token?(csrf_token)
+    end
+
     def refresh_by_uid(&block)
       check_refresh_on_time(&block) if block_given?
       AccessToken.destroy(@_refresh.access_uid, store)
@@ -44,6 +52,11 @@ module JWTSessions
       token_data = access_token_data(access_token)
       raise Errors::Unauthorized, 'Access token not found' if token_data.empty?
       CSRFToken.new(token_data[:csrf])
+    end
+
+    def refresh_csrf(refresh_token)
+      refresh_token_instance = refresh_token_data(refresh_token)
+      CSRFToken.new(refresh_token_instance.csrf)
     end
 
     def access_token_data(token)

@@ -14,9 +14,8 @@ module JWTSessions
         rescue Errors::Unauthorized
           cookie_based_auth(token_type)
         end
-
         invalid_authentication unless Token.valid_payload?(payload)
-        check_csrf
+        check_csrf(token_type)
       end
     end
 
@@ -26,8 +25,8 @@ module JWTSessions
       raise Errors::Unauthorized
     end
 
-    def check_csrf
-      invalid_authentication if should_check_csrf? && @_csrf_check && !valid_csrf_token?(retrieve_csrf)
+    def check_csrf(token_type)
+      invalid_authentication if should_check_csrf? && @_csrf_check && !valid_csrf_token?(retrieve_csrf, token_type)
     end
 
     def should_check_csrf?
@@ -46,8 +45,8 @@ module JWTSessions
       raise Errors::Malconfigured, 'request_method is not implemented'
     end
 
-    def valid_csrf_token?(csrf_token)
-      JWTSessions::Session.new.valid_csrf?(found_token, csrf_token)
+    def valid_csrf_token?(csrf_token, token_type)
+      JWTSessions::Session.new.valid_csrf?(found_token, csrf_token, token_type)
     end
 
     def cookieless_auth(token_type)
@@ -61,7 +60,7 @@ module JWTSessions
     end
 
     def retrieve_csrf
-      token = requset_headers[JWTSessions.csrf_header]
+      token = request_headers[JWTSessions.csrf_header]
       raise Errors::Unauthorized, 'CSRF token is not found' unless token
       token
     end
@@ -69,13 +68,13 @@ module JWTSessions
     def token_from_headers(token_type)
       raw_token = request_headers[JWTSessions.header_by(token_type)] || ''
       token = raw_token.split(' ')[-1]
-      raise Errors::Unauthorized, 'Token is not found among request headers' unless token
+      raise Errors::Unauthorized, 'Token is not found' unless token
       token
     end
 
     def token_from_cookies(token_type)
       token = request_cookies[JWTSessions.cookie_by(token_type)]
-      raise Errors::Unauthorized, 'Token is not found among cookies' unless token
+      raise Errors::Unauthorized, 'Token is not found' unless token
       token
     end
 
