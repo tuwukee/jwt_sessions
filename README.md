@@ -52,6 +52,13 @@ class ApplicationController < ActionController::API
 end
 ```
 
+Specify an encryption key for JSON Web Tokens in `config/initializers/jwt_session.rb` \
+It's adviced to store the key itself within the app secrets.
+
+```
+JWTSessions.encryption_key = Rails.application.secrets.secret_jwt_encryption_key
+```
+
 Generate access/refresh/csrf tokens with a custom payload. \
 The payload will be available in the controllers once the access (or refresh) token is authorized.
 
@@ -200,16 +207,55 @@ end
 
 ## Configuration
 
-List of configurable settings with their default values:
+List of configurable settings with their default values.
+
+##### Redis
+
+Default token store configurations
 
 ```
 JWTSessions.redis_host = '127.0.0.1'
 JWTSessions.redis_port = '6379'
+JWTSessions.redis_db_name = 'jwtokens'
+JWTSessions.token_prefix = 'jwt_' # used for redis db keys
+```
+
+##### JWT encryption
+
+```
+JWTSessions.algorithm = 'HS256'
+```
+
+You need to specify a secret encryption key to use for HMAC, this setting doesn't have a default value.
+
+```
+JWTSessions.encryption_key = 'secret'
+```
+
+##### Request headers and cookies names
+
+Default request headers/cookies names can be re-configured
+
+```
+JWTSessions.access_header = 'Authorization'
+JWTSessions.access_cookie = 'jwt_access'
+JWTSessions.refresh_header = 'X-Refresh-Token'
+JWTSessions.refresh_cookie = 'jwt_refresh'
+JWTSessions.csrf_header = 'X-CSRF-Token'
+```
+
+##### Expiration time
+
+Acces token must have a short life span, while refresh tokens can be stored for a longer time period
+
+```
+JWTSessions.access_exp_time = 3600 # 1 hour in seconds
+JWTSessions.refresh_exp_time = 604800 # 1 week in seconds
 ```
 
 ## TODO
 
-Add to readme CSRF tokens usage examples, cookies usage examples, configuration description, refresh before access expiration examples, security best practices, redis/non-redis token store. \
+Add to readme CSRF tokens usage examples, cookies usage examples, detailed configuration description, refresh before access expiration examples, security best practices, redis/non-redis token store. \
 Store jwt encryption configuration as a separate options set.
 
 ## License
