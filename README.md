@@ -243,13 +243,6 @@ You need to specify a secret to use for HMAC, this setting doesn't have a defaul
 JWTSessions.secret = 'secret'
 ```
 
-Or you need to specify public and private keys for RSA/EDCSA/EDDSA, there are no default values for keys. You can use instructions from [ruby-jwt](https://github.com/jwt/ruby-jwt) to generate keys corresponding keys.
-
-```
-JWTSessions.private_key = 'private_key'
-JWTSessions.public_key  = 'public_key_for_private'
-```
-
 ##### Request headers and cookies names
 
 Default request headers/cookies names can be re-configured
@@ -289,6 +282,16 @@ Since sessions are always defined by a pair of tokens and there can't be multipl
 ```
 session = JwtSessions::Session.new(payload: payload)
 session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ... }
+```
+
+## TODO
+
+Ability to specify public and private keys for RSA/EDCSA/EDDSA, there are no default values for keys. \
+You can use instructions from [ruby-jwt](https://github.com/jwt/ruby-jwt) to generate keys corresponding keys.
+
+```
+JWTSessions.private_key = 'private_key'
+JWTSessions.public_key  = 'public_key_for_private'
 ```
 
 ## Contributing
