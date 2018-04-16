@@ -89,22 +89,33 @@ class LoginController < ApplicationController
       session = JWTSessions::Session.new(payload: payload)
       render json: session.login
     else
-      render json: 'Invalid email or password', status: :unauthorized
+      render json: 'Invalid user', status: :unauthorized
     end
   end
 end
 ```
 
-Now you can build a refresh endpoint. To protect the endpoint use before_action `authenticate_refresh_request!`. \
+Since it's not required to pass an access token when you want to perform a refresh you may need to have some data in the payload of the refresh token to allow you to construct a payload of the new access token during refresh.
+
+```
+session = JWTSessions::Session.new(payload: payload, refresh_payload: refresh_payload)
+```
+
+Now you can build a refresh endpoint. To protect the endpoint use before_action `authorize_refresh_request!`. \
 In the example `found_token` - is a token fetched from request headers or cookies.
 
 ```
 class RefreshController < ApplicationController
-  before_action :authenticate_refresh_request!
+  before_action :authorize_refresh_request!
 
   def create
-    session = JWTSessions::Session.new(payload: payload)
+    session = JWTSessions::Session.new(payload: access_payload)
     render json: session.refresh(found_token)
+  end
+
+  def access_payload
+    # payload here stands for refresh token payload
+    build_access_payload_based_on_refresh(payload)
   end
 end
 ```
@@ -116,11 +127,11 @@ X-Refresh-Token: eyJhbGciOiJIUzI1NiJ9...
 POST /refresh
 ```
 
-Now when there're login and refresh endpoints, you can protect the rest of your secure controllers with `before_action :authenticate_access_request!`.
+Now when there're login and refresh endpoints, you can protect the rest of your secure controllers with `before_action :authorize_access_request!`.
 
 ```
 class UsersController < ApplicationController
-  before_action :authenticate_access_request!
+  before_action :authorize_access_request!
 
   def index
     ...
@@ -196,7 +207,7 @@ class SimpleApp < Sinatra::Base
 
   post '/refresh' do
     content_type :json
-    authenticate_refresh_request!
+    authorize_refresh_request!
     session = JWTSessions::Session.new(payload: payload)
     session.refresh(found_token).to_json
   end
@@ -214,10 +225,10 @@ List of configurable settings with their default values.
 Default token store configurations
 
 ```
-JWTSessions.redis_host = '127.0.0.1'
-JWTSessions.redis_port = '6379'
+JWTSessions.redis_host    = '127.0.0.1'
+JWTSessions.redis_port    = '6379'
 JWTSessions.redis_db_name = 'jwtokens'
-JWTSessions.token_prefix = 'jwt_' # used for redis db keys
+JWTSessions.token_prefix  = 'jwt_' # used for redis db keys
 ```
 
 ##### JWT encryption
@@ -226,10 +237,17 @@ JWTSessions.token_prefix = 'jwt_' # used for redis db keys
 JWTSessions.algorithm = 'HS256'
 ```
 
-You need to specify a secret encryption key to use for HMAC, this setting doesn't have a default value.
+You need to specify a secret to use for HMAC, this setting doesn't have a default value.
 
 ```
-JWTSessions.encryption_key = 'secret'
+JWTSessions.secret = 'secret'
+```
+
+Or you need to specify public and private keys for RSA/EDCSA/EDDSA, there are no default values for keys. You can use instructions from [ruby-jwt](https://github.com/jwt/ruby-jwt) to generate keys corresponding keys.
+
+```
+JWTSessions.private_key = 'private_key'
+JWTSessions.public_key  = 'public_key_for_private'
 ```
 
 ##### Request headers and cookies names
@@ -237,11 +255,11 @@ JWTSessions.encryption_key = 'secret'
 Default request headers/cookies names can be re-configured
 
 ```
-JWTSessions.access_header = 'Authorization'
-JWTSessions.access_cookie = 'jwt_access'
+JWTSessions.access_header  = 'Authorization'
+JWTSessions.access_cookie  = 'jwt_access'
 JWTSessions.refresh_header = 'X-Refresh-Token'
 JWTSessions.refresh_cookie = 'jwt_refresh'
-JWTSessions.csrf_header = 'X-CSRF-Token'
+JWTSessions.csrf_header    = 'X-CSRF-Token'
 ```
 
 ##### Expiration time
@@ -253,10 +271,29 @@ JWTSessions.access_exp_time = 3600 # 1 hour in seconds
 JWTSessions.refresh_exp_time = 604800 # 1 week in seconds
 ```
 
-## TODO
+#### CSRF and cookies
 
-Add to readme CSRF tokens usage examples, cookies usage examples, detailed configuration description, refresh before access expiration examples, security best practices, redis/non-redis token store. \
-Store jwt encryption configuration as a separate options set.
+In case when you use cookies as your tokens transport it gets vulnerable to CSRF. That's why both login and refresh methods of the `Session` class produce CSRF tokens for you. `Authorization` mixin expects that this token is sent with all requests except GET and HEAD in a header specified among this gem's settings (X-CSRF-Token by default). Verification will be done automatically and `Authorization` exception will be raised in case of mismatch between the token from the header and the one stored in session. \
+Although you don't need to mitigate BREACH attacks it's still possible to generate a new masked token with the access token
+
+```
+session = JWTSessions::Session.new
+session.masked_csrf(access_token)
+```
+
+#### Refresh token hijack protection
+
+There is a security recommendation regarding the usage of refresh tokens: only perform refresh when an access token gets expired. \
+Since sessions are always defined by a pair of tokens and there can't be multiple access tokens for a single refresh token simultaneous usage of the refresh token by multiple users can be easily noticed as refresh will be perfomed before the expiration of the access token by one of the users. Because of that `refresh` method of the `Session` class supports optional block as one of its arguments which will be executed only in case of refresh being performed before the expiration of the access token.
+
+```
+session = JwtSessions::Session.new(payload: payload)
+session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ... }
+```
+
+## Contributing
+
+Fork & Pull Request
 
 ## License
 

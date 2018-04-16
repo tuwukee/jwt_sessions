@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UsersController < ApplicationController
-  before_action :authenticate_access_request!
+  before_action :authorize_access_request!
 
   def create
     user = User.new(user_params)

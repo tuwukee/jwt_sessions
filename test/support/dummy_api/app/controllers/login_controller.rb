@@ -8,7 +8,7 @@ class LoginController < ApplicationController
       session = JWTSessions::Session.new(payload: payload)
       render json: session.login
     else
-      render json: 'Invalid email or password', status: :unauthorized
+      render json: 'Invalid user', status: :unauthorized
     end
   end
 end

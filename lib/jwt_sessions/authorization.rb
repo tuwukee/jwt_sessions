@@ -8,25 +8,25 @@ module JWTSessions
     protected
 
     TOKEN_TYPES.each do |token_type|
-      define_method("authenticate_#{token_type}_request!") do
+      define_method("authorize_#{token_type}_request!") do
         begin
           cookieless_auth(token_type)
         rescue Errors::Unauthorized
           cookie_based_auth(token_type)
         end
-        invalid_authentication unless Token.valid_payload?(payload)
+        invalid_authorization unless Token.valid_payload?(payload)
         check_csrf(token_type)
       end
     end
 
     private
 
-    def invalid_authentication
+    def invalid_authorization
       raise Errors::Unauthorized
     end
 
     def check_csrf(token_type)
-      invalid_authentication if should_check_csrf? && @_csrf_check && !valid_csrf_token?(retrieve_csrf, token_type)
+      invalid_authorization if should_check_csrf? && @_csrf_check && !valid_csrf_token?(retrieve_csrf, token_type)
     end
 
     def should_check_csrf?
