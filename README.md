@@ -185,7 +185,7 @@ def request_method
 end
 ```
 
-Example Sinatra app.
+Example Sinatra app. \
 NOTE: Since rack updates HTTP headers by using `HTTP_` prefix, upcasing and using underscores for sake of simplicity JWTSessions tokens header names are converted to rack-style in this example.
 
 ```ruby
@@ -231,7 +231,7 @@ class SimpleApp < Sinatra::Base
     session.refresh(found_token).to_json
   end
 
-  # GEY /payload
+  # GET /payload
   # authorization: Bearer ...
   get '/payload' do
     authorize_access_request!
