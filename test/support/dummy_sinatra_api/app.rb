@@ -14,6 +14,7 @@ end
 namespace '/api/v1' do
   include JWTSessions::Authorization
 
+  # rack headers standard
   ACCESS_HEADER = "HTTP_#{JWTSessions.access_header.underscore.upcase}"
   REFRESH_HEADER = "HTTP_#{JWTSessions.refresh_header.underscore.upcase}"
 
