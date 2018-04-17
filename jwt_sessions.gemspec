@@ -6,7 +6,7 @@ require 'jwt_sessions/version'
 Gem::Specification.new do |s|
   s.name        = 'jwt_sessions'
   s.version     = JWTSessions::VERSION
-  s.date        = '2018-04-16'
+  s.date        = '2018-04-17'
   s.summary     = 'JWT Sessions'
   s.description = 'XSS/CSRF safe JWT auth designed for SPA'
   s.authors     = ['Yulia Oletskaya']
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.test_files    = Dir['test/units/*', 'test/units/**/*']
   s.require_paths = ['lib']
 
-  s.add_dependency 'jwt', '~>1.4'
+  s.add_dependency 'jwt', '>=1.4'
   s.add_dependency 'redis', '~>3'
 
   s.add_development_dependency 'pry', '~>0.11'

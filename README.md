@@ -185,16 +185,22 @@ def request_method
 end
 ```
 
-Example Sinatra app
+Example Sinatra app.
+NOTE: Since rack updates HTTP headers by using `HTTP_` prefix, upcasing and using underscores for sake of simplicity JWTSessions tokens header names are converted to rack-style in this example.
 
 ```ruby
 require 'sinatra/base'
+
+JWTSessions.access_header = 'authorization'
+JWTSessions.refresh_header = 'x_refresh_token'
+JWTSessions.csrf_header = 'x_csrf_token'
+JWTSessions.encryption_key = 'secret key'
 
 class SimpleApp < Sinatra::Base
   include JWTSessions::Authorization
 
   def request_headers
-    request.headers
+    env.inject({}){|acc, (k,v)| acc[$1.downcase] = v if k =~ /^http_(.*)/i; acc}
   end
 
   def request_cookies
@@ -205,11 +211,31 @@ class SimpleApp < Sinatra::Base
     request.request_method
   end
 
+  before do
+    content_type 'application/json'
+  end
+
+  post '/login' do
+    access_payload = { key: 'access value' }
+    refresh_payload = { key: 'refresh value' }
+    session = JWTSessions::Session.new(payload: access_payload, refresh_payload: refresh_payload)
+    session.login.to_json
+  end
+
+  # POST /refresh
+  # x_refresh_token: ...
   post '/refresh' do
-    content_type :json
     authorize_refresh_request!
-    session = JWTSessions::Session.new(payload: payload)
+    access_payload = { key: 'reloaded access value' }
+    session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
     session.refresh(found_token).to_json
+  end
+
+  # GEY /payload
+  # authorization: Bearer ...
+  get '/payload' do
+    authorize_access_request!
+    payload.to_json
   end
 
   ....
