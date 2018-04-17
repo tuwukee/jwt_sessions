@@ -24,6 +24,13 @@ describe RefreshController do
       end
 
       it do
+        request.headers[JWTSessions.refresh_header.downcase] = refresh_token
+        post :create
+        expect(response).to be_successful
+        expect(response_json.keys.sort).to eq ['access', 'csrf', 'refresh']
+      end
+
+      it do
         request.cookies[JWTSessions.refresh_cookie] = refresh_cookie
         request.headers[JWTSessions.csrf_header] = csrf_token
         post :create
