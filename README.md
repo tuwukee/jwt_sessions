@@ -1,5 +1,6 @@
 # jwt_sessions
 [![Gem Version](https://badge.fury.io/rb/jwt_sessions.svg)](https://badge.fury.io/rb/jwt_sessions)
+[![Maintainability](https://api.codeclimate.com/v1/badges/53de11b8334933b1c0ef/maintainability)](https://codeclimate.com/github/tuwukee/jwt_sessions/maintainability)
 
 XSS/CSRF safe JWT auth designed for SPA
 
