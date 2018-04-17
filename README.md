@@ -21,7 +21,7 @@ jwt_sessions itself uses `ext` claim and `HS256` signing by default.
 
 Put this line in your Gemfile
 
-```
+```ruby
 gem 'jwt_sessions'
 ```
 
@@ -39,7 +39,7 @@ bundle install
 
 Include `JWTSessions::RailsAuthorization` in your controllers, add `JWTSessions::Errors::Unauthorized` exceptions handling if needed.
 
-```
+```ruby
 class ApplicationController < ActionController::API
   include JWTSessions::RailsAuthorization
   rescue_from JWTSessions::Errors::Unauthorized, with: :not_authorized
@@ -55,14 +55,14 @@ end
 Specify an encryption key for JSON Web Tokens in `config/initializers/jwt_session.rb` \
 It's adviced to store the key itself within the app secrets.
 
-```
+```ruby
 JWTSessions.encryption_key = Rails.application.secrets.secret_jwt_encryption_key
 ```
 
 Generate access/refresh/csrf tokens with a custom payload. \
 The payload will be available in the controllers once the access (or refresh) token is authorized.
 
-```
+```ruby
 > payload = { user_id: user.id }
 => {:user_id=>1}
 
@@ -80,7 +80,7 @@ Refresh controller - to be able to get a new access token using refresh token af
 Here is example of a simple login controller, which returns set of tokens as a plain JSON response. \
 It's also possible to set tokens as cookies in the response instead.
 
-```
+```ruby
 class LoginController < ApplicationController
   def create
     user = User.find_by!(email: params[:email])
@@ -97,14 +97,14 @@ end
 
 Since it's not required to pass an access token when you want to perform a refresh you may need to have some data in the payload of the refresh token to allow you to construct a payload of the new access token during refresh.
 
-```
+```ruby
 session = JWTSessions::Session.new(payload: payload, refresh_payload: refresh_payload)
 ```
 
 Now you can build a refresh endpoint. To protect the endpoint use before_action `authorize_refresh_request!`. \
 In the example `found_token` - is a token fetched from request headers or cookies.
 
-```
+```ruby
 class RefreshController < ApplicationController
   before_action :authorize_refresh_request!
 
@@ -129,7 +129,7 @@ POST /refresh
 
 Now when there're login and refresh endpoints, you can protect the rest of your secure controllers with `before_action :authorize_access_request!`.
 
-```
+```ruby
 class UsersController < ApplicationController
   before_action :authorize_access_request!
 
@@ -151,7 +151,7 @@ GET /users
 
 The `payload` method is available to fetch encoded data from the token.
 
-```
+```ruby
 def current_user
   @current_user ||= User.find(payload['user_id'])
 end
@@ -163,7 +163,7 @@ You must include `JWTSessions::Authorization` module to your auth class and impl
 
 1. request_headers
 
-```
+```ruby
 def request_headers
   # must return hash-like object with request headers
 end
@@ -171,7 +171,7 @@ end
 
 2. request_cookies
 
-```
+```ruby
 def request_cookies
   # must return hash-like object with request cookies
 end
@@ -179,7 +179,7 @@ end
 
 3. request_method
 
-```
+```ruby
 def request_method
   # must return current request verb as a string in upcase, f.e. 'GET', 'HEAD', 'POST', 'PATCH', etc
 end
@@ -187,7 +187,7 @@ end
 
 Example Sinatra app
 
-```
+```ruby
 require 'sinatra/base'
 
 class SimpleApp < Sinatra::Base
@@ -224,7 +224,7 @@ List of configurable settings with their default values.
 
 Default token store configurations
 
-```
+```ruby
 JWTSessions.redis_host    = '127.0.0.1'
 JWTSessions.redis_port    = '6379'
 JWTSessions.redis_db_name = 'jwtokens'
@@ -233,13 +233,13 @@ JWTSessions.token_prefix  = 'jwt_' # used for redis db keys
 
 ##### JWT encryption
 
-```
+```ruby
 JWTSessions.algorithm = 'HS256'
 ```
 
 You need to specify a secret to use for HMAC, this setting doesn't have a default value.
 
-```
+```ruby
 JWTSessions.secret = 'secret'
 ```
 
@@ -247,7 +247,7 @@ JWTSessions.secret = 'secret'
 
 Default request headers/cookies names can be re-configured
 
-```
+```ruby
 JWTSessions.access_header  = 'Authorization'
 JWTSessions.access_cookie  = 'jwt_access'
 JWTSessions.refresh_header = 'X-Refresh-Token'
@@ -259,7 +259,7 @@ JWTSessions.csrf_header    = 'X-CSRF-Token'
 
 Acces token must have a short life span, while refresh tokens can be stored for a longer time period
 
-```
+```ruby
 JWTSessions.access_exp_time = 3600 # 1 hour in seconds
 JWTSessions.refresh_exp_time = 604800 # 1 week in seconds
 ```
@@ -269,7 +269,7 @@ JWTSessions.refresh_exp_time = 604800 # 1 week in seconds
 In case when you use cookies as your tokens transport it gets vulnerable to CSRF. That's why both login and refresh methods of the `Session` class produce CSRF tokens for you. `Authorization` mixin expects that this token is sent with all requests except GET and HEAD in a header specified among this gem's settings (X-CSRF-Token by default). Verification will be done automatically and `Authorization` exception will be raised in case of mismatch between the token from the header and the one stored in session. \
 Although you don't need to mitigate BREACH attacks it's still possible to generate a new masked token with the access token
 
-```
+```ruby
 session = JWTSessions::Session.new
 session.masked_csrf(access_token)
 ```
@@ -279,7 +279,7 @@ session.masked_csrf(access_token)
 There is a security recommendation regarding the usage of refresh tokens: only perform refresh when an access token gets expired. \
 Since sessions are always defined by a pair of tokens and there can't be multiple access tokens for a single refresh token simultaneous usage of the refresh token by multiple users can be easily noticed as refresh will be perfomed before the expiration of the access token by one of the users. Because of that `refresh` method of the `Session` class supports optional block as one of its arguments which will be executed only in case of refresh being performed before the expiration of the access token.
 
-```
+```ruby
 session = JwtSessions::Session.new(payload: payload)
 session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ... }
 ```
@@ -289,7 +289,7 @@ session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ..
 Ability to specify public and private keys for RSA/EDCSA/EDDSA, there are no default values for keys. \
 You can use instructions from [ruby-jwt](https://github.com/jwt/ruby-jwt) to generate keys corresponding keys.
 
-```
+```ruby
 JWTSessions.private_key = 'private_key'
 JWTSessions.public_key  = 'public_key_for_private'
 ```
