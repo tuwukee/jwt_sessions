@@ -312,6 +312,11 @@ session = JwtSessions::Session.new(payload: payload)
 session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ... }
 ```
 
+## Examples
+
+[Rails API](test/support/dummy_api) \
+[Sinatra API](test/support/dummy_sinatra_api)
+
 ## TODO
 
 Ability to specify public and private keys for RSA/EDCSA/EDDSA, there are no default values for keys. \
