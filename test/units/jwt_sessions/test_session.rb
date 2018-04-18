@@ -8,8 +8,8 @@ class TestSession < Minitest::Test
   EXPECTED_KEYS = [:access, :csrf, :refresh].freeze
 
   def setup
-    JWTSessions.encryption_key = '65994c7b523a3232e7aba54d8cbf'
-    @payload = { test: 'test' }
+    JWTSessions.encryption_key = 'encrypted'
+    @payload = { test: 'secret' }
     @session = JWTSessions::Session.new(payload: payload)
     @tokens = session.login
   end

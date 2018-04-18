@@ -7,13 +7,15 @@ class TestToken < Minitest::Test
   attr_reader :payload
 
   def setup
-    JWTSessions.encryption_key = '65994c7b523a3232e7aba54d8cbf'
-    @payload = { 'user_id' => 1 }
+    JWTSessions.encryption_key = 'super secret'
+    @payload = { 'user_id' => 1, 'secret' => 'mystery' }
   end
 
   def test_valid_token_decode
     token = JWTSessions::Token.encode(payload)
-    assert_equal payload['user_id'], JWTSessions::Token.decode(token).first['user_id']
+    decoded = JWTSessions::Token.decode(token).first
+    assert_equal payload['user_id'], decoded['user_id']
+    assert_equal payload['secret'], decoded['secret']
   end
 
   def test_invalid_token_decode
