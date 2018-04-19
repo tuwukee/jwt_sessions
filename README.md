@@ -290,7 +290,7 @@ JWTSessions.algorithm = 'HS256'
 You need to specify a secret to use for HMAC, this setting doesn't have a default value.
 
 ```ruby
-JWTSessions.secret = 'secret'
+JWTSessions.encryption_key = 'secret'
 ```
 
 ##### Request headers and cookies names
