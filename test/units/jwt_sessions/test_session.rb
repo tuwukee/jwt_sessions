@@ -5,7 +5,7 @@ require 'jwt_sessions'
 
 class TestSession < Minitest::Test
   attr_reader :session, :payload, :tokens
-  EXPECTED_KEYS = [:access, :csrf, :refresh].freeze
+  EXPECTED_KEYS = %i[access access_expires_at csrf refresh refresh_expires_at].freeze
 
   def setup
     JWTSessions.encryption_key = 'encrypted'

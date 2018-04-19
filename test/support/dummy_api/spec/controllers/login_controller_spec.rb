@@ -10,7 +10,7 @@ describe LoginController do
 
       it do
         expect(response).to be_successful
-        expect(response_json.keys.sort).to eq ['access', 'csrf', 'refresh']
+        expect(response_json.keys.sort).to eq ['access', 'access_expires_at', 'csrf', 'refresh', 'refresh_expires_at']
       end
     end
   end
