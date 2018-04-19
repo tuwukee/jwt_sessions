@@ -11,6 +11,8 @@ describe RefreshController do
       @tokens = session.login
     end
 
+    EXPECTED_KEYS = %w[access access_expires_at csrf refresh refresh_expires_at].freeze
+
     context 'success' do
       let(:refresh_token) { "Bearer #{@tokens[:refresh]}" }
       let(:refresh_cookie) { @tokens[:refresh] }
@@ -20,14 +22,14 @@ describe RefreshController do
         request.headers[JWTSessions.refresh_header] = refresh_token
         post :create
         expect(response).to be_successful
-        expect(response_json.keys.sort).to eq ['access', 'csrf', 'refresh']
+        expect(response_json.keys.sort).to eq EXPECTED_KEYS
       end
 
       it do
         request.headers[JWTSessions.refresh_header.downcase] = refresh_token
         post :create
         expect(response).to be_successful
-        expect(response_json.keys.sort).to eq ['access', 'csrf', 'refresh']
+        expect(response_json.keys.sort).to eq EXPECTED_KEYS
       end
 
       it do
@@ -35,7 +37,7 @@ describe RefreshController do
         request.headers[JWTSessions.csrf_header] = csrf_token
         post :create
         expect(response).to be_successful
-        expect(response_json.keys.sort).to eq ['access', 'csrf', 'refresh']
+        expect(response_json.keys.sort).to eq EXPECTED_KEYS
       end
     end
 

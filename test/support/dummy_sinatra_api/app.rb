@@ -1,4 +1,4 @@
-$LOAD_PATH.push File.expand_path('../../../../../lib', __FILE__)
+$LOAD_PATH.push File.expand_path('../../../../lib', __FILE__)
 require 'jwt'
 require 'jwt_sessions'
 require 'sinatra'

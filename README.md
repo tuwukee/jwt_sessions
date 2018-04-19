@@ -81,7 +81,8 @@ JWTSessions.encryption_key = Rails.application.secrets.secret_jwt_encryption_key
 ```
 
 Generate access/refresh/csrf tokens with a custom payload. \
-The payload will be available in the controllers once the access (or refresh) token is authorized.
+The payload will be available in the controllers once the access (or refresh) token is authorized. \
+Access/refresh tokens contain expiration time in their payload. Yet expiration times are also added to the output just in case.
 
 ```ruby
 > payload = { user_id: user.id }
@@ -93,7 +94,9 @@ The payload will be available in the controllers once the access (or refresh) to
 > session.login
 => {:csrf=>"BmhxDRW5NAEIx...",
     :access=>"eyJhbGciOiJIUzI1NiJ9...",
-    :refresh=>"eyJhbGciOiJIUzI1NiJ9..."}
+    :access_expires_at=>"..."
+    :refresh=>"eyJhbGciOiJIUzI1NiJ9...",
+    :refresh_expires_at=>"..."}
 ```
 
 You can build login controller to receive access, refresh and csrf tokens in exchange for user's login/password. \
