@@ -5,6 +5,25 @@
 
 XSS/CSRF safe JWT auth designed for SPA
 
+## Table of Contents
+
+- [Synopsis](#synopsis)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+  * [Rails integration](#rails-integration)
+  * [Non-Rails usage](#non-rails-usage)
+- [Configuration](#configuration)
+    + [Redis](#redis)
+    + [JWT encryption](#jwt-encryption)
+    + [Request headers and cookies names](#request-headers-and-cookies-names)
+    + [Expiration time](#expiration-time)
+    + [CSRF and cookies](#csrf-and-cookies)
+    + [Refresh token hijack protection](#refresh-token-hijack-protection)
+- [Examples](#examples)
+- [TODO](#todo)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Synopsis
 
 Main goal of this gem is to provide configurable, manageable, and safe stateful sessions based on JSON Web Tokens.
