@@ -18,11 +18,11 @@ Gem::Specification.new do |s|
   s.test_files    = Dir['test/units/*', 'test/units/**/*']
   s.require_paths = ['lib']
 
-  s.add_dependency 'jwt', '>=1.4'
-  s.add_dependency 'redis', '~>3'
+  s.add_dependency 'jwt', '~> 2.1'
+  s.add_dependency 'redis', '~> 3'
 
-  s.add_development_dependency 'bundler', '~>1.16'
-  s.add_development_dependency 'minitest', '~>5.11'
-  s.add_development_dependency 'pry', '~>0.11'
+  s.add_development_dependency 'bundler', '~> 1.16'
+  s.add_development_dependency 'minitest', '~> 5.11'
+  s.add_development_dependency 'pry', '~> 0.11'
   s.add_development_dependency 'rake', '~> 10.0'
 end

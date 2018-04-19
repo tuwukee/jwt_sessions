@@ -290,9 +290,46 @@ JWTSessions.algorithm = 'HS256'
 You need to specify a secret to use for HMAC, this setting doesn't have a default value.
 
 ```ruby
-JWTSessions.secret = 'secret'
+JWTSessions.encryption_key = 'secret'
 ```
 
+If you are using another algorithm like RSA/ECDSA/EDDSA you should specify private and public keys.
+
+```ruby
+JWTSessions.private_key = 'abcd'
+JWTSessions.public_key  = 'efjh'
+```
+
+NOTE: ED25519 and HS512256 require rbnacl installation in order to make it work. \
+
+jwt_sessions only uses `exp` claim by default when it decodes tokens, you can specify which additional claims to use by
+setting `jwt_options`. You can also specify leeway to account for clock skew.
+
+```ruby
+JWTSessions.jwt_options.verify_iss = true
+JWTSessions.jwt_options.verify_sub = true
+JWTSessions.jwt_options.verify_iat = true
+JWTSessions.jwt_options.verify_aud = true
+JWTSessions.jwt_options.leeway     = 30 # seconds
+```
+
+To pass options like `sub`, `aud`, `iss`, or leeways you should specify a method called `token_claims` in your controller.
+
+```ruby
+class UsersController < ApplicationController
+  before_action :authorize_access_request!
+  
+  def token_claims
+    {
+      aud: ['admin', 'staff'],
+      exp_leeway: 15 # will be used instead of default leeway only for exp claim
+    }
+  end
+end
+```
+
+Claims are also supported by `JWTSessions::Session`, you can pass `access_claims` and `refresh_claims` options in the initializer
+ 
 ##### Request headers and cookies names
 
 Default request headers/cookies names can be re-configured
@@ -341,17 +378,13 @@ session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ..
 
 ## TODO
 
-Ability to specify public and private keys for RSA/EDCSA/EDDSA, there are no default values for keys. \
-You can use instructions from [ruby-jwt](https://github.com/jwt/ruby-jwt) to generate keys corresponding keys.
-
-```ruby
-JWTSessions.private_key = 'private_key'
-JWTSessions.public_key  = 'public_key_for_private'
-```
+Session cleanup by uid or refresh token instance. \
+Refresh token namespaces to allow centralized token cleanup per namespace (scenarios like password reset).
 
 ## Contributing
 
-Fork & Pull Request
+Fork & Pull Request \
+RbNaCl is required for tests
 
 ## License
 

@@ -14,7 +14,8 @@ module JWTSessions
         rescue Errors::Unauthorized
           cookie_based_auth(token_type)
         end
-        invalid_authorization unless Token.valid_payload?(payload)
+        # triggers token decode and jwt claim checks
+        payload
         check_csrf(token_type)
       end
     end
@@ -83,7 +84,8 @@ module JWTSessions
     end
 
     def payload
-      @_payload ||= Token.decode(found_token).first
+      claims = respond_to?(:token_claims) ? token_claims : {}
+      @_payload ||= Token.decode(found_token, claims).first
     end
   end
 end
