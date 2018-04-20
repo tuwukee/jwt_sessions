@@ -14,7 +14,8 @@ class TestRefreshToken < Minitest::Test
                                              @access_uid,
                                              JWTSessions.access_expiration - 5,
                                              JWTSessions.token_store,
-                                             {})
+                                             {},
+                                             nil)
   end
 
   def test_update
@@ -27,15 +28,15 @@ class TestRefreshToken < Minitest::Test
   end
 
   def test_find
-    found_token = JWTSessions::RefreshToken.find(token.uid, JWTSessions.token_store)
+    found_token = JWTSessions::RefreshToken.find(token.uid, JWTSessions.token_store, nil)
     assert_equal found_token.access_uid, token.access_uid
     token.destroy
   end
 
   def test_destroy
-    JWTSessions::RefreshToken.destroy(token.uid, JWTSessions.token_store)
+    JWTSessions::RefreshToken.destroy(token.uid, JWTSessions.token_store, nil)
     assert_raises JWTSessions::Errors::Unauthorized do
-      JWTSessions::RefreshToken.find(token.uid, JWTSessions.token_store)
+      JWTSessions::RefreshToken.find(token.uid, JWTSessions.token_store, nil)
     end
   end
 end
