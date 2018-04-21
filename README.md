@@ -307,7 +307,7 @@ JWTSessions.csrf_header    = 'X-CSRF-Token'
 
 ##### Expiration time
 
-Acces token must have a short life span, while refresh tokens can be stored for a longer time period
+Access token must have a short life span, while refresh tokens can be stored for a longer time period
 
 ```ruby
 JWTSessions.access_exp_time = 3600 # 1 hour in seconds
