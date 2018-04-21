@@ -9,6 +9,8 @@ module JWTSessions
       @store           = options.fetch(:store, JWTSessions.token_store)
       @refresh_payload = options.fetch(:refresh_payload, {})
       @payload         = options.fetch(:payload, {})
+      @access_claims   = options.fetch(:access_claims, {})
+      @refresh_claims  = options.fetch(:refresh_claims, {})
     end
 
     def login
@@ -60,17 +62,17 @@ module JWTSessions
     end
 
     def access_token_data(token)
-      uid = token_uid(token, :access)
+      uid = token_uid(token, :access, @access_claims)
       store.fetch_access(uid)
     end
 
     def refresh_token_data(token)
-      uid = token_uid(token, :refresh)
+      uid = token_uid(token, :refresh, @refresh_claims)
       retrieve_refresh_token(uid)
     end
 
-    def token_uid(token, type)
-      token_payload = JWTSessions::Token.decode(token).first
+    def token_uid(token, type, claims)
+      token_payload = JWTSessions::Token.decode(token, claims).first
       uid           = token_payload.fetch('uid', nil)
       if uid.nil?
         message = "#{type.to_s.capitalize} token payload does not contain token uid"

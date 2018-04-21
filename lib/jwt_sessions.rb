@@ -18,6 +18,10 @@ module JWTSessions
 
   attr_writer :token_store
 
+  NONE = 'none'
+
+  JWTOptions = Struct.new(*JWT::DefaultOptions::DEFAULT_OPTIONS.keys)
+
   DEFAULT_SETTINGS_KEYS = %i[access_cookie
                              access_exp_time
                              access_header
@@ -30,19 +34,19 @@ module JWTSessions
                              refresh_exp_time
                              refresh_header
                              token_prefix].freeze
-  DEFAULT_REDIS_HOST = '127.0.0.1'
-  DEFAULT_REDIS_PORT = '6379'
-  DEFAULT_REDIS_DB_NAME = 'jwtokens'
-  DEFAULT_TOKEN_PREFIX = 'jwt_'
-  DEFAULT_ALGORITHM = 'HS256'
-  DEFAULT_ACCESS_EXP_TIME = 3600 # 1 hour in seconds
-  DEFAULT_REFRESH_EXP_TIME = 604800 # 1 week in seconds
-  DEFAULT_ACCESS_COOKIE = 'jwt_access'
-  DEFAULT_ACCESS_HEADER = 'Authorization'
-  DEFAULT_REFRESH_COOKIE = 'jwt_refresh'
-  DEFAULT_REFRESH_HEADER = 'X-Refresh-Token'
-  DEFAULT_CSRF_HEADER = 'X-CSRF-Token'
 
+  DEFAULT_REDIS_HOST       = '127.0.0.1'
+  DEFAULT_REDIS_PORT       = '6379'
+  DEFAULT_REDIS_DB_NAME    = 'jwtokens'
+  DEFAULT_TOKEN_PREFIX     = 'jwt_'
+  DEFAULT_ALGORITHM        = 'HS256'
+  DEFAULT_ACCESS_EXP_TIME  = 3600 # 1 hour in seconds
+  DEFAULT_REFRESH_EXP_TIME = 604800 # 1 week in seconds
+  DEFAULT_ACCESS_COOKIE    = 'jwt_access'
+  DEFAULT_ACCESS_HEADER    = 'Authorization'
+  DEFAULT_REFRESH_COOKIE   = 'jwt_refresh'
+  DEFAULT_REFRESH_HEADER   = 'X-Refresh-Token'
+  DEFAULT_CSRF_HEADER      = 'X-CSRF-Token'
 
   DEFAULT_SETTINGS_KEYS.each do |setting|
     var_name = :"@#{setting}"
@@ -61,13 +65,41 @@ module JWTSessions
     end
   end
 
+  def jwt_options
+    @jwt_options ||= JWTOptions.new(*JWT::DefaultOptions::DEFAULT_OPTIONS.values)
+  end
+
+  def algorithm=(algo)
+    raise Errors::Malconfigured, "algorithm #{algo} is not supported" unless supported_algos.include?(algo)
+    @algorithm = algo
+  end
+
   def token_store
     RedisTokenStore.instance(redis_host, redis_port, redis_db_name, token_prefix)
   end
 
-  def encryption_key
-    raise Errors::Malconfigured, 'encryption_key is not specified' unless @encryption_key
-    @encryption_key
+  def validate?
+    algorithm != NONE
+  end
+
+  [:public_key, :private_key].each do |key|
+    var_name = :"@#{key}"
+    define_method("#{key}") do
+      return nil if algorithm == NONE
+      var = instance_variable_get(var_name)
+      raise Errors::Malconfigured, "#{key} is not specified" unless var
+      var
+    end
+
+    define_method("#{key}=") do |val|
+      instance_variable_set(var_name, val)
+    end
+  end
+
+  # should be used for hmac only
+  def encryption_key=(key)
+    @public_key  = key
+    @private_key = key
   end
 
   def access_expiration
@@ -78,9 +110,6 @@ module JWTSessions
     Time.now.to_i + refresh_exp_time.to_i
   end
 
-  def encryption_key=(key)
-    @encryption_key = key
-  end
 
   def header_by(token_type)
     send("#{token_type}_header")
@@ -88,5 +117,13 @@ module JWTSessions
 
   def cookie_by(token_type)
     send("#{token_type}_cookie")
+  end
+
+  private
+
+  def supported_algos
+    # TODO once ECDSA is fixed in ruby-jwt it can be added to the list of algos just the same way others are added
+    algos = JWT::Algos.constants - [:Unsupported, :Ecdsa]
+    algos.map { |algo| JWT::Algos.const_get(algo)::SUPPORTED }.flatten + [NONE, *JWT::Algos::Ecdsa::SUPPORTED.split(' ')]
   end
 end

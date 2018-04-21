@@ -4,6 +4,9 @@ rvm:
   - 2.3.7
   - 2.4.2
   - 2.5.1
-before_install: gem update --system
+before_install:
+  - gem update --system
+  - sudo add-apt-repository ppa:chris-lea/libsodium -y
+  - sudo apt-get update && sudo apt-get install libsodium-dev -y
 services:
   - redis-server

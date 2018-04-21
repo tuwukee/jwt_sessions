@@ -39,10 +39,10 @@ class TestSession < Minitest::Test
     JWTSessions.access_exp_time = 0
     @session = JWTSessions::Session.new(payload: payload)
     @tokens = session.login
+    JWTSessions.access_exp_time = 3600
     refreshed_tokens = session.refresh(tokens[:refresh]) do
       raise JWTSessions::Errors::Unauthorized
     end
-    JWTSessions.access_exp_time = 3600
     decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
     assert_equal EXPECTED_KEYS, refreshed_tokens.keys.sort
     assert_equal payload[:test], decoded_access['test']
