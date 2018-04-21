@@ -1,6 +1,7 @@
 # jwt_sessions
 [![Gem Version](https://badge.fury.io/rb/jwt_sessions.svg)](https://badge.fury.io/rb/jwt_sessions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/53de11b8334933b1c0ef/maintainability)](https://codeclimate.com/github/tuwukee/jwt_sessions/maintainability)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c86efdfca81448919ec3e1c1e48fc152)](https://www.codacy.com/app/tuwukee/jwt_sessions?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tuwukee/jwt_sessions&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/tuwukee/jwt_sessions.svg?branch=master)](https://travis-ci.org/tuwukee/jwt_sessions)
 
 XSS/CSRF safe JWT auth designed for SPA
@@ -77,7 +78,16 @@ Specify an encryption key for JSON Web Tokens in `config/initializers/jwt_sessio
 It's adviced to store the key itself within the app secrets.
 
 ```ruby
+JWTSessions.algorithm = 'HS256'
 JWTSessions.encryption_key = Rails.application.secrets.secret_jwt_encryption_key
+```
+
+Most of the encryption algorithms require private and public keys to sign a token, yet HMAC only require a single key, so you can use a shortcat `encryotion_key` to sign the token. For other algorithms you must specify a private and public keys separately.
+
+```ruby
+JWTSessions.algorithm   = 'RS256'
+JWTSessions.private_key = OpenSSL::PKey::RSA.generate(2048)
+JWTSessions.public_key  = JWTSessions.private_key.public_key
 ```
 
 Generate access/refresh/csrf tokens with a custom payload. \
@@ -300,7 +310,7 @@ JWTSessions.private_key = 'abcd'
 JWTSessions.public_key  = 'efjh'
 ```
 
-NOTE: ED25519 and HS512256 require rbnacl installation in order to make it work. \
+NOTE: ED25519 and HS512256 require rbnacl installation in order to make it work.
 
 jwt_sessions only uses `exp` claim by default when it decodes tokens, you can specify which additional claims to use by
 setting `jwt_options`. You can also specify leeway to account for clock skew.
@@ -318,7 +328,7 @@ To pass options like `sub`, `aud`, `iss`, or leeways you should specify a method
 ```ruby
 class UsersController < ApplicationController
   before_action :authorize_access_request!
-  
+
   def token_claims
     {
       aud: ['admin', 'staff'],
@@ -329,7 +339,7 @@ end
 ```
 
 Claims are also supported by `JWTSessions::Session`, you can pass `access_claims` and `refresh_claims` options in the initializer
- 
+
 ##### Request headers and cookies names
 
 Default request headers/cookies names can be re-configured
@@ -379,12 +389,13 @@ session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ..
 ## TODO
 
 Session cleanup by uid or refresh token instance. \
-Refresh token namespaces to allow centralized token cleanup per namespace (scenarios like password reset).
+Refresh token namespaces to allow centralized token cleanup per namespace (scenarios like password reset). \
+Documentation for code.
 
 ## Contributing
 
 Fork & Pull Request \
-RbNaCl is required for tests
+RbNaCl and sodium cryptographic library are required for tests
 
 ## License
 
