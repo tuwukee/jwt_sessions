@@ -82,7 +82,7 @@ JWTSessions.algorithm = 'HS256'
 JWTSessions.encryption_key = Rails.application.secrets.secret_jwt_encryption_key
 ```
 
-Most of the encryption algorithms require private and public keys to sign a token, yet HMAC only require a single key, so you can use a shortcat `encryotion_key` to sign the token. For other algorithms you must specify a private and public keys separately.
+Most of the encryption algorithms require private and public keys to sign a token, yet HMAC only require a single key, so you can use a shortcat `encryption_key` to sign the token. For other algorithms you must specify a private and public keys separately.
 
 ```ruby
 JWTSessions.algorithm   = 'RS256'
