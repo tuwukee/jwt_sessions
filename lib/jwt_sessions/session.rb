@@ -54,9 +54,17 @@ module JWTSessions
       token.destroy
     end
 
-    def flush_namespaced(force = false)
-      return 0 unless namespace || force
+    def flush_namespaced
+      return 0 unless namespace
       tokens = RefreshToken.all(namespace, store)
+      tokens.each do |token|
+        AccessToken.destroy(token.access_uid, store)
+        token.destroy
+      end.count
+    end
+
+    def self.flush_all(store = JWTSessions.token_store)
+      tokens = RefreshToken.all(nil, store)
       tokens.each do |token|
         AccessToken.destroy(token.access_uid, store)
         token.destroy

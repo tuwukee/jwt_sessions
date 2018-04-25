@@ -14,6 +14,12 @@ class TestSession < Minitest::Test
     @tokens = session.login
   end
 
+  def teardown
+    redis = Redis.new
+    keys = redis.keys('jwt_*')
+    keys.each { |k| redis.del(k) }
+  end
+
   def test_login
     decoded_access = JWTSessions::Token.decode(tokens[:access]).first
     assert_equal EXPECTED_KEYS, tokens.keys.sort
@@ -78,8 +84,9 @@ class TestSession < Minitest::Test
     @session1.login
     @session2.login
 
-    @session1.flush_namespaced
+    flushed_count = @session1.flush_namespaced
 
+    assert_equal 2, flushed_count
     assert_raises JWTSessions::Errors::Unauthorized do
       refresh_token = @session1.instance_variable_get(:"@_refresh")
       JWTSessions::RefreshToken.find(refresh_token.uid, JWTSessions.token_store, nil)
@@ -91,6 +98,17 @@ class TestSession < Minitest::Test
     end
 
     refresh_token = @session.instance_variable_get(:"@_refresh")
+    flushed_count = @session.flush_namespaced
+    assert_equal 0, flushed_count
     assert_equal refresh_token.token, JWTSessions::RefreshToken.find(refresh_token.uid, JWTSessions.token_store, nil).token
+  end
+
+  def test_flush_all
+    refresh_token = @session.instance_variable_get(:"@_refresh")
+    flushed_count = JWTSessions::Session.flush_all
+    assert_equal 1, flushed_count
+    assert_raises JWTSessions::Errors::Unauthorized do
+      JWTSessions::RefreshToken.find(refresh_token.uid, JWTSessions.token_store, nil).token
+    end
   end
 end
