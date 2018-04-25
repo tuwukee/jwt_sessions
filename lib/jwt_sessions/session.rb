@@ -27,7 +27,7 @@ module JWTSessions
     end
 
     def session_exists?(token, token_type = :access)
-      token_data = send(:"#{token_type}_token_data", token)
+      send(:"#{token_type}_token_data", token)
       true
     rescue Errors::Unauthorized
       false
