@@ -20,6 +20,8 @@ XSS/CSRF safe JWT auth designed for SPA
     + [Expiration time](#expiration-time)
     + [CSRF and cookies](#csrf-and-cookies)
     + [Refresh token hijack protection](#refresh-token-hijack-protection)
+- [Flush Sessions](#flush-sessions)
+    + [Sessions Namespace](#sessions-namespace)
 - [Examples](#examples)
 - [TODO](#todo)
 - [Contributing](#contributing)
@@ -379,6 +381,42 @@ Since sessions are always defined by a pair of tokens and there can't be multipl
 ```ruby
 session = JwtSessions::Session.new(payload: payload)
 session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ... }
+```
+
+## Flush Sessions
+
+Flush session by refresh token. The method returns number of flushed sessions.
+
+```ruby
+session = JWTSessions::Session.new
+tokens = session.login
+session.flush_by_token(tokens[:refresh]) # => 1
+```
+
+Or by refresh token UID
+
+```ruby
+session.flush_by_uid(uid) # => 1
+```
+
+##### Sessions namespace
+
+It's possible to group sessions by custom namespaces
+
+```ruby
+session = JWTSessions::Session.new(namespace: 'account-1')
+```
+
+and selectively flush sessions by namespace
+
+```ruby
+session = JWTSessions::Session.new(namespace: 'ie-sessions')
+session.flush_namespaced # will flush all sessions that belong to the same namespace
+```
+
+To force flush of all app sessions
+```ruby
+JWTSessions::Session.flush_all
 ```
 
 ## Examples
