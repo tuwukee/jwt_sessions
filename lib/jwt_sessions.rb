@@ -22,18 +22,30 @@ module JWTSessions
 
   JWTOptions = Struct.new(*JWT::DefaultOptions::DEFAULT_OPTIONS.keys)
 
-  DEFAULT_SETTINGS_KEYS = %i[access_cookie
-                             access_exp_time
-                             access_header
-                             algorithm
-                             csrf_header
-                             redis_db_name
-                             redis_host
-                             redis_port
-                             refresh_cookie
-                             refresh_exp_time
-                             refresh_header
-                             token_prefix].freeze
+  DEFAULT_SETTINGS_GETTERS = %i[access_cookie
+                                access_exp_time
+                                access_header
+                                algorithm
+                                csrf_header
+                                redis_db_name
+                                redis_host
+                                redis_port
+                                refresh_cookie
+                                refresh_exp_time
+                                refresh_header
+                                token_prefix].freeze
+
+  DEFAULT_SETTINGS_SETTERS = %i[access_cookie
+                                access_exp_time
+                                access_header
+                                csrf_header
+                                redis_db_name
+                                redis_host
+                                redis_port
+                                refresh_cookie
+                                refresh_exp_time
+                                refresh_header
+                                token_prefix].freeze
 
   DEFAULT_REDIS_HOST       = '127.0.0.1'
   DEFAULT_REDIS_PORT       = '6379'
@@ -48,7 +60,7 @@ module JWTSessions
   DEFAULT_REFRESH_HEADER   = 'X-Refresh-Token'
   DEFAULT_CSRF_HEADER      = 'X-CSRF-Token'
 
-  DEFAULT_SETTINGS_KEYS.each do |setting|
+  DEFAULT_SETTINGS_GETTERS.each do |setting|
     var_name = :"@#{setting}"
 
     define_method(setting) do
@@ -59,6 +71,10 @@ module JWTSessions
                               const_get("DEFAULT_#{setting.upcase}"))
       end
     end
+  end
+
+  DEFAULT_SETTINGS_SETTERS.each do |setting|
+    var_name = :"@#{setting}"
 
     define_method("#{setting}=") do |val|
       instance_variable_set(var_name, val)
@@ -109,7 +125,6 @@ module JWTSessions
   def refresh_expiration
     Time.now.to_i + refresh_exp_time.to_i
   end
-
 
   def header_by(token_type)
     send("#{token_type}_header")

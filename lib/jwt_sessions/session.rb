@@ -28,7 +28,6 @@ module JWTSessions
 
     def session_exists?(token, token_type = :access)
       token_data = send(:"#{token_type}_token_data", token)
-      raise Errors::Unauthorized, "#{token_type.to_s.capitalize} token not found" if token_data.empty?
       true
     end
 
@@ -80,7 +79,6 @@ module JWTSessions
 
     def csrf(access_token)
       token_data = access_token_data(access_token)
-      raise Errors::Unauthorized, 'Access token not found' if token_data.empty?
       CSRFToken.new(token_data[:csrf])
     end
 
@@ -91,7 +89,9 @@ module JWTSessions
 
     def access_token_data(token)
       uid = token_uid(token, :access, @access_claims)
-      store.fetch_access(uid)
+      data = store.fetch_access(uid)
+      raise Errors::Unauthorized, 'Access token not found' if data.empty?
+      data
     end
 
     def refresh_token_data(token)

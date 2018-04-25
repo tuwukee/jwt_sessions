@@ -44,10 +44,10 @@ module JWTSessions
     end
 
     def fetch_refresh(uid, namespace)
-      keys   = [:csrf, :access_uid, :access_expiration, :expiration]
+      keys   = %i[csrf access_uid access_expiration expiration]
       values = store.hmget(refresh_key(uid, namespace), *keys).compact
       return {} if values.length != keys.length
-      keys.each_with_index.inject({}) { |acc, (key, index)| acc[key] = values[index]; acc }
+      keys.each_with_index.each_with_object({}) { |(key, index), acc| acc[key] = values[index]; }
     end
 
     def persist_refresh(uid, access_expiration, access_uid, csrf, expiration, namespace = nil)
@@ -59,7 +59,10 @@ module JWTSessions
     end
 
     def update_refresh(uid, access_expiration, access_uid, csrf, namespace = nil)
-      store.hmset(refresh_key(uid, namespace), :csrf, csrf, :access_expiration, access_expiration, :access_uid, access_uid)
+      store.hmset(refresh_key(uid, namespace),
+                  :csrf, csrf,
+                  :access_expiration, access_expiration,
+                  :access_uid, access_uid)
     end
 
     def all_in_namespace(namespace)
