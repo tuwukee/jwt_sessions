@@ -23,7 +23,6 @@ XSS/CSRF safe JWT auth designed for SPA
 - [Flush Sessions](#flush-sessions)
     + [Sessions Namespace](#sessions-namespace)
 - [Examples](#examples)
-- [TODO](#todo)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -424,11 +423,6 @@ JWTSessions::Session.flush_all
 [Rails API](test/support/dummy_api) \
 [Sinatra API](test/support/dummy_sinatra_api)
 
-## TODO
-
-Session cleanup by uid or refresh token instance. \
-Refresh token namespaces to allow centralized token cleanup per namespace (scenarios like password reset). \
-Documentation for code.
 
 ## Contributing
 
