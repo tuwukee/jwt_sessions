@@ -59,6 +59,27 @@ describe UsersController do
           expect(response.code).to eq '401'
         end
       end
+
+      context 'flushed tokens' do
+        let(:access_token) { "Bearer #{@tokens[:access]}" }
+        let(:access_cookie) { @tokens[:access] }
+
+        it do
+          request.headers[JWTSessions.access_header] = access_token
+          session = JWTSessions::Session.new
+          session.flush_by_token(@tokens[:refresh])
+          get :show, params: { id: user.id }
+          expect(response.code).to eq '401'
+        end
+
+        it do
+          request.cookies[JWTSessions.access_cookie] = access_cookie
+          session = JWTSessions::Session.new
+          session.flush_by_token(@tokens[:refresh])
+          get :show, params: { id: user.id }
+          expect(response.code).to eq '401'
+        end
+      end
     end
   end
 

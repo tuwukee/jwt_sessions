@@ -10,7 +10,7 @@ describe LoginWithCookiesController do
 
       it do
         expect(response).to be_successful
-        expect(response_json.keys.sort).to eq ['access', 'access_expires_at', 'csrf', 'refresh', 'refresh_expires_at']
+        expect(response_json.keys.sort).to eq ['csrf']
         expect(response.cookies.keys.sort).to eq ['jwt_access', 'jwt_refresh']
       end
     end

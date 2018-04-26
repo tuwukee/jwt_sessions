@@ -3,7 +3,7 @@
 module JWTSessions
   class Session
     attr_reader :access_token, :refresh_token, :csrf_token
-    attr_accessor :payload, :store, :refresh_payload
+    attr_accessor :payload, :store, :refresh_payload, :namespace
 
     def initialize(options = {})
       @store           = options.fetch(:store, JWTSessions.token_store)
@@ -11,6 +11,7 @@ module JWTSessions
       @payload         = options.fetch(:payload, {})
       @access_claims   = options.fetch(:access_claims, {})
       @refresh_claims  = options.fetch(:refresh_claims, {})
+      @namespace       = options.fetch(:namespace, nil)
     end
 
     def login
@@ -25,6 +26,13 @@ module JWTSessions
       send(:"valid_#{token_type}_csrf?", token, csrf_token)
     end
 
+    def session_exists?(token, token_type = :access)
+      send(:"#{token_type}_token_data", token)
+      true
+    rescue Errors::Unauthorized
+      false
+    end
+
     def masked_csrf(access_token)
       csrf(access_token).token
     end
@@ -32,6 +40,35 @@ module JWTSessions
     def refresh(refresh_token, &block)
       refresh_token_data(refresh_token)
       refresh_by_uid(&block)
+    end
+
+    def flush_by_token(token)
+      uid = token_uid(token, :refresh, @refresh_claims)
+      flush_by_uid(uid)
+    end
+
+    def flush_by_uid(uid)
+      token = retrieve_refresh_token(uid)
+
+      AccessToken.destroy(token.access_uid, store)
+      token.destroy
+    end
+
+    def flush_namespaced
+      return 0 unless namespace
+      tokens = RefreshToken.all(namespace, store)
+      tokens.each do |token|
+        AccessToken.destroy(token.access_uid, store)
+        token.destroy
+      end.count
+    end
+
+    def self.flush_all(store = JWTSessions.token_store)
+      tokens = RefreshToken.all(nil, store)
+      tokens.each do |token|
+        AccessToken.destroy(token.access_uid, store)
+        token.destroy
+      end.count
     end
 
     private
@@ -52,7 +89,6 @@ module JWTSessions
 
     def csrf(access_token)
       token_data = access_token_data(access_token)
-      raise Errors::Unauthorized, 'Access token not found' if token_data.empty?
       CSRFToken.new(token_data[:csrf])
     end
 
@@ -63,7 +99,9 @@ module JWTSessions
 
     def access_token_data(token)
       uid = token_uid(token, :access, @access_claims)
-      store.fetch_access(uid)
+      data = store.fetch_access(uid)
+      raise Errors::Unauthorized, 'Access token not found' if data.empty?
+      data
     end
 
     def refresh_token_data(token)
@@ -82,15 +120,17 @@ module JWTSessions
     end
 
     def retrieve_refresh_token(uid)
-      @_refresh = RefreshToken.find(uid, store)
+      @_refresh = RefreshToken.find(uid, store, namespace)
     end
 
     def tokens_hash
-      { csrf: csrf_token,
+      {
+        csrf: csrf_token,
         access: access_token,
         access_expires_at: Time.at(@_access.expiration.to_i),
         refresh: refresh_token,
-        refresh_expires_at: Time.at(@_refresh.expiration.to_i) }
+        refresh_expires_at: Time.at(@_refresh.expiration.to_i)
+      }
     end
 
     def check_refresh_on_time
@@ -121,7 +161,8 @@ module JWTSessions
                                       @_access.uid,
                                       @_access.expiration,
                                       store,
-                                      @refresh_payload)
+                                      refresh_payload,
+                                      namespace)
       @refresh_token = @_refresh.token
     end
 

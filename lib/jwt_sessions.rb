@@ -25,7 +25,6 @@ module JWTSessions
   DEFAULT_SETTINGS_KEYS = %i[access_cookie
                              access_exp_time
                              access_header
-                             algorithm
                              csrf_header
                              redis_db_name
                              redis_host
@@ -74,6 +73,10 @@ module JWTSessions
     @algorithm = algo
   end
 
+  def algorithm
+    @algorithm ||= DEFAULT_ALGORITHM
+  end
+
   def token_store
     RedisTokenStore.instance(redis_host, redis_port, redis_db_name, token_prefix)
   end
@@ -109,7 +112,6 @@ module JWTSessions
   def refresh_expiration
     Time.now.to_i + refresh_exp_time.to_i
   end
-
 
   def header_by(token_type)
     send("#{token_type}_header")

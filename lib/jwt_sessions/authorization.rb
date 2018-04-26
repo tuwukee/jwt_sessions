@@ -16,6 +16,7 @@ module JWTSessions
         end
         # triggers token decode and jwt claim checks
         payload
+        invalid_authorization unless session_exists?(token_type)
         check_csrf(token_type)
       end
     end
@@ -48,6 +49,10 @@ module JWTSessions
 
     def valid_csrf_token?(csrf_token, token_type)
       JWTSessions::Session.new.valid_csrf?(found_token, csrf_token, token_type)
+    end
+
+    def session_exists?(token_type)
+      JWTSessions::Session.new.session_exists?(found_token, token_type)
     end
 
     def cookieless_auth(token_type)

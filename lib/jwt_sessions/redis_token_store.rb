@@ -43,26 +43,38 @@ module JWTSessions
       store.expireat(key, expiration)
     end
 
-    def fetch_refresh(uid)
-      keys   = [:csrf, :access_uid, :access_expiration, :expiration]
-      values = store.hmget(refresh_key(uid), *keys).compact
+    def fetch_refresh(uid, namespace)
+      keys   = %i[csrf access_uid access_expiration expiration]
+      values = store.hmget(refresh_key(uid, namespace), *keys).compact
       return {} if values.length != keys.length
-      keys.each_with_index.inject({}) { |acc, (key, index)| acc[key] = values[index]; acc }
+      keys.each_with_index.each_with_object({}) { |(key, index), acc| acc[key] = values[index]; }
     end
 
-    def persist_refresh(uid, access_expiration, access_uid, csrf, expiration)
-      key = refresh_key(uid)
-      update_refresh(uid, access_expiration, access_uid, csrf)
+    def persist_refresh(uid, access_expiration, access_uid, csrf, expiration, namespace = nil)
+      ns = namespace || ''
+      key = refresh_key(uid, ns)
+      update_refresh(uid, access_expiration, access_uid, csrf, ns)
       store.hset(key, :expiration, expiration)
       store.expireat(key, expiration)
     end
 
-    def update_refresh(uid, access_expiration, access_uid, csrf)
-      store.hmset(refresh_key(uid), :csrf, csrf, :access_expiration, access_expiration, :access_uid, access_uid)
+    def update_refresh(uid, access_expiration, access_uid, csrf, namespace = nil)
+      store.hmset(refresh_key(uid, namespace),
+                  :csrf, csrf,
+                  :access_expiration, access_expiration,
+                  :access_uid, access_uid)
     end
 
-    def destroy_refresh(uid)
-      store.del(refresh_key(uid))
+    def all_in_namespace(namespace)
+      keys = store.keys(refresh_key('*', namespace))
+      (keys || []).each_with_object({}) do |key, acc|
+        uid = uid_from_key(key)
+        acc[uid] = fetch_refresh(uid, namespace)
+      end
+    end
+
+    def destroy_refresh(uid, namespace)
+      store.del(refresh_key(uid, namespace))
     end
 
     def destroy_access(uid)
@@ -75,8 +87,21 @@ module JWTSessions
       "#{prefix}_access_#{uid}"
     end
 
-    def refresh_key(uid)
-      "#{prefix}_refresh_#{uid}"
+    def refresh_key(uid, namespace = nil)
+      if namespace
+        "#{prefix}_#{namespace}_refresh_#{uid}"
+      else
+        wildcard_refresh_key(uid)
+      end
+    end
+
+    def wildcard_refresh_key(uid)
+      keys = store.keys(refresh_key(uid, '*')) || []
+      keys.first
+    end
+
+    def uid_from_key(key)
+      key.split('_').last
     end
   end
 end

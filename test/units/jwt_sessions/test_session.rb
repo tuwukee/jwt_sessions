@@ -14,6 +14,12 @@ class TestSession < Minitest::Test
     @tokens = session.login
   end
 
+  def teardown
+    redis = Redis.new
+    keys = redis.keys('jwt_*')
+    keys.each { |k| redis.del(k) }
+  end
+
   def test_login
     decoded_access = JWTSessions::Token.decode(tokens[:access]).first
     assert_equal EXPECTED_KEYS, tokens.keys.sort
@@ -46,5 +52,63 @@ class TestSession < Minitest::Test
     decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
     assert_equal EXPECTED_KEYS, refreshed_tokens.keys.sort
     assert_equal payload[:test], decoded_access['test']
+  end
+
+  def test_flush_by_token
+    refresh_token = @session.instance_variable_get(:"@_refresh")
+    uid = refresh_token.uid
+    assert_equal refresh_token.token, JWTSessions::RefreshToken.find(uid, JWTSessions.token_store, nil).token
+
+    @session.flush_by_token(refresh_token.token)
+
+    assert_raises JWTSessions::Errors::Unauthorized do
+      JWTSessions::RefreshToken.find(uid, JWTSessions.token_store, nil)
+    end
+  end
+
+  def test_flush_by_uid
+    refresh_token = @session.instance_variable_get(:"@_refresh")
+    uid = refresh_token.uid
+
+    @session.flush_by_uid(uid)
+
+    assert_raises JWTSessions::Errors::Unauthorized do
+      JWTSessions::RefreshToken.find(uid, JWTSessions.token_store, nil)
+    end
+  end
+
+  def test_flush_namespaced
+    namespace = 'test_namespace'
+    @session1 = JWTSessions::Session.new(payload: payload, namespace: namespace)
+    @session2 = JWTSessions::Session.new(payload: payload, namespace: namespace)
+    @session1.login
+    @session2.login
+
+    flushed_count = @session1.flush_namespaced
+
+    assert_equal 2, flushed_count
+    assert_raises JWTSessions::Errors::Unauthorized do
+      refresh_token = @session1.instance_variable_get(:"@_refresh")
+      JWTSessions::RefreshToken.find(refresh_token.uid, JWTSessions.token_store, nil)
+    end
+
+    assert_raises JWTSessions::Errors::Unauthorized do
+      refresh_token = @session2.instance_variable_get(:"@_refresh")
+      JWTSessions::RefreshToken.find(refresh_token.uid, JWTSessions.token_store, nil)
+    end
+
+    refresh_token = @session.instance_variable_get(:"@_refresh")
+    flushed_count = @session.flush_namespaced
+    assert_equal 0, flushed_count
+    assert_equal refresh_token.token, JWTSessions::RefreshToken.find(refresh_token.uid, JWTSessions.token_store, nil).token
+  end
+
+  def test_flush_all
+    refresh_token = @session.instance_variable_get(:"@_refresh")
+    flushed_count = JWTSessions::Session.flush_all
+    assert_equal 1, flushed_count
+    assert_raises JWTSessions::Errors::Unauthorized do
+      JWTSessions::RefreshToken.find(refresh_token.uid, JWTSessions.token_store, nil).token
+    end
   end
 end
