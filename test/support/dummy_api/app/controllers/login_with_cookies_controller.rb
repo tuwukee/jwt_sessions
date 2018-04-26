@@ -13,7 +13,7 @@ class LoginWithCookiesController < ApplicationController
       cookies[JWTSessions.access_cookie] = tokens[:access]
       cookies[JWTSessions.refresh_cookie] = tokens[:refresh]
 
-      render json: tokens
+      render json: { csrf: tokens[:csrf] }
     else
       render json: 'Invalid email or password', status: :unauthorized
     end
