@@ -14,7 +14,7 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
-require 'support/response_helper'
+require_relative 'support/response_helper'
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate

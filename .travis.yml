@@ -8,5 +8,6 @@ before_install:
   - gem update --system
   - sudo add-apt-repository ppa:chris-lea/libsodium -y
   - sudo apt-get update && sudo apt-get install libsodium-dev -y
+gemfile: test/support/dummy_api/Gemfile
 services:
   - redis-server
