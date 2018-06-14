@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module JWTSessions
   class AccessToken
     attr_reader :token, :payload, :uid, :expiration, :csrf, :store
@@ -13,6 +15,14 @@ module JWTSessions
 
     def destroy
       store.destroy_access(uid)
+    end
+
+    def refresh_uid=(uid)
+      self.payload['refresh_uid'] = uid
+    end
+
+    def refresh_uid
+      payload['refresh_uid']
     end
 
     class << self

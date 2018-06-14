@@ -2,16 +2,24 @@
 
 module JWTSessions
   class Session
-    attr_reader :access_token, :refresh_token, :csrf_token
-    attr_accessor :payload, :store, :refresh_payload, :namespace
+    attr_reader :access_token,
+                :refresh_token,
+                :csrf_token
+
+    attr_accessor :payload,
+                  :store,
+                  :refresh_payload,
+                  :namespace,
+                  :refresh_by_access_allowed
 
     def initialize(options = {})
-      @store           = options.fetch(:store, JWTSessions.token_store)
-      @refresh_payload = options.fetch(:refresh_payload, {})
-      @payload         = options.fetch(:payload, {})
-      @access_claims   = options.fetch(:access_claims, {})
-      @refresh_claims  = options.fetch(:refresh_claims, {})
-      @namespace       = options.fetch(:namespace, nil)
+      @store                     = options.fetch(:store, JWTSessions.token_store)
+      @refresh_payload           = options.fetch(:refresh_payload, {})
+      @payload                   = options.fetch(:payload, {})
+      @access_claims             = options.fetch(:access_claims, {})
+      @refresh_claims            = options.fetch(:refresh_claims, {})
+      @namespace                 = options.fetch(:namespace, nil)
+      @refresh_by_access_allowed = options.fetch(:refresh_by_access_allowed, false)
     end
 
     def login
@@ -40,6 +48,12 @@ module JWTSessions
     def refresh(refresh_token, &block)
       refresh_token_data(refresh_token)
       refresh_by_uid(&block)
+    end
+
+    def refresh_by_access(access_token, &block)
+      token_data = access_token_data(access_token)
+      refresh_token = RefreshToken.find(token_data['refresh_uid'], JWTSessions.token_store, nil)
+      refresh(refresh_token, &block)
     end
 
     def flush_by_token(token)
@@ -163,6 +177,7 @@ module JWTSessions
                                       store,
                                       refresh_payload,
                                       namespace)
+      @_access.refresh_uid = @_refresh.uid if refresh_by_access_allowed
       @refresh_token = @_refresh.token
     end
 
