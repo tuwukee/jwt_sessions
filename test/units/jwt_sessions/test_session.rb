@@ -33,6 +33,16 @@ class TestSession < Minitest::Test
     assert_equal payload[:test], decoded_access['test']
   end
 
+  def test_refresh_by_access
+    session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
+    tokens = session.login
+    refreshed_tokens = session.refresh_by_access(tokens[:access])
+    decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
+    assert_equal EXPECTED_KEYS, refreshed_tokens.keys.sort
+    assert_equal payload[:test], decoded_access['test']
+    assert_equal session.instance_variable_get('@_refresh').uid, decoded_access['ruid']
+  end
+
   def test_refresh_with_block_not_expired
     assert_raises JWTSessions::Errors::Unauthorized do
       session.refresh(tokens[:refresh]) do

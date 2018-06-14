@@ -50,10 +50,10 @@ module JWTSessions
       refresh_by_uid(&block)
     end
 
-    def refresh_by_access(access_token, &block)
-      token_data = access_token_data(access_token)
-      refresh_token = RefreshToken.find(token_data['refresh_uid'], JWTSessions.token_store, nil)
-      refresh(refresh_token, &block)
+    def refresh_by_access(token, &block)
+      ruid = access_token_ruid(token)
+      retrieve_refresh_token(ruid)
+      refresh_by_uid(&block)
     end
 
     def flush_by_token(token)
@@ -133,6 +133,22 @@ module JWTSessions
       uid
     end
 
+    def access_token_ruid(token)
+      token_payload  = JWTSessions::Token.decode(token, @access_claims).first
+
+      # ensure access token exists in the store
+      uid            = token_payload.fetch('uid', nil)
+      data           = store.fetch_access(uid)
+      raise Errors::Unauthorized, 'Access token not found' if data.empty?
+
+      ruid = token_payload.fetch('ruid', nil)
+      if ruid.nil?
+        message = "Access token payload does not contain refresh uid"
+        raise Errors::InvalidPayload, message
+      end
+      ruid
+    end
+
     def retrieve_refresh_token(uid)
       @_refresh = RefreshToken.find(uid, store, namespace)
     end
@@ -163,6 +179,13 @@ module JWTSessions
     def update_refresh_token
       @_refresh.update(@_access.uid, @_access.expiration, @_csrf.encoded)
       @refresh_token = @_refresh.token
+      link_access_to_refresh
+    end
+
+    def link_access_to_refresh
+      return unless refresh_by_access_allowed
+      @_access.refresh_uid = @_refresh.uid
+      @access_token = @_access.token
     end
 
     def create_csrf_token
@@ -177,8 +200,8 @@ module JWTSessions
                                       store,
                                       refresh_payload,
                                       namespace)
-      @_access.refresh_uid = @_refresh.uid if refresh_by_access_allowed
       @refresh_token = @_refresh.token
+      link_access_to_refresh
     end
 
     def create_access_token
