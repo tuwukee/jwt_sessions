@@ -19,9 +19,11 @@ XSS/CSRF safe JWT auth designed for SPA
     + [Request headers and cookies names](#request-headers-and-cookies-names)
     + [Expiration time](#expiration-time)
     + [CSRF and cookies](#csrf-and-cookies)
+    + [Refresh with access token](#refresh-with-access-token)
     + [Refresh token hijack protection](#refresh-token-hijack-protection)
 - [Flush Sessions](#flush-sessions)
     + [Sessions Namespace](#sessions-namespace)
+    + [Logout](#logout)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -372,6 +374,60 @@ session = JWTSessions::Session.new
 session.masked_csrf(access_token)
 ```
 
+##### Refresh with access token
+
+Sometimes it's not secure enough to store the refresh tokens in web / JS clients.
+That's why you have a possibility to operate only with an access token, and to not pass the refresh to the client at all.
+Session accepts `refresh_by_access_allowed: true` setting, which links the access token to the according refresh token.
+Example Rails login controller, which passes an access token token via cookies and renders CSRF.
+
+```ruby
+class LoginController < ApplicationController
+  include ActionController::Cookies
+
+  def create
+    user = User.find_by!(email: params[:email])
+    if user.authenticate(params[:password])
+
+      payload = { user_id: user.id }
+      session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
+      tokens = session.login
+      cookies[JWTSessions.access_cookie] = tokens[:access]
+
+      render json: { csrf: tokens[:csrf] }
+    else
+      render json: 'Invalid email or password', status: :unauthorized
+    end
+  end
+end
+```
+
+The gem provides an ability to refresh the session by access token.
+
+```ruby
+tokens = session.refresh_by_access(access_token)
+```
+
+In case of token forgery and successful refresh performed by an atacker - the original user will have to logout.
+To protect the endpoint use before_action `authorize_refresh_by_access_request!`.
+Example Rails refresh by access controller with cookies as token transport.
+
+```ruby
+class RefreshController < ApplicationController
+  include ActionController::Cookies
+  before_action :authorize_refresh_by_access_request!
+
+  def create
+    session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
+    tokens = session.refresh_by_access(found_token)
+    cookies[JWTSessions.access_cookie] = tokens[:access]
+
+    render json: { csrf: tokens[:csrf] }
+  end
+end
+
+```
+
 #### Refresh token hijack protection
 
 There is a security recommendation regarding the usage of refresh tokens: only perform refresh when an access token gets expired. \
@@ -417,6 +473,13 @@ To force flush of all app sessions
 ```ruby
 JWTSessions::Session.flush_all
 ```
+
+##### Logout
+
+To logout you need to remove both access and refresh tokens from the store.
+Flush sessions methods can be used to perform logout.
+Refresh token or refresh token UID is required to flush a session.
+To logout with an access token `refresh_by_access_allowed` setting should be set to true on an access token creation. If logout by access token is allowed it's recommended to ignore the expiration claim and to allow to logout with expired access token.
 
 ## Examples
 
