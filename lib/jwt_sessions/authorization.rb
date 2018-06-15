@@ -21,6 +21,17 @@ module JWTSessions
       end
     end
 
+    def authorize_refresh_by_access_request!
+      begin
+        cookieless_auth(:access)
+      rescue Errors::Unauthorized
+        cookie_based_auth(:access)
+      end
+      # only latest access token can be used for refresh
+      invalid_authorization unless session_exists?(:access)
+      check_csrf(:access)
+    end
+
     private
 
     def invalid_authorization

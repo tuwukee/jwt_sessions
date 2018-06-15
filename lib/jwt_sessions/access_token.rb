@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module JWTSessions
   class AccessToken
-    attr_reader :token, :payload, :uid, :expiration, :csrf, :store
+    attr_reader :payload, :uid, :expiration, :csrf, :store
 
     def initialize(csrf, payload, store, uid = SecureRandom.uuid, expiration = JWTSessions.access_expiration)
       @csrf       = csrf
@@ -8,11 +10,22 @@ module JWTSessions
       @expiration = expiration
       @payload    = payload
       @store      = store
-      @token      = Token.encode(payload.merge(uid: uid, exp: expiration.to_i))
     end
 
     def destroy
       store.destroy_access(uid)
+    end
+
+    def refresh_uid=(uid)
+      self.payload['ruid'] = uid
+    end
+
+    def refresh_uid
+      payload['ruid']
+    end
+
+    def token
+      Token.encode(payload.merge(uid: uid, exp: expiration.to_i))
     end
 
     class << self
