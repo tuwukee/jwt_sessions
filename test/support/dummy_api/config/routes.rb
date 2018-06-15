@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   post :login, to: 'login#create'
   post :login_with_cookies, to: 'login_with_cookies#create'
   post :refresh, to: 'refresh#create'
+  post :refresh_by_access, to: 'refresh_by_access#create'
 
   resources :users, only: [:show, :create]
 end

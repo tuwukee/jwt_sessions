@@ -3,19 +3,20 @@
 module JWTSessions
   module Authorization
     CSRF_SAFE_METHODS = %w[GET HEAD].freeze
-    TOKEN_TYPES = %w[access refresh].freeze
+    AUTH_ACTIONS = { access: :access, refresh: :refresh, refresh_by_access: :access }.freeze
 
     protected
 
-    TOKEN_TYPES.each do |token_type|
-      define_method("authorize_#{token_type}_request!") do
+    AUTH_ACTIONS.keys.each do |action|
+      define_method("authorize_#{action}_request!") do
+        token_type = AUTH_ACTIONS[action]
         begin
           cookieless_auth(token_type)
         rescue Errors::Unauthorized
           cookie_based_auth(token_type)
         end
         # triggers token decode and jwt claim checks
-        payload
+        payload unless action == :refresh_by_access
         invalid_authorization unless session_exists?(token_type)
         check_csrf(token_type)
       end
