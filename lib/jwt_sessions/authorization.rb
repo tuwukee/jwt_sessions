@@ -27,8 +27,11 @@ module JWTSessions
       rescue Errors::Unauthorized
         cookie_based_auth(:access)
       end
+      ruid = JWTSessions::Session.new.access_token_ruid(found_token)
+      refresh_token = RefreshToken.find(ruid, JWTSessions.token_store)
+
       # only latest access token can be used for refresh
-      invalid_authorization unless session_exists?(:access)
+      invalid_authorization unless safe_payload['uid'] == refresh_token.access_uid
       check_csrf(:access)
     end
 
@@ -102,6 +105,10 @@ module JWTSessions
     def payload
       claims = respond_to?(:token_claims) ? token_claims : {}
       @_payload ||= Token.decode(found_token, claims).first
+    end
+
+    def safe_payload
+      @_safe_payload ||= Token.decode!(found_token).first
     end
   end
 end

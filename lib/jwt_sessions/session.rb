@@ -85,6 +85,17 @@ module JWTSessions
       end.count
     end
 
+    def access_token_ruid(token)
+      token_payload  = JWTSessions::Token.decode!(token).first
+
+      ruid = token_payload.fetch('ruid', nil)
+      if ruid.nil?
+        message = "Access token payload does not contain refresh uid"
+        raise Errors::InvalidPayload, message
+      end
+      ruid
+    end
+
     private
 
     def valid_access_csrf?(access_token, csrf_token)
@@ -131,22 +142,6 @@ module JWTSessions
         raise Errors::InvalidPayload, message
       end
       uid
-    end
-
-    def access_token_ruid(token)
-      token_payload  = JWTSessions::Token.decode(token, @access_claims).first
-
-      # ensure access token exists in the store
-      uid            = token_payload.fetch('uid', nil)
-      data           = store.fetch_access(uid)
-      raise Errors::Unauthorized, 'Access token not found' if data.empty?
-
-      ruid = token_payload.fetch('ruid', nil)
-      if ruid.nil?
-        message = "Access token payload does not contain refresh uid"
-        raise Errors::InvalidPayload, message
-      end
-      ruid
     end
 
     def retrieve_refresh_token(uid)
