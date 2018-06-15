@@ -22,4 +22,4 @@ RSpec::Core::RakeTask.new(:sinatra_spec) do |t|
 end
 desc 'Run sinatra tests'
 
-task default: [:test, :rails_spec, :sinatra_spec]
+task default: [:test, :rails_spec]
