@@ -112,6 +112,19 @@ class TestSession < Minitest::Test
     end
   end
 
+  def test_flush_by_access_token
+    session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
+    tokens = session.login
+    refresh_token = session.instance_variable_get(:"@_refresh")
+    uid = refresh_token.uid
+
+    session.flush_by_access_token(tokens[:access])
+
+    assert_raises JWTSessions::Errors::Unauthorized do
+      JWTSessions::RefreshToken.find(uid, JWTSessions.token_store, nil)
+    end
+  end
+
   def test_flush_by_uid
     refresh_token = @session.instance_variable_get(:"@_refresh")
     uid = refresh_token.uid

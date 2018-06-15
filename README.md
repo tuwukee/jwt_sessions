@@ -441,12 +441,20 @@ session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ..
 
 ## Flush Sessions
 
-Flush session by refresh token. The method returns number of flushed sessions.
+Flush a session by its refresh token. The method returns number of flushed sessions.
 
 ```ruby
 session = JWTSessions::Session.new
 tokens = session.login
 session.flush_by_token(tokens[:refresh]) # => 1
+```
+
+Flush a session by its access token.
+
+```ruby
+session = JWTSessions::Session.new(refresh_by_access_allowed: true)
+tokens = session.login
+session.flush_by_access_token(tokens[:access]) # => 1
 ```
 
 Or by refresh token UID

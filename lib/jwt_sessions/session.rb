@@ -56,6 +56,11 @@ module JWTSessions
       refresh_by_uid(&block)
     end
 
+    def flush_by_access_token(token)
+      ruid = access_token_ruid(token)
+      flush_by_uid(ruid)
+    end
+
     def flush_by_token(token)
       uid = token_uid(token, :refresh, @refresh_claims)
       flush_by_uid(uid)
