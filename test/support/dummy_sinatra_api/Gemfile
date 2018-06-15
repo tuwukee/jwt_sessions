@@ -2,5 +2,5 @@ source 'https://rubygems.org'
 
 gem 'sinatra'
 gem 'sinatra-contrib'
-gem 'jwt', '~>1.4'
+gem 'jwt', '~> 2'
 gem 'pry-byebug', '~> 3.4'
