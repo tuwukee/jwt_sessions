@@ -4,3 +4,7 @@ gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'jwt', '~> 2'
 gem 'pry-byebug', '~> 3.4'
+
+group :test do
+  gem 'rspec'
+end

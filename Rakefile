@@ -16,4 +16,10 @@ RSpec::Core::RakeTask.new(:rails_spec) do |t|
 end
 desc 'Run rails tests'
 
-task default: [:test, :rails_spec]
+RSpec::Core::RakeTask.new(:sinatra_spec) do |t|
+  t.rspec_opts = '--require ./test/support/dummy_sinatra_api/spec/spec_helper.rb'
+  t.pattern = Dir.glob('test/support/dummy_sinatra_api/spec/*_spec.rb')
+end
+desc 'Run sinatra tests'
+
+task default: [:test, :rails_spec, :sinatra_spec]

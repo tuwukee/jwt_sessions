@@ -15,8 +15,8 @@ namespace '/api/v1' do
   include JWTSessions::Authorization
 
   # rack headers standard
-  ACCESS_HEADER = "HTTP_#{JWTSessions.access_header.underscore.upcase}"
-  REFRESH_HEADER = "HTTP_#{JWTSessions.refresh_header.underscore.upcase}"
+  ACCESS_HEADER = "HTTP_#{JWTSessions.access_header.downcase.gsub(/-/,'_').upcase}"
+  REFRESH_HEADER = "HTTP_#{JWTSessions.refresh_header.downcase.gsub(/-/,'_').upcase}"
 
   before do
     content_type 'application/json'
