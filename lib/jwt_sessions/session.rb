@@ -96,6 +96,14 @@ module JWTSessions
       ruid
     end
 
+    def safe_valid_access_csrf?(access_token, csrf_token)
+      token_payload = JWTSessions::Token.decode!(access_token).first
+      uid           = token_payload.fetch('uid', nil)
+      data          = store.fetch_access(uid)
+      raise Errors::Unauthorized, 'Access token not found' if data.empty?
+      CSRFToken.new(data[:csrf]).valid_authenticity_token?(csrf_token)
+    end
+
     private
 
     def valid_access_csrf?(access_token, csrf_token)

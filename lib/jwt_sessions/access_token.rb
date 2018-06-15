@@ -31,7 +31,9 @@ module JWTSessions
     class << self
       def create(csrf, payload, store)
         new(csrf, payload, store).tap do |inst|
-          store.persist_access(inst.uid, inst.csrf, inst.expiration)
+          # set refresh expiration within redis
+          # in order to be able  to perform refresh by expired access
+          store.persist_access(inst.uid, inst.csrf, JWTSessions.refresh_expiration)
         end
       end
 
