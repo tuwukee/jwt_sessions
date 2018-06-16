@@ -10,8 +10,8 @@ class LoginWithCookiesController < ApplicationController
       payload = { user_id: user.id }
       session = JWTSessions::Session.new(payload: payload)
       tokens = session.login
-      cookies[JWTSessions.access_cookie] = tokens[:access]
-      cookies[JWTSessions.refresh_cookie] = tokens[:refresh]
+      cookies[JWTSessions.access_cookie] = { value: tokens[:access], httponly: true }
+      cookies[JWTSessions.refresh_cookie] = { value: tokens[:refresh], httponly: true }
 
       render json: { csrf: tokens[:csrf] }
     else

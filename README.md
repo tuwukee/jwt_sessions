@@ -392,7 +392,7 @@ class LoginController < ApplicationController
       payload = { user_id: user.id }
       session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
       tokens = session.login
-      cookies[JWTSessions.access_cookie] = tokens[:access]
+      cookies[JWTSessions.access_cookie] = { value: tokens[:access], httponly: true }
 
       render json: { csrf: tokens[:csrf] }
     else
@@ -421,7 +421,7 @@ class RefreshController < ApplicationController
   def create
     session = JWTSessions::Session.new(payload: safe_payload, refresh_by_access_allowed: true)
     tokens = session.refresh_by_access(found_token)
-    cookies[JWTSessions.access_cookie] = tokens[:access]
+    cookies[JWTSessions.access_cookie] = { value: tokens[:access], httponly: true }
 
     render json: { csrf: tokens[:csrf] }
   end

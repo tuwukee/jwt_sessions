@@ -10,7 +10,7 @@ class RefreshByAccessController < ApplicationController
       # notify the support
       raise JWTSessions::Errors::Unauthorized, 'Malicious activity detected'
     end
-    cookies[JWTSessions.access_cookie] = tokens[:access]
+    cookies[JWTSessions.access_cookie] = { value: tokens[:access], httponly: true }
 
     render json: { csrf: tokens[:csrf] }
   end
