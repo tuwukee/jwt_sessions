@@ -28,12 +28,7 @@ module JWTSessions
         cookie_based_auth(:access)
       end
 
-      ruid = JWTSessions::Session.new.access_token_ruid(found_token)
-      refresh_token = RefreshToken.find(ruid, JWTSessions.token_store)
-
-      # only latest access token can be used for refresh
-      invalid_authorization unless safe_payload['uid'] == refresh_token.access_uid
-      safe_check_csrf
+      invalid_authorization if should_check_csrf? && @_csrf_check && !JWTSessions::Session.new.valid_access_request?(retrieve_csrf, claimless_payload)
     end
 
     private
@@ -44,10 +39,6 @@ module JWTSessions
 
     def check_csrf(token_type)
       invalid_authorization if should_check_csrf? && @_csrf_check && !valid_csrf_token?(retrieve_csrf, token_type)
-    end
-
-    def safe_check_csrf
-      invalid_authorization if should_check_csrf? && @_csrf_check && !valid_access_csrf_token?(retrieve_csrf)
     end
 
     def should_check_csrf?
@@ -68,10 +59,6 @@ module JWTSessions
 
     def valid_csrf_token?(csrf_token, token_type)
       JWTSessions::Session.new.valid_csrf?(found_token, csrf_token, token_type)
-    end
-
-    def valid_access_csrf_token?(csrf_token)
-      JWTSessions::Session.new.safe_valid_access_csrf?(found_token, csrf_token)
     end
 
     def session_exists?(token_type)
@@ -116,8 +103,9 @@ module JWTSessions
       @_payload ||= Token.decode(found_token, claims).first
     end
 
-    def safe_payload
-      @_safe_payload ||= Token.decode!(found_token).first
+    # retrieves tokens payload without JWT claims validation
+    def claimless_payload
+      @_claimless_payload ||= Token.decode!(found_token).first
     end
   end
 end
