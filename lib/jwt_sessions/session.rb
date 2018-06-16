@@ -199,6 +199,7 @@ module JWTSessions
       return unless refresh_by_access_allowed
       @_access.refresh_uid = @_refresh.uid
       @access_token = @_access.token
+      @payload = @_access.payload
     end
 
     def create_csrf_token

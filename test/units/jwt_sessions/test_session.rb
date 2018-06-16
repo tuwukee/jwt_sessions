@@ -36,11 +36,15 @@ class TestSession < Minitest::Test
   def test_refresh_by_access_payload
     session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
     session.login
+    access1 = session.instance_variable_get('@_access')
+    sleep(1)
     refreshed_tokens = session.refresh_by_access_payload
+    access2 = session.instance_variable_get('@_access')
     decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
     assert_equal EXPECTED_KEYS, refreshed_tokens.keys.sort
     assert_equal payload[:test], decoded_access['test']
     assert_equal session.instance_variable_get('@_refresh').uid, decoded_access['ruid']
+    assert_equal access2.expiration > access1.expiration, true
   end
 
   def test_refresh_by_access_payload_expired

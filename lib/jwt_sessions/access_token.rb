@@ -8,7 +8,7 @@ module JWTSessions
       @csrf       = csrf
       @uid        = uid
       @expiration = expiration
-      @payload    = payload
+      @payload    = payload.merge(uid: uid, exp: expiration.to_i)
       @store      = store
     end
 
@@ -25,7 +25,7 @@ module JWTSessions
     end
 
     def token
-      Token.encode(payload.merge(uid: uid, exp: expiration.to_i))
+      Token.encode(payload)
     end
 
     class << self
