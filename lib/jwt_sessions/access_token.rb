@@ -8,7 +8,7 @@ module JWTSessions
       @csrf       = csrf
       @uid        = uid
       @expiration = expiration
-      @payload    = payload.merge(uid: uid, exp: expiration.to_i)
+      @payload    = payload.merge('uid' => uid, 'exp' => expiration.to_i)
       @store      = store
     end
 
