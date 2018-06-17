@@ -383,8 +383,6 @@ Example Rails login controller, which passes an access token token via cookies a
 
 ```ruby
 class LoginController < ApplicationController
-  include ActionController::Cookies
-
   def create
     user = User.find_by!(email: params[:email])
     if user.authenticate(params[:password])
@@ -419,7 +417,6 @@ As refresh should be performed once the access token is already expired we need 
 
 ```ruby
 class RefreshController < ApplicationController
-  include ActionController::Cookies
   before_action :authorize_refresh_by_access_request!
 
   def create
