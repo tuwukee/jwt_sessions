@@ -19,6 +19,13 @@ module JWTSessions
         raise Errors::Unauthorized, 'could not decode a token'
       end
 
+      def decode!(token)
+        decode_options = { algorithm: JWTSessions.algorithm }
+        JWT.decode(token, JWTSessions.public_key, false, decode_options)
+      rescue StandardError
+        raise Errors::Unauthorized, 'could not decode a token'
+      end
+
       def meta
         { exp: JWTSessions.access_expiration }
       end

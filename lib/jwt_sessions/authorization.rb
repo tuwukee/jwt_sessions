@@ -27,9 +27,8 @@ module JWTSessions
       rescue Errors::Unauthorized
         cookie_based_auth(:access)
       end
-      # only latest access token can be used for refresh
-      invalid_authorization unless session_exists?(:access)
-      check_csrf(:access)
+
+      invalid_authorization if should_check_csrf? && @_csrf_check && !JWTSessions::Session.new.valid_access_request?(retrieve_csrf, claimless_payload)
     end
 
     private
@@ -102,6 +101,11 @@ module JWTSessions
     def payload
       claims = respond_to?(:token_claims) ? token_claims : {}
       @_payload ||= Token.decode(found_token, claims).first
+    end
+
+    # retrieves tokens payload without JWT claims validation
+    def claimless_payload
+      @_claimless_payload ||= Token.decode!(found_token).first
     end
   end
 end

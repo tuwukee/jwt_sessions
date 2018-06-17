@@ -50,10 +50,17 @@ module JWTSessions
       refresh_by_uid(&block)
     end
 
-    def refresh_by_access(token, &block)
-      ruid = access_token_ruid(token)
+    def refresh_by_access_payload(&block)
+      raise Errors::InvalidPayload if payload.nil?
+      ruid = retrive_ruid_from(payload)
       retrieve_refresh_token(ruid)
       refresh_by_uid(&block)
+    end
+
+    def flush_by_access_payload
+      raise Errors::InvalidPayload if payload.nil?
+      ruid = retrive_ruid_from(payload)
+      flush_by_uid(ruid)
     end
 
     def flush_by_token(token)
@@ -83,6 +90,19 @@ module JWTSessions
         AccessToken.destroy(token.access_uid, store)
         token.destroy
       end.count
+    end
+
+    def valid_access_request?(external_csrf_token, external_payload)
+      ruid = external_payload.fetch('ruid', nil)
+      uid  = external_payload.fetch('uid', nil)
+      if ruid.nil? || uid.nil?
+        message = 'Token payload is invalid'
+        raise Errors::InvalidPayload, message
+      end
+      refresh_token = RefreshToken.find(ruid, JWTSessions.token_store)
+      return false unless uid == refresh_token.access_uid
+
+      CSRFToken.new(refresh_token.csrf).valid_authenticity_token?(external_csrf_token)
     end
 
     private
@@ -133,14 +153,7 @@ module JWTSessions
       uid
     end
 
-    def access_token_ruid(token)
-      token_payload  = JWTSessions::Token.decode(token, @access_claims).first
-
-      # ensure access token exists in the store
-      uid            = token_payload.fetch('uid', nil)
-      data           = store.fetch_access(uid)
-      raise Errors::Unauthorized, 'Access token not found' if data.empty?
-
+    def retrive_ruid_from(token_payload)
       ruid = token_payload.fetch('ruid', nil)
       if ruid.nil?
         message = "Access token payload does not contain refresh uid"
@@ -186,6 +199,7 @@ module JWTSessions
       return unless refresh_by_access_allowed
       @_access.refresh_uid = @_refresh.uid
       @access_token = @_access.token
+      @payload = @_access.payload
     end
 
     def create_csrf_token

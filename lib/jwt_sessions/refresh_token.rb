@@ -16,7 +16,7 @@ module JWTSessions
       @uid               = options.fetch(:uid, SecureRandom.uuid)
       @expiration        = options.fetch(:expiration, JWTSessions.refresh_expiration)
       @namespace         = options.fetch(:namespace, nil)
-      @token             = Token.encode(options.fetch(:payload, {}).merge(uid: uid, exp: expiration.to_i))
+      @token             = Token.encode(options.fetch(:payload, {}).merge('uid' => uid, 'exp' => expiration.to_i))
     end
 
     class << self
@@ -33,7 +33,7 @@ module JWTSessions
         end
       end
 
-      def find(uid, store, namespace)
+      def find(uid, store, namespace = nil)
         token_attrs = store.fetch_refresh(uid, namespace)
         raise Errors::Unauthorized, 'Refresh token not found' if token_attrs.empty?
         build_with_token_attrs(store, uid, token_attrs, namespace)
@@ -61,7 +61,7 @@ module JWTSessions
       @csrf              = csrf
       @access_uid        = access_uid
       @access_expiration = access_expiration
-      store.update_refresh(uid, access_uid, access_expiration, csrf, namespace)
+      store.update_refresh(uid, access_expiration, access_uid, csrf, namespace)
     end
 
     def destroy

@@ -383,8 +383,6 @@ Example Rails login controller, which passes an access token token via cookies a
 
 ```ruby
 class LoginController < ApplicationController
-  include ActionController::Cookies
-
   def create
     user = User.find_by!(email: params[:email])
     if user.authenticate(params[:password])
@@ -392,7 +390,10 @@ class LoginController < ApplicationController
       payload = { user_id: user.id }
       session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
       tokens = session.login
-      cookies[JWTSessions.access_cookie] = tokens[:access]
+      response.set_cookie(JWTSessions.access_cookie,
+                          value: tokens[:access],
+                          httponly: true,
+                          secure: Rails.env.production?)
 
       render json: { csrf: tokens[:csrf] }
     else
@@ -405,22 +406,26 @@ end
 The gem provides an ability to refresh the session by access token.
 
 ```ruby
-tokens = session.refresh_by_access(access_token)
+session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
+tokens  = session.refresh_by_access_payload
 ```
 
 In case of token forgery and successful refresh performed by an atacker - the original user will have to logout.
 To protect the endpoint use before_action `authorize_refresh_by_access_request!`.
 Example Rails refresh by access controller with cookies as token transport.
+As refresh should be performed once the access token is already expired we need to use `claimless_payload` method in order to skip JWT expiration validation (and other claims) so we can proceed
 
 ```ruby
 class RefreshController < ApplicationController
-  include ActionController::Cookies
   before_action :authorize_refresh_by_access_request!
 
   def create
-    session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
-    tokens = session.refresh_by_access(found_token)
-    cookies[JWTSessions.access_cookie] = tokens[:access]
+    session = JWTSessions::Session.new(payload: claimless_payload, refresh_by_access_allowed: true)
+    tokens  = session.refresh_by_access_payload
+    response.set_cookie(JWTSessions.access_cookie,
+                        value: tokens[:access],
+                        httponly: true,
+                        secure: Rails.env.production?)
 
     render json: { csrf: tokens[:csrf] }
   end
@@ -440,12 +445,20 @@ session.refresh(refresh_token) { |refresh_token_uid, access_token_expiration| ..
 
 ## Flush Sessions
 
-Flush session by refresh token. The method returns number of flushed sessions.
+Flush a session by its refresh token. The method returns number of flushed sessions.
 
 ```ruby
 session = JWTSessions::Session.new
 tokens = session.login
 session.flush_by_token(tokens[:refresh]) # => 1
+```
+
+Flush a session by its access token.
+
+```ruby
+session = JWTSessions::Session.new(refresh_by_access_allowed: true)
+tokens = session.login
+session.flush_by_access_token(tokens[:access]) # => 1
 ```
 
 Or by refresh token UID
