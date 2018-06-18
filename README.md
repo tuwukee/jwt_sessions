@@ -15,7 +15,7 @@ XSS/CSRF safe JWT auth designed for SPA
   * [Non-Rails usage](#non-rails-usage)
 - [Configuration](#configuration)
     + [Redis](#redis)
-    + [JWT encryption](#jwt-encryption)
+    + [JWT signature](#jwt-signature)
     + [Request headers and cookies names](#request-headers-and-cookies-names)
     + [Expiration time](#expiration-time)
     + [CSRF and cookies](#csrf-and-cookies)
@@ -294,7 +294,7 @@ JWTSessions.redis_db_name = 'jwtokens'
 JWTSessions.token_prefix  = 'jwt_' # used for redis db keys
 ```
 
-##### JWT encryption
+##### JWT signature
 
 ```ruby
 JWTSessions.algorithm = 'HS256'
