@@ -290,7 +290,7 @@ Default token store configurations
 ```ruby
 JWTSessions.redis_host    = '127.0.0.1'
 JWTSessions.redis_port    = '6379'
-JWTSessions.redis_db_name = 'jwtokens'
+JWTSessions.redis_db_name = '0'
 JWTSessions.token_prefix  = 'jwt_' # used for redis db keys
 ```
 

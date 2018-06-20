@@ -36,7 +36,7 @@ module JWTSessions
 
   DEFAULT_REDIS_HOST       = '127.0.0.1'
   DEFAULT_REDIS_PORT       = '6379'
-  DEFAULT_REDIS_DB_NAME    = 'jwtokens'
+  DEFAULT_REDIS_DB_NAME    = '0'
   DEFAULT_TOKEN_PREFIX     = 'jwt_'
   DEFAULT_ALGORITHM        = 'HS256'
   DEFAULT_ACCESS_EXP_TIME  = 3600 # 1 hour in seconds
