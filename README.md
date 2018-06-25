@@ -479,7 +479,14 @@ and selectively flush sessions by namespace
 
 ```ruby
 session = JWTSessions::Session.new(namespace: 'ie-sessions')
-session.flush_namespaced # will flush all sessions that belong to the same namespace
+session.flush_namespaced # will flush all sessions which belong to the same namespace
+```
+
+it's posible to flush access tokens only
+
+```ruby
+session = JWTSessions::Session.new(namespace: 'ie-sessions')
+session.flush_namespaced_access_tokens # will flush all access tokens which belong to the same namespace, but will keep refresh tokens
 ```
 
 To force flush of all app sessions
