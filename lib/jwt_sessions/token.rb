@@ -13,6 +13,8 @@ module JWTSessions
       def decode(token, claims = {})
         decode_options = { algorithm: JWTSessions.algorithm }.merge(JWTSessions.jwt_options.to_h).merge(claims)
         JWT.decode(token, JWTSessions.public_key, JWTSessions.validate?, decode_options)
+      rescue JWT::InvalidIssuerError, JWT::InvalidIatError, JWT::InvalidAudError, JWT::InvalidSubError, JWT::InvalidJtiError => e
+        raise Errors::ClaimsVerification, e.message
       rescue JWT::DecodeError => e
         raise Errors::Unauthorized, e.message
       rescue StandardError

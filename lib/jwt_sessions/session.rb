@@ -63,16 +63,27 @@ module JWTSessions
       flush_by_uid(ruid)
     end
 
+    # flush the session by refresh token
     def flush_by_token(token)
       uid = token_uid(token, :refresh, @refresh_claims)
       flush_by_uid(uid)
     end
 
+    # flush the session by refresh token uid
     def flush_by_uid(uid)
       token = retrieve_refresh_token(uid)
 
       AccessToken.destroy(token.access_uid, store)
       token.destroy
+    end
+
+    # flush access tokens only and keep refresh
+    def flush_namespaced_access_tokens
+      return 0 unless namespace
+      tokens = RefreshToken.all(namespace, store)
+      tokens.each do |token|
+        AccessToken.destroy(token.access_uid, store)
+      end.count
     end
 
     def flush_namespaced

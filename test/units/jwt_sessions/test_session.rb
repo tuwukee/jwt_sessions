@@ -166,6 +166,25 @@ class TestSession < Minitest::Test
     assert_equal refresh_token.token, JWTSessions::RefreshToken.find(refresh_token.uid, JWTSessions.token_store, nil).token
   end
 
+  def test_flush_namespaced_access_tokens
+    namespace = 'test_namespace'
+    @session1 = JWTSessions::Session.new(payload: payload, namespace: namespace)
+    @session1.login
+    refresh_token = @session1.instance_variable_get(:"@_refresh")
+    access_token = @session1.instance_variable_get(:"@_access")
+    uid = access_token.uid
+    ruid = refresh_token.uid
+
+    assert_equal access_token.csrf, JWTSessions::AccessToken.find(uid, JWTSessions.token_store).csrf
+    flushed_count = @session1.flush_namespaced_access_tokens
+
+    assert_equal 1, flushed_count
+    assert_raises JWTSessions::Errors::Unauthorized do
+      JWTSessions::AccessToken.find(uid, JWTSessions.token_store)
+    end
+    assert_equal ruid, JWTSessions::RefreshToken.find(ruid, JWTSessions.token_store, namespace).uid
+  end
+
   def test_flush_all
     refresh_token = @session.instance_variable_get(:"@_refresh")
     flushed_count = JWTSessions::Session.flush_all

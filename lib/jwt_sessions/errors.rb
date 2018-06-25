@@ -4,5 +4,6 @@ module JWTSessions
     class Malconfigured < Error; end
     class InvalidPayload < Error; end
     class Unauthorized < Error; end
+    class ClaimsVerification < Unauthorized; end
   end
 end

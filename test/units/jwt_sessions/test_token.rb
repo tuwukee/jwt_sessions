@@ -79,7 +79,7 @@ class TestToken < Minitest::Test
     decoded = JWTSessions::Token.decode(token, { sub: 'subject' }).first
     assert_equal payload['user_id'], decoded['user_id']
     assert_equal payload['secret'], decoded['secret']
-    assert_raises JWTSessions::Errors::Unauthorized do
+    assert_raises JWTSessions::Errors::ClaimsVerification do
       JWTSessions::Token.decode(token, { sub: 'different subject' })
     end
   end
@@ -91,7 +91,7 @@ class TestToken < Minitest::Test
     decoded = JWTSessions::Token.decode(token, { iss: 'Me' }).first
     assert_equal payload['user_id'], decoded['user_id']
     assert_equal payload['secret'], decoded['secret']
-    assert_raises JWTSessions::Errors::Unauthorized do
+    assert_raises JWTSessions::Errors::ClaimsVerification do
       JWTSessions::Token.decode(token, { iss: 'Not Me' })
     end
   end
@@ -103,7 +103,7 @@ class TestToken < Minitest::Test
     decoded = JWTSessions::Token.decode(token, { aud: ['young'] }).first
     assert_equal payload['user_id'], decoded['user_id']
     assert_equal payload['secret'], decoded['secret']
-    assert_raises JWTSessions::Errors::Unauthorized do
+    assert_raises JWTSessions::Errors::ClaimsVerification do
       JWTSessions::Token.decode(token, { aud: ['adult'] })
     end
   end
