@@ -2,8 +2,14 @@ module JWTSessions
   module RailsAuthorization
     include Authorization
 
-    def request_headers
-      ActionDispatch::Http::Headers.from_hash(request.headers)
+    if Rails::VERSION::MAJOR < 5
+      def request_headers
+        request.headers
+      end
+    else
+      def request_headers
+        ActionDispatch::Http::Headers.from_hash(request.headers)
+      end
     end
 
     def request_cookies
