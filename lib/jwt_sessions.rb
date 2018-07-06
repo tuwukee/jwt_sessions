@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'securerandom'
+require 'uri'
 
 require 'jwt_sessions/errors'
 require 'jwt_sessions/token'
@@ -64,6 +65,15 @@ module JWTSessions
     end
   end
 
+  attr_writer :redis_url
+
+  def redis_url
+    return @redis_url if instance_variable_defined?(:@redis_url)
+
+    redis_base_url = ENV['REDIS_URL'] || "redis://#{redis_host}:#{redis_port}"
+    @redis_url = URI.join(redis_base_url, redis_db_name).to_s
+  end
+
   def jwt_options
     @jwt_options ||= JWTOptions.new(*JWT::DefaultOptions::DEFAULT_OPTIONS.values)
   end
@@ -78,7 +88,7 @@ module JWTSessions
   end
 
   def token_store
-    RedisTokenStore.instance(redis_host, redis_port, redis_db_name, token_prefix)
+    RedisTokenStore.instance(redis_url, token_prefix)
   end
 
   def validate?

@@ -294,6 +294,14 @@ JWTSessions.redis_db_name = '0'
 JWTSessions.token_prefix  = 'jwt_' # used for redis db keys
 ```
 
+You can also provide a Redis URL instead:
+
+```ruby
+JWTSessions.redis_url = 'redis://localhost:6397'
+```
+
+**NOTE:** if `REDIS_URL` environment variable is set it is used automatically.
+
 ##### JWT signature
 
 ```ruby
