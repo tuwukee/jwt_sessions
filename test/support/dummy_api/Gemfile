@@ -28,6 +28,8 @@ gem 'redis'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
 
+eval_gemfile "../dummy_sinatra_api/Gemfile"
+
 group :development, :test do
   gem 'pry-byebug', '~> 3.4'
   gem 'pry-rails', '~> 0.3.4'
