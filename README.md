@@ -517,7 +517,7 @@ To logout with an access token `refresh_by_access_allowed` setting should be set
 
 ## Contributing
 
-Fork & Pull Request \
+Fork & Pull Request. \
 RbNaCl and sodium cryptographic library are required for tests.
 
 For MacOS see [these instructions](http://macappstore.org/libsodium/). \

@@ -6,8 +6,7 @@ require 'jwt_sessions'
 class TestJWTSessions < Minitest::Test
   def teardown
     ENV.delete('REDIS_URL')
-    JWTSessions.remove_instance_variable(:@redis_url) if
-      JWTSessions.instance_variable_defined?(:@redis_url)
+    JWTSessions.instance_variable_set(:@redis_url, nil)
   end
 
   def test_default_settings
