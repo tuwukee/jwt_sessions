@@ -9,5 +9,8 @@ before_install:
   - sudo add-apt-repository ppa:chris-lea/libsodium -y
   - sudo apt-get update && sudo apt-get install libsodium-dev -y
 gemfile: test/support/dummy_api/Gemfile
+env:
+  - RAILS_VERSION="~> 5.2"
+  - RAILS_VERSION="~> 4.2"
 services:
   - redis-server

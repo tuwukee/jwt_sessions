@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# Fallback to Base for Rails < 5
+if Rails::VERSION::MAJOR < 5
+  ActionController::API = ActionController::Base
+end
+
 class ApplicationController < ActionController::API
   include JWTSessions::RailsAuthorization
   rescue_from JWTSessions::Errors::Unauthorized, with: :not_authorized
