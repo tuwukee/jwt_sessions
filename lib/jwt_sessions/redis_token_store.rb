@@ -5,8 +5,8 @@ require 'redis'
 module JWTSessions
   class RedisTokenStore
     class << self
-      def instance(redis_host, redis_port, redis_db_name, prefix)
-        @_tokens_store ||= Redis.new(url: "redis://#{redis_host}:#{redis_port}/#{redis_db_name}")
+      def instance(redis_url, prefix)
+        @_tokens_store ||= Redis.new(url: redis_url)
         @_token_prefix ||= prefix
 
         new(@_tokens_store, @_token_prefix)
