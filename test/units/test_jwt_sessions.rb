@@ -4,11 +4,6 @@ require 'minitest/autorun'
 require 'jwt_sessions'
 
 class TestJWTSessions < Minitest::Test
-  def teardown
-    ENV.delete('REDIS_URL')
-    JWTSessions.instance_variable_set(:@redis_url, nil)
-  end
-
   def test_default_settings
     assert_equal JWTSessions::DEFAULT_REDIS_HOST, JWTSessions.redis_host
     assert_equal JWTSessions::DEFAULT_REDIS_DB_NAME, JWTSessions.redis_db_name
@@ -46,7 +41,11 @@ class TestJWTSessions < Minitest::Test
   end
 
   def test_redis_url_with_env_var
+    JWTSessions.instance_variable_set(:@redis_url, nil)
     ENV['REDIS_URL'] = 'rediska://locallol:2018/'
     assert_equal 'rediska://locallol:2018/0', JWTSessions.redis_url
+    ENV.delete('REDIS_URL')
+    JWTSessions.instance_variable_set(:@redis_url, nil)
+    assert_equal 'redis://127.0.0.1:6379/0', JWTSessions.redis_url
   end
 end
