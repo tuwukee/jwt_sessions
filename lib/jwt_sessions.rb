@@ -65,13 +65,15 @@ module JWTSessions
     end
   end
 
-  attr_writer :redis_url
-
   def redis_url
-    return @redis_url if instance_variable_defined?(:@redis_url)
+    @redis_url ||= begin
+      redis_base_url = ENV['REDIS_URL'] || "redis://#{redis_host}:#{redis_port}"
+      URI.join(redis_base_url, redis_db_name).to_s
+    end
+  end
 
-    redis_base_url = ENV['REDIS_URL'] || "redis://#{redis_host}:#{redis_port}"
-    @redis_url = URI.join(redis_base_url, redis_db_name).to_s
+  def redis_url=(url)
+    @redis_url = URI.join(url, redis_db_name).to_s
   end
 
   def jwt_options
