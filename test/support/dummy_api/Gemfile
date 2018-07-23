@@ -7,7 +7,7 @@ end
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', ENV.fetch("RAILS_VERSION", "~> 5.2")
+gem 'rails', ENV.fetch('RAILS_VERSION', '~> 5.2')
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
 # Use Puma as the app server
@@ -28,7 +28,7 @@ gem 'redis'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
 
-eval_gemfile "../dummy_sinatra_api/Gemfile"
+eval_gemfile '../dummy_sinatra_api/Gemfile'
 
 group :development, :test do
   gem 'pry-byebug', '~> 3.4'
