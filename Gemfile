@@ -2,8 +2,6 @@
 
 source "https://rubygems.org"
 
-eval_gemfile "test/support/dummy_api/Gemfile"
-
 gemspec
 
 group :test do
