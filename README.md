@@ -34,14 +34,12 @@ Main goal of this gem is to provide configurable, manageable, and safe stateful 
 
 It's designed to be framework agnostic yet is easily integrable so Rails integration is also available out of the box.
 
-Core concept behind jwt_sessions is that each session is represented by a pair of tokens: access and refresh,
-and a session store's used to handle CSRF checks and refresh token hijacking. Both tokens have configurable expiration
-times, but in general refresh token is supposed to have a longer lifespan than an access token. Access token is used to retrieve
-secured resources and refresh token is used to renew the access token once it's expired. Default token store is based on redis.
+Core concept behind `jwt_sessions` is that each session is represented by a pair of tokens: access and refresh,
+and a session store is used to handle CSRF checks and refresh token hijacking. Both tokens have configurable expiration
+times, but in general refresh token is supposed to have a longer lifespan than an access token. Access token is used to retrieve secured resources and refresh token is used to renew the access token once it's expired. Default token store is based on redis.
 
-All tokens are encoded and decoded by [ruby-jwt](https://github.com/jwt/ruby-jwt) gem, and its reserved claim names are supported
-as well as it's allowed to configure claim checks and cryptographic signing algorithms supported by it.
-jwt_sessions itself uses `ext` claim and `HS256` signing by default.
+All tokens are encoded and decoded by [ruby-jwt](https://github.com/jwt/ruby-jwt) gem, and its reserved claim names are supported as well as it's allowed to configure claim checks and cryptographic signing algorithms supported by it.
+`jwt_sessions` itself uses `ext` claim and `HS256` signing by default.
 
 
 ## Installation
