@@ -35,12 +35,14 @@ Main goal of this gem is to provide configurable, manageable, and safe stateful 
 It's designed to be framework agnostic yet is easily integrable so Rails integration is also available out of the box.
 
 Core concept behind jwt_sessions is that each session is represented by a pair of tokens: access and refresh,
-and a session store used to handle CSRF checks and refresh token hijacking. Default token store is based on redis
-but you can freely implement your own store with whichever backend you prefer.
+and a session store's used to handle CSRF checks and refresh token hijacking. Both tokens have configurable expiration
+times, but in general refresh token is supposed to have a longer lifespan than an access token. Access token is used to retrieve
+secured resources and refresh token is used to renew the access token once it's expired. Default token store is based on redis.
 
 All tokens are encoded and decoded by [ruby-jwt](https://github.com/jwt/ruby-jwt) gem, and its reserved claim names are supported
 as well as it's allowed to configure claim checks and cryptographic signing algorithms supported by it.
 jwt_sessions itself uses `ext` claim and `HS256` signing by default.
+
 
 ## Installation
 
@@ -58,7 +60,7 @@ bundle install
 
 ## Getting Started
 
-`Authorization` mixin is supposed to be included in your controllers and is used to retrieve access and refresh tokens from incoming requests and verify CSRF token if needed.
+`Authorization` mixin is supposed to be included in your controllers and is used to retrieve access and refresh tokens from incoming requests and verify CSRF token if needed. It assumes that a token is either in a cookie or in a header (cookie and header names are configurable). It tries to retrieve it from headers first, then from cookies (CSRF check included) if the headers check failed.
 
 ### Rails integration
 
@@ -275,7 +277,7 @@ class SimpleApp < Sinatra::Base
     payload.to_json
   end
 
-  ....
+  # ...
 end
 ```
 
@@ -466,7 +468,10 @@ Flush a session by its access token.
 ```ruby
 session = JWTSessions::Session.new(refresh_by_access_allowed: true)
 tokens = session.login
-session.flush_by_access_token(tokens[:access]) # => 1
+session.flush_by_access_payload
+# or
+session = JWTSessions::Session.new(refresh_by_access_allowed: true, payload: payload)
+session.flush_by_access_payload
 ```
 
 Or by refresh token UID
