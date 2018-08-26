@@ -187,6 +187,14 @@ module JWTSessions
       }
     end
 
+    def refresh_tokens_hash
+      {
+        csrf: csrf_token,
+        access: access_token,
+        access_expires_at: Time.at(@_access.expiration.to_i)
+      }
+    end
+
     def check_refresh_on_time
       expiration = @_refresh.access_expiration
       yield @_refresh.uid, expiration if expiration.to_i > Time.now.to_i
@@ -197,7 +205,7 @@ module JWTSessions
       create_access_token
       update_refresh_token
 
-      tokens_hash
+      refresh_tokens_hash
     end
 
     def update_refresh_token

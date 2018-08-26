@@ -3,7 +3,8 @@
 require File.expand_path '../spec_helper.rb', __FILE__
 
 describe 'Sinatra Application' do
-  EXPECTED_KEYS = %w[access access_expires_at csrf refresh refresh_expires_at].freeze
+  LOGIN_KEYS = %w[access access_expires_at csrf refresh refresh_expires_at].freeze
+  REFRESH_KEYS = %w[access access_expires_at csrf].freeze
 
   def json(body)
     JSON.parse(body) rescue {}
@@ -17,7 +18,7 @@ describe 'Sinatra Application' do
   it 'should allow to log in' do
     post '/api/v1/login', format: :json
     expect(last_response).to be_ok
-    expect(json(last_response.body).keys.sort).to eq EXPECTED_KEYS
+    expect(json(last_response.body).keys.sort).to eq LOGIN_KEYS
   end
 
   it 'should allow to refresh' do
@@ -27,7 +28,7 @@ describe 'Sinatra Application' do
     header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, refresh_token
     post '/api/v1/refresh', format: :json
     expect(last_response).to be_ok
-    expect(json(last_response.body).keys.sort).to eq EXPECTED_KEYS
+    expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
   end
 
   it 'should allow to access' do
