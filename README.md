@@ -137,7 +137,7 @@ session = JWTSessions::Session.new(payload: payload, refresh_payload: refresh_pa
 ```
 
 Now you can build a refresh endpoint. To protect the endpoint use before_action `authorize_refresh_request!`. \
-In the example `found_token` - is a token fetched from request headers or cookies.
+The endpoint itself should return a renewed access token.
 
 ```ruby
 class RefreshController < ApplicationController
@@ -154,7 +154,7 @@ class RefreshController < ApplicationController
   end
 end
 ```
-
+In the example `found_token` - is a token fetched from request headers or cookies. In the context of `RefreshController` it's a refresh token. \
 The refresh request with headers must include `X-Refresh-Token` (header name is configurable) with refresh token.
 
 ```
