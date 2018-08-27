@@ -11,7 +11,7 @@ describe RefreshController do
       @tokens = session.login
     end
 
-    EXPECTED_KEYS = %w[access access_expires_at csrf refresh refresh_expires_at].freeze
+    EXPECTED_KEYS = %w[access access_expires_at csrf].freeze
 
     context 'success' do
       let(:refresh_token) { "Bearer #{@tokens[:refresh]}" }
