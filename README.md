@@ -515,6 +515,52 @@ To logout with an access token `refresh_by_access_allowed` setting should be set
 [Rails API](test/support/dummy_api) \
 [Sinatra API](test/support/dummy_sinatra_api)
 
+You can use a mixed approach for the cases when you'd like to store an access token in localStorage and refresh token in HTTP-only secure cookies. \
+Rails controllers setup example:
+
+```ruby
+class LoginController < ApplicationController
+  def create
+    user = User.find_by(email: params[:email])
+    if user&.authenticate(params[:password])
+
+      payload = { user_id: user.id, role: user.role, permissions: user.permissions }
+      refresh_payload = { user_id: user.id }
+      session = JWTSessions::Session.new(payload: payload, refresh_payload: refresh_payload)
+      tokens = session.login
+      response.set_cookie(JWTSessions.refresh_cookie,
+                          value: tokens[:refresh],
+                          httponly: true,
+                          secure: Rails.env.production?)
+
+      render json: { access: tokens[:access], csrf: tokens[:csrf] }
+    else
+      render json: 'Cannot login', status: :unauthorized
+    end
+  end
+end
+
+class RefreshController < ApplicationController
+  before_action :authorize_refresh_request!
+
+  def create
+    tokens = JWTSessions::Session.new(payload: access_payload).refresh(found_token)
+    render json: { access: tokens[:access], csrf: tokens[:csrf] }
+  end
+
+  def access_payload
+    user = User.find_by!(email: payload['user_id'])
+    { user_id: user.id, role: user.role, permissions: user.permissions }
+  end
+end
+
+class ResourcesController < ApplicationController
+  before_action :authorize_access_request!
+  before_action :validate_role_and_permissions_from_payload
+
+  # ...
+end
+```
 
 ## Contributing
 
