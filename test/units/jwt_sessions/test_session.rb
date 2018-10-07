@@ -88,7 +88,6 @@ class TestSession < Minitest::Test
     session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
     session.login
     access1 = session.instance_variable_get('@_access')
-    session.refresh_by_access_payload
     # should execute the code block for the cases when access UID within the refresh token
     # does not match access UID from the session payload
     session2 = JWTSessions::Session.new(payload: access1.payload, refresh_by_access_allowed: true)
@@ -97,6 +96,66 @@ class TestSession < Minitest::Test
         raise JWTSessions::Errors::Unauthorized
       end
     end
+  end
+
+  # executes the code block (aka throws an error / flushes the session)
+  # for several refreshes in a row
+  def test_refresh_by_access_payload_invalid_uid_2
+    JWTSessions.access_exp_time = 0
+    session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
+    session.login
+    sleep(1)
+    JWTSessions.access_exp_time = 3600
+    session.refresh_by_access_payload do
+      raise JWTSessions::Errors::Unauthorized
+    end
+    assert_raises JWTSessions::Errors::Unauthorized do
+      session.refresh_by_access_payload do
+        raise JWTSessions::Errors::Unauthorized
+      end
+    end
+  end
+
+  # executes the code block (aka throws an error / flushes the session)
+  # for sessions with payloads with old access UID
+  def test_refresh_by_access_payload_invalid_uid_3
+    JWTSessions.access_exp_time = 0
+    session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
+    original_tokens  = session.login
+    session.refresh_by_access_payload do
+      raise JWTSessions::Errors::Unauthorized
+    end
+    decoded_access = JWTSessions::Token.decode!(original_tokens[:access]).first
+    session2 = JWTSessions::Session.new(payload: decoded_access, refresh_by_access_allowed: true)
+    JWTSessions.access_exp_time = 3600
+    assert_raises JWTSessions::Errors::Unauthorized do
+      session2.refresh_by_access_payload do
+        raise JWTSessions::Errors::Unauthorized
+      end
+    end
+  end
+
+  # does not execute the code block
+  # for sessions with payloads with the latest access UID
+  def test_refresh_by_access_payload_invalid_uid_4
+    JWTSessions.access_exp_time = 0
+    session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
+    session.login
+    refreshed_tokens = session.refresh_by_access_payload do
+      raise JWTSessions::Errors::Unauthorized
+    end
+
+    decoded_access = JWTSessions::Token.decode!(refreshed_tokens[:access]).first
+    session2 = JWTSessions::Session.new(payload: decoded_access, refresh_by_access_allowed: true)
+    JWTSessions.access_exp_time = 3600
+
+    session2.refresh_by_access_payload do
+      raise JWTSessions::Errors::Unauthorized
+    end
+
+    assert_equal REFRESH_KEYS, refreshed_tokens.keys.sort
+    assert_equal payload[:test], decoded_access['test']
+    assert_equal session.instance_variable_get('@_refresh').uid, decoded_access['ruid']
   end
 
   def test_refresh_with_block_not_expired
