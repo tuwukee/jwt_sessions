@@ -52,14 +52,17 @@ module JWTSessions
 
     def refresh_by_access_payload(&block)
       raise Errors::InvalidPayload if payload.nil?
-      ruid = retrive_ruid_from(payload)
+      ruid = retrive_val_from(payload, :access, 'ruid', 'refresh uid')
       retrieve_refresh_token(ruid)
+
+      check_access_uid_within_refresh_payload(&block) if block_given?
+
       refresh_by_uid(&block)
     end
 
     def flush_by_access_payload
       raise Errors::InvalidPayload if payload.nil?
-      ruid = retrive_ruid_from(payload)
+      ruid = retrive_val_from(payload, :access, 'ruid', 'refresh uid')
       flush_by_uid(ruid)
     end
 
@@ -104,12 +107,9 @@ module JWTSessions
     end
 
     def valid_access_request?(external_csrf_token, external_payload)
-      ruid = external_payload.fetch('ruid', nil)
-      uid  = external_payload.fetch('uid', nil)
-      if ruid.nil? || uid.nil?
-        message = 'Token payload is invalid'
-        raise Errors::InvalidPayload, message
-      end
+      ruid = retrive_val_from(external_payload, :access, 'ruid', 'refresh uid')
+      uid  = retrive_val_from(external_payload, :access, 'uid', 'access uid')
+
       refresh_token = RefreshToken.find(ruid, JWTSessions.token_store)
       return false unless uid == refresh_token.access_uid
 
@@ -164,13 +164,13 @@ module JWTSessions
       uid
     end
 
-    def retrive_ruid_from(token_payload)
-      ruid = token_payload.fetch('ruid', nil)
-      if ruid.nil?
-        message = "Access token payload does not contain refresh uid"
+    def retrive_val_from(token_payload, type, val_key, val_name)
+      val = token_payload.fetch(val_key, nil)
+      if val.nil?
+        message = "#{type.to_s.capitalize} token payload does not contain #{val_name}"
         raise Errors::InvalidPayload, message
       end
-      ruid
+      val
     end
 
     def retrieve_refresh_token(uid)
@@ -198,6 +198,12 @@ module JWTSessions
     def check_refresh_on_time
       expiration = @_refresh.access_expiration
       yield @_refresh.uid, expiration if expiration.to_i > Time.now.to_i
+    end
+
+    def check_access_uid_within_refresh_payload
+      uid = retrive_val_from(payload, :access, 'uid', 'access uid')
+      expiration = @_refresh.access_expiration
+      yield @_refresh.uid, expiration if @_refresh.access_uid != uid
     end
 
     def issue_tokens_after_refresh
