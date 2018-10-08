@@ -86,6 +86,8 @@ module JWTSessions
       tokens = RefreshToken.all(namespace, store)
       tokens.each do |token|
         AccessToken.destroy(token.access_uid, store)
+        # unlink refresh token from the current access token
+        token.update(nil, nil, token.csrf)
       end.count
     end
 
@@ -197,13 +199,15 @@ module JWTSessions
 
     def check_refresh_on_time
       expiration = @_refresh.access_expiration
+      return if expiration.size.zero?
       yield @_refresh.uid, expiration if expiration.to_i > Time.now.to_i
     end
 
     def check_access_uid_within_refresh_payload
       uid = retrive_val_from(payload, :access, 'uid', 'access uid')
-      expiration = @_refresh.access_expiration
-      yield @_refresh.uid, expiration if @_refresh.access_uid != uid
+      access_uid = @_refresh.access_uid
+      return if access_uid.size.zero?
+      yield @_refresh.uid, @_refresh.access_expiration if access_uid != uid
     end
 
     def issue_tokens_after_refresh

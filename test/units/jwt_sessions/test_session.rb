@@ -260,6 +260,31 @@ class TestSession < Minitest::Test
     assert_equal ruid, JWTSessions::RefreshToken.find(ruid, JWTSessions.token_store, namespace).uid
   end
 
+  def test_refresh_after_flush_namespaced_access_tokens
+    namespace = 'test_namespace'
+    session = JWTSessions::Session.new(payload: payload, namespace: namespace, refresh_by_access_allowed: true)
+    session.login
+
+    session.flush_namespaced_access_tokens
+    ruid = session.instance_variable_get(:"@_refresh").uid
+    refresh_token = JWTSessions::RefreshToken.find(ruid, JWTSessions.token_store, nil)
+    assert_equal '', refresh_token.access_uid
+    assert_equal '', refresh_token.access_expiration
+
+    # allows to refresh with un-expired but flushed access token payload
+    session.refresh_by_access_payload do
+      raise JWTSessions::Errors::Unauthorized
+    end
+    auid = session.instance_variable_get(:"@_access").uid
+    access_token = JWTSessions::AccessToken.find(auid, JWTSessions.token_store)
+    refresh_token = JWTSessions::RefreshToken.find(ruid, JWTSessions.token_store, nil)
+
+    assert_equal false, access_token.uid.size.zero?
+    assert_equal false, access_token.expiration.size.zero?
+    assert_equal access_token.uid.to_s, refresh_token.access_uid
+    assert_equal access_token.expiration.to_s, refresh_token.access_expiration
+  end
+
   def test_flush_all
     refresh_token = @session.instance_variable_get(:"@_refresh")
     flushed_count = JWTSessions::Session.flush_all
