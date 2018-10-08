@@ -55,7 +55,7 @@ module JWTSessions
       ruid = retrive_val_from(payload, :access, 'ruid', 'refresh uid')
       retrieve_refresh_token(ruid)
 
-      check_access_uid_within_refresh_payload(&block) if block_given?
+      check_access_uid_within_refresh_token(&block) if block_given?
 
       refresh_by_uid(&block)
     end
@@ -203,7 +203,7 @@ module JWTSessions
       yield @_refresh.uid, expiration if expiration.to_i > Time.now.to_i
     end
 
-    def check_access_uid_within_refresh_payload
+    def check_access_uid_within_refresh_token
       uid = retrive_val_from(payload, :access, 'uid', 'access uid')
       access_uid = @_refresh.access_uid
       return if access_uid.size.zero?
