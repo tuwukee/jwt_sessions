@@ -98,9 +98,7 @@ class TestSession < Minitest::Test
     end
   end
 
-  # executes the code block (aka throws an error / flushes the session)
-  # for several refreshes in a row
-  def test_refresh_by_access_payload_invalid_uid_2
+  def test_refresh_by_access_payload_invalid_uid_with_multiple_refreshes
     JWTSessions.access_exp_time = 0
     session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
     session.login
@@ -116,9 +114,7 @@ class TestSession < Minitest::Test
     end
   end
 
-  # executes the code block (aka throws an error / flushes the session)
-  # for sessions with payloads with old access UID
-  def test_refresh_by_access_payload_invalid_uid_3
+  def test_refresh_by_access_payload_invalid_uid_outdated_access_token
     JWTSessions.access_exp_time = 0
     session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
     original_tokens  = session.login
@@ -135,9 +131,7 @@ class TestSession < Minitest::Test
     end
   end
 
-  # does not execute the code block
-  # for sessions with payloads with the latest access UID
-  def test_refresh_by_access_payload_invalid_uid_4
+  def test_refresh_by_access_payload_with_valid_uid
     JWTSessions.access_exp_time = 0
     session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
     session.login
