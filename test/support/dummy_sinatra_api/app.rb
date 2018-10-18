@@ -6,6 +6,7 @@ require 'sinatra/namespace'
 require 'pry'
 
 JWTSessions.encryption_key = 'secret key'
+JWTSessions.token_store = ENV['STORE_ADAPTER']
 
 get '/' do
   'Welcome to Sinatra app!'
@@ -56,4 +57,3 @@ namespace '/api/v1' do
     payload.to_json
   end
 end
-
