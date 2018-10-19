@@ -46,15 +46,15 @@ module JWTSessions
     end
 
     def request_headers
-      raise Errors::Malconfigured, 'request_headers is not implemented'
+      raise Errors::Misconfigured, 'request_headers is not implemented'
     end
 
     def request_cookies
-      raise Errors::Malconfigured, 'request_cookies is not implemented'
+      raise Errors::Misconfigured, 'request_cookies is not implemented'
     end
 
     def request_method
-      raise Errors::Malconfigured, 'request_method is not implemented'
+      raise Errors::Misconfigured, 'request_method is not implemented'
     end
 
     def valid_csrf_token?(csrf_token, token_type)

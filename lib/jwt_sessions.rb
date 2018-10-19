@@ -5,7 +5,8 @@ require 'uri'
 
 require 'jwt_sessions/errors'
 require 'jwt_sessions/token'
-require 'jwt_sessions/redis_token_store'
+require 'jwt_sessions/token_store'
+require 'jwt_sessions/storage_adapter'
 require 'jwt_sessions/refresh_token'
 require 'jwt_sessions/csrf_token'
 require 'jwt_sessions/access_token'
@@ -81,7 +82,7 @@ module JWTSessions
   end
 
   def algorithm=(algo)
-    raise Errors::Malconfigured, "algorithm #{algo} is not supported" unless supported_algos.include?(algo)
+    raise Errors::Misconfigured, "algorithm #{algo} is not supported" unless supported_algos.include?(algo)
     @algorithm = algo
   end
 
@@ -90,7 +91,9 @@ module JWTSessions
   end
 
   def token_store
-    RedisTokenStore.instance(redis_url, token_prefix)
+    # TokenStore.instance(storage: :Memory, prefix: token_prefix)
+    TokenStore.instance(storage: :Redis, prefix: token_prefix)
+    # TokenStore.instance(storage: :LRUHash, prefix: token_prefix)
   end
 
   def validate?
@@ -102,7 +105,7 @@ module JWTSessions
     define_method("#{key}") do
       return nil if algorithm == NONE
       var = instance_variable_get(var_name)
-      raise Errors::Malconfigured, "#{key} is not specified" unless var
+      raise Errors::Misconfigured, "#{key} is not specified" unless var
       var
     end
 
