@@ -82,7 +82,7 @@ module JWTSessions
   end
 
   def algorithm=(algo)
-    raise Errors::Misconfigured, "algorithm #{algo} is not supported" unless supported_algos.include?(algo)
+    raise Errors::Malconfigured, "algorithm #{algo} is not supported" unless supported_algos.include?(algo)
     @algorithm = algo
   end
 
@@ -105,7 +105,7 @@ module JWTSessions
     define_method("#{key}") do
       return nil if algorithm == NONE
       var = instance_variable_get(var_name)
-      raise Errors::Misconfigured, "#{key} is not specified" unless var
+      raise Errors::Malconfigured, "#{key} is not specified" unless var
       var
     end
 

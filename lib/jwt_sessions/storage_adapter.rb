@@ -1,5 +1,4 @@
 require 'moneta'
-require 'awesome_print'
 
 module JWTSessions
   class StorageAdapter
@@ -13,7 +12,7 @@ module JWTSessions
     class << self
       def instance(storage_opts)
         storage_type = (storage_opts[:storage] || :Memory)
-        raise Errors::Misconfigured, "storage #{storage_type} is not supported, try one of #{STORAGE_TYPES}" unless
+        raise Errors::Malconfigured, "storage #{storage_type} is not supported, try one of #{STORAGE_TYPES}" unless
               STORAGE_TYPES.include?(storage_type)
         @_store ||= build_storage(storage_opts)
         @_prefix ||= storage_opts[:prefix]
