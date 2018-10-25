@@ -83,7 +83,10 @@ module JWTSessions
 
     def token_from_headers(token_type)
       raw_token = request_headers[JWTSessions.header_by(token_type)] || ''
-      token = raw_token.split(' ')[-1]
+      scheme, token = raw_token.split(' ')
+      unless scheme == 'Bearer'
+        raise Errors::Unauthorized, 'Unsupported HTTP authentication scheme'
+      end
       raise Errors::Unauthorized, 'Token is not found' unless token
       token
     end
