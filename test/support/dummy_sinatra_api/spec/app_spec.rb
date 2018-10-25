@@ -25,7 +25,7 @@ describe 'Sinatra Application' do
     post '/api/v1/login', format: :json
     expect(last_response).to be_ok
     refresh_token = json(last_response.body)['refresh']
-    header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, refresh_token
+    header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, "Bearer #{refresh_token}"
     post '/api/v1/refresh', format: :json
     expect(last_response).to be_ok
     expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
@@ -35,21 +35,33 @@ describe 'Sinatra Application' do
     post '/api/v1/login', format: :json
     expect(last_response).to be_ok
     access_token = json(last_response.body)['access']
-    header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, access_token
+    header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, "Bearer #{access_token}"
     get '/api/v1/payload', format: :json
     expect(last_response).to be_ok
     expect(json(last_response.body)['key']).to eq 'big access value'
+  end
+
+  it 'should ignore non-bearer auth headers and use cookie' do
+    post '/api/v1/login', format: :json
+    expect(last_response).to be_ok
+    access_token = json(last_response.body)['access']
+    header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, "Basic abcd123"
+    header 'Cookie', "#{JWTSessions.access_cookie}=#{access_token};"
+    get '/api/v1/payload', format: :json
+    expect(last_response).to be_ok
+    expect(json(last_response.body)['key']).to eq 'big access value'
+
   end
 
   it 'should allow to access with refreshed token' do
     post '/api/v1/login', format: :json
     expect(last_response).to be_ok
     refresh_token = json(last_response.body)['refresh']
-    header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, refresh_token
+    header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, "Bearer #{refresh_token}"
     post '/api/v1/refresh', format: :json
     expect(last_response).to be_ok
     access_token = json(last_response.body)['access']
-    header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, access_token
+    header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, "Bearer #{access_token}"
     get '/api/v1/payload', format: :json
     expect(last_response).to be_ok
     expect(json(last_response.body)['key']).to eq 'reloaded access value'
