@@ -13,7 +13,7 @@ module JWTSessions
                   :refresh_by_access_allowed
 
     def initialize(options = {})
-      @store                     = options.fetch(:store, JWTSessions.token_store)
+      @store                     = options.fetch(:token_store, JWTSessions.token_store)
       @refresh_payload           = options.fetch(:refresh_payload, {})
       @payload                   = options.fetch(:payload, {})
       @access_claims             = options.fetch(:access_claims, {})

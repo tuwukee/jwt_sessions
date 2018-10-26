@@ -16,6 +16,7 @@ class TestJWTSessions < Minitest::Test
     assert_equal JWTSessions::DEFAULT_ACCESS_HEADER, JWTSessions.access_header
     assert_equal JWTSessions::DEFAULT_REFRESH_HEADER, JWTSessions.refresh_header
     assert_equal JWTSessions::DEFAULT_CSRF_HEADER, JWTSessions.csrf_header
+    assert_equal JWTSessions::DEFAULT_STORE, JWTSessions.store
   end
 
   def test_encryption_key

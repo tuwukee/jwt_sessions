@@ -16,9 +16,7 @@ class TestSession < Minitest::Test
   end
 
   def teardown
-    redis = Redis.new
-    keys = redis.keys('jwt_*')
-    keys.each { |k| redis.del(k) }
+    JWTSessions.token_store.class.clear
   end
 
   def test_login
@@ -281,6 +279,8 @@ class TestSession < Minitest::Test
 
   def test_flush_all
     refresh_token = @session.instance_variable_get(:"@_refresh")
+    # require 'pry'
+    # binding.pry
     flushed_count = JWTSessions::Session.flush_all
     assert_equal 1, flushed_count
     assert_raises JWTSessions::Errors::Unauthorized do

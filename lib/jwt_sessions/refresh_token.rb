@@ -27,7 +27,7 @@ module JWTSessions
       end
 
       def all(namespace, store)
-        tokens = store.all_in_namespace(namespace)
+        tokens = store.all(namespace)
         tokens.map do |uid, token_attrs|
           build_with_token_attrs(store, uid, token_attrs, namespace)
         end
@@ -46,9 +46,9 @@ module JWTSessions
       private
 
       def build_with_token_attrs(store, uid, token_attrs, namespace)
-        new(token_attrs[:csrf],
-            token_attrs[:access_uid],
-            token_attrs[:access_expiration],
+        new(token_attrs[:csrf].to_s,
+            token_attrs[:access_uid].to_s,
+            token_attrs[:access_expiration].to_s,
             store,
             namespace: namespace,
             payload: {},

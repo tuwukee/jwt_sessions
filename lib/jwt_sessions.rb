@@ -5,7 +5,7 @@ require 'uri'
 
 require 'jwt_sessions/errors'
 require 'jwt_sessions/token'
-require 'jwt_sessions/redis_token_store'
+require 'jwt_sessions/token_store'
 require 'jwt_sessions/refresh_token'
 require 'jwt_sessions/csrf_token'
 require 'jwt_sessions/access_token'
@@ -30,6 +30,7 @@ module JWTSessions
                              redis_db_name
                              redis_host
                              redis_port
+                             store
                              refresh_cookie
                              refresh_exp_time
                              refresh_header
@@ -39,6 +40,7 @@ module JWTSessions
   DEFAULT_REDIS_PORT       = '6379'
   DEFAULT_REDIS_DB_NAME    = '0'
   DEFAULT_TOKEN_PREFIX     = 'jwt_'
+  DEFAULT_STORE            = :memory
   DEFAULT_ALGORITHM        = 'HS256'
   DEFAULT_ACCESS_EXP_TIME  = 3600 # 1 hour in seconds
   DEFAULT_REFRESH_EXP_TIME = 604800 # 1 week in seconds
@@ -90,11 +92,21 @@ module JWTSessions
   end
 
   def token_store
-    RedisTokenStore.instance(redis_url, token_prefix)
+    options = if redis_store?
+                { url: redis_url, prefix: token_prefix }
+              else
+                {}
+              end
+
+    TokenStore.adapter(store, options)
   end
 
   def validate?
     algorithm != NONE
+  end
+
+  def redis_store?
+    store == :redis
   end
 
   [:public_key, :private_key].each do |key|
