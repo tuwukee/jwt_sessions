@@ -71,7 +71,7 @@ class TestMemoryStoreAdapter < Minitest::Test
     assert_equal 'csrf2', refresh[:csrf]
   end
 
-  def test_all
+  def test_all_refresh_tokens
     expiration = Time.now.to_i + 3600
     store.persist_refresh(
       uid: 'uid',
@@ -89,7 +89,7 @@ class TestMemoryStoreAdapter < Minitest::Test
       expiration: expiration,
       namespace: 'ns2'
     )
-    refresh_tokens = store.all('ns')
+    refresh_tokens = store.all_refresh_tokens('ns')
     assert_equal 1, refresh_tokens.count
   end
 

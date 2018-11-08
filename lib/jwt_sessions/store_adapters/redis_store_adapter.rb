@@ -41,9 +41,7 @@ module JWTSessions
       end
 
       def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: nil)
-        puts 'persist refresh'
-        key = refresh_key(uid, namespace)
-        puts "uid: #{uid}, access_uid: #{access_uid}"
+        key = full_refresh_key(uid, namespace)
         update_refresh(
           uid: uid,
           access_expiration: access_expiration,
@@ -56,10 +54,8 @@ module JWTSessions
       end
 
       def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: nil)
-        puts 'update refresh'
-        puts "uid: #{uid}, access_uid: #{access_uid}"
         @redis_client.hmset(
-          refresh_key(uid, namespace),
+          full_refresh_key(uid, namespace),
           :csrf, csrf,
           :access_expiration, access_expiration,
           :access_uid, access_uid
@@ -67,7 +63,6 @@ module JWTSessions
       end
 
       def all_refresh_tokens(namespace = nil)
-        puts refresh_key('*', namespace)
         keys_in_namespace = @redis_client.keys(refresh_key('*', namespace))
         (keys_in_namespace || []).each_with_object({}) do |key, acc|
           uid = uid_from_key(key)
@@ -110,21 +105,16 @@ module JWTSessions
         URI.join(redis_base_url, redis_db_name).to_s
       end
 
-      def refresh_key(uid, namespace)
-        if namespace.to_s.empty?
-          "#{prefix}_*_refresh_#{uid}"
-        else
-          "#{prefix}_#{namespace}_refresh_#{uid}"
-        end
-        #if namespace
-        #  "#{prefix}_#{namespace}_refresh_#{uid}"
-        #else
-        #  wildcard_refresh_key(uid)
-        #end
+      def full_refresh_key(uid, namespace)
+        "#{prefix}_#{namespace}_refresh_#{uid}"
       end
 
-      def wildcard_refresh_key(uid)
-        (@redis_client.keys(refresh_key(uid, '*')) || []).first
+      def refresh_key(uid, namespace)
+        if namespace.to_s.empty?
+          wildcard_refresh_key(uid)
+        else
+          full_refresh_key(uid, namespace)
+        end
       end
 
       def access_key(uid)
