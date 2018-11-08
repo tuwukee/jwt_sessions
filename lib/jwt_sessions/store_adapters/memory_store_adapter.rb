@@ -24,8 +24,7 @@ module JWTSessions
         get_value_if_not_expired(namespaced_key)
       end
 
-      def persist_refresh(uid, access_expiration, access_uid, csrf, expiration, namespace = '')
-        namespace ||= ''
+      def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: '')
         update_refresh_fields(
           refresh_key(uid, namespace),
           csrf: csrf,
@@ -35,7 +34,7 @@ module JWTSessions
         )
       end
 
-      def update_refresh(uid, access_expiration, access_uid, csrf, namespace = nil)
+      def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: '')
         update_refresh_fields(
           refresh_key(uid, namespace),
           csrf: csrf,
@@ -44,7 +43,7 @@ module JWTSessions
         )
       end
 
-      def all(namespace)
+      def all_refresh_tokens(namespace)
         regex = Regexp.new(
           "^#{refresh_key('*', namespace)}$".
           gsub(/([+|()])/, '\\\\\1').
@@ -84,7 +83,7 @@ module JWTSessions
         "access_#{uid}"
       end
 
-      def refresh_key(uid, namespace = nil)
+      def refresh_key(uid, namespace)
         "#{namespace}_refresh_#{uid}"
       end
 

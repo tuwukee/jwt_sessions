@@ -15,15 +15,15 @@ module JWTSessions
         raise NotImplementedError
       end
 
-      def persist_refresh(_uid, _access_expiration, _access_uid, _csrf, _expiration, _namespace)
+      def persist_refresh(_uid:, _access_expiration:, _access_uid:, _csrf:, _expiration:, _namespace:)
         raise NotImplementedError
       end
 
-      def update_refresh(_uid, _access_expiration, _access_uid, _csrf, _namespace)
+      def update_refresh(_uid:, _access_expiration:, _access_uid:, _csrf:, _namespace:)
         raise NotImplementedError
       end
 
-      def all(_namespace)
+      def all_refresh_tokens(_namespace)
         raise NotImplementedError
       end
 
