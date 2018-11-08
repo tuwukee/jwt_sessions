@@ -27,7 +27,7 @@ module JWTSessions
       end
 
       def all(namespace, store)
-        tokens = store.all_in_namespace(namespace)
+        tokens = store.all(namespace)
         tokens.map do |uid, token_attrs|
           build_with_token_attrs(store, uid, token_attrs, namespace)
         end
