@@ -2,7 +2,6 @@
 
 require 'minitest/autorun'
 require 'jwt_sessions'
-require 'pry'
 
 class TestSession < Minitest::Test
   attr_reader :session, :payload, :tokens
@@ -259,9 +258,9 @@ class TestSession < Minitest::Test
     namespace = 'test_namespace'
     session = JWTSessions::Session.new(payload: payload, namespace: namespace, refresh_by_access_allowed: true)
     session.login
+
     session.flush_namespaced_access_tokens
     ruid = session.instance_variable_get(:"@_refresh").uid
-
     refresh_token = JWTSessions::RefreshToken.find(ruid, JWTSessions.token_store, nil)
     assert_equal '', refresh_token.access_uid
     assert_equal '', refresh_token.access_expiration

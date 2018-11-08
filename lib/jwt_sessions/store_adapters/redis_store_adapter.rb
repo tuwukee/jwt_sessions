@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "pry"
-
 module JWTSessions
   module StoreAdapters
     class RedisStoreAdapter < AbstractStoreAdapter
@@ -62,7 +60,7 @@ module JWTSessions
         )
       end
 
-      def all_refresh_tokens(namespace = nil)
+      def all_refresh_tokens(namespace)
         keys_in_namespace = @redis_client.keys(refresh_key('*', namespace))
         (keys_in_namespace || []).each_with_object({}) do |key, acc|
           uid = uid_from_key(key)
@@ -115,6 +113,10 @@ module JWTSessions
         else
           full_refresh_key(uid, namespace)
         end
+      end
+
+      def wildcard_refresh_key(uid)
+        (@redis_client.keys(refresh_key(uid, '*')) || []).first
       end
 
       def access_key(uid)
