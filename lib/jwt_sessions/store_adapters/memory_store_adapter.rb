@@ -50,10 +50,12 @@ module JWTSessions
         namespace_keys = namespace.nil? ? storage.keys : [namespace]
 
         namespace_keys.each_with_object({}) do |namespace_key, acc|
-          storage[namespace_key]['refresh'].keys.each do |uid|
-            value = storage[namespace_key]['refresh'][uid]
+          namespaced = storage[namespace_key]['refresh']
+
+          namespaced.keys.each do |uid|
+            value = namespaced[uid]
             if value[:expiration] && value[:expiration] < Time.now.to_i
-              storage[namespace_key]['refresh'].delete(key)
+              namespaced.delete(key)
             else
               acc[uid] = value
             end
