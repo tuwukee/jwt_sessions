@@ -18,12 +18,12 @@ module JWTSessions
         authorize_request(token_type)
       end
 
-      define_method("authorize_#{token_type}_request_by_cookies!") do
+      define_method("authorize_by_#{token_type}_cookie!") do
         cookie_based_auth(token_type)
         authorize_request(token_type)
       end
 
-      define_method("authorize_#{token_type}_request_by_headers!") do
+      define_method("authorize_by_#{token_type}_header!") do
         cookieless_auth(token_type)
         authorize_request(token_type)
       end
@@ -39,12 +39,12 @@ module JWTSessions
       invalid_authorization if refresh_by_access_invalid?
     end
 
-    def authorize_refresh_by_access_request_by_cookies!
+    def authorize_refresh_by_access_cookie!
       cookie_based_auth(:access)
       invalid_authorization if refresh_by_access_invalid?
     end
 
-    def authorize_refresh_by_access_request_by_headers!
+    def authorize_refresh_by_access_header!
       cookieless_auth(:access)
     end
 

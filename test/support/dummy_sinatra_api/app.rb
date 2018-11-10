@@ -65,14 +65,14 @@ namespace '/api/v1' do
   end
 
   post '/refresh_by_cookies' do
-    authorize_refresh_request_by_cookies!
+    authorize_by_refresh_cookie!
     access_payload = payload.merge({ key: 'new access value' })
     session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
     session.refresh(found_token).to_json
   end
 
   post '/refresh_by_headers' do
-    authorize_refresh_request_by_headers!
+    authorize_by_refresh_header!
     access_payload = payload.merge({ key: 'a little shy access value' })
     session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
     session.refresh(found_token).to_json
@@ -90,7 +90,7 @@ namespace '/api/v1' do
   end
 
   post '/refresh_by_access_by_cookies' do
-    authorize_refresh_by_access_request_by_cookies!
+    authorize_refresh_by_access_cookie!
     access_payload = payload.merge({ key: 'such many auth methods much wow access value' })
     session = JWTSessions::Session.new(
       payload: access_payload,
@@ -101,7 +101,7 @@ namespace '/api/v1' do
   end
 
   post '/refresh_by_access_by_headers' do
-    authorize_refresh_by_access_request_by_headers!
+    authorize_refresh_by_access_header!
     access_payload = payload.merge({ key: 'yet another access value' })
     session = JWTSessions::Session.new(
       payload: access_payload,
