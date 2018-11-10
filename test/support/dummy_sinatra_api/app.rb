@@ -49,7 +49,11 @@ namespace '/api/v1' do
   post '/login' do
     access_payload = { key: 'big access value' }
     refresh_payload = { refresh_key: 'small refresh value' }
-    session = JWTSessions::Session.new(payload: access_payload, refresh_payload: refresh_payload)
+    session = JWTSessions::Session.new(
+      payload: access_payload,
+      refresh_payload: refresh_payload,
+      refresh_by_access_allowed: true
+    )
     session.login.to_json
   end
 
@@ -77,22 +81,34 @@ namespace '/api/v1' do
   post '/refresh_by_access' do
     authorize_refresh_by_access_request!
     access_payload = payload.merge({ key: 'a big brave access value' })
-    session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
-    session.refresh(found_token).to_json
+    session = JWTSessions::Session.new(
+      payload: access_payload,
+      refresh_payload: payload,
+      refresh_by_access_allowed: true
+    )
+    session.refresh_by_access_payload.to_json
   end
 
   post '/refresh_by_access_by_cookies' do
     authorize_refresh_by_access_request_by_cookies!
     access_payload = payload.merge({ key: 'such many auth methods much wow access value' })
-    session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
-    session.refresh(found_token).to_json
+    session = JWTSessions::Session.new(
+      payload: access_payload,
+      refresh_payload: payload,
+      refresh_by_access_allowed: true
+    )
+    session.refresh_by_access_payload.to_json
   end
 
   post '/refresh_by_access_by_headers' do
     authorize_refresh_by_access_request_by_headers!
     access_payload = payload.merge({ key: 'yet another access value' })
-    session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
-    session.refresh(found_token).to_json
+    session = JWTSessions::Session.new(
+      payload: access_payload,
+      refresh_payload: payload,
+      refresh_by_access_allowed: true
+    )
+    session.refresh_by_access_payload.to_json
   end
 
   get '/payload' do
