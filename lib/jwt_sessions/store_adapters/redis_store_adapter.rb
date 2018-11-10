@@ -3,14 +3,14 @@
 module JWTSessions
   module StoreAdapters
     class RedisStoreAdapter < AbstractStoreAdapter
-      attr_reader :prefix, :redis_client
+      attr_reader :prefix, :storage
 
       def initialize(token_prefix: JWTSessions.token_prefix, **options)
         @prefix = token_prefix
 
         begin
           require 'redis'
-          @redis_client = configure_redis_client(options)
+          @storage = configure_redis_client(options)
         rescue LoadError => e
           msg = "Could not load the 'redis' gem, please add it to your gemfile or " \
                 "configure a different adapter (e.g. JWTSessions.store_adapter = :memory)"
@@ -19,43 +19,49 @@ module JWTSessions
       end
 
       def fetch_access(uid)
-        csrf = @redis_client.get(access_key(uid))
+        csrf = storage.get(access_key(uid))
         csrf.nil? ? {} : { csrf: csrf }
       end
 
       def persist_access(uid, csrf, expiration)
         key = access_key(uid)
-        @redis_client.set(key, csrf)
-        @redis_client.expireat(key, expiration)
+        storage.set(key, csrf)
+        storage.expireat(key, expiration)
       end
 
       REFRESH_KEYS = %i[csrf access_uid access_expiration expiration].freeze
 
       def fetch_refresh(uid, namespace)
-        values = @redis_client.hmget(refresh_key(uid, namespace), *REFRESH_KEYS).compact
+        values = storage.hmget(refresh_key(uid, namespace), *REFRESH_KEYS).compact
+
         return {} if values.length != REFRESH_KEYS.length
         REFRESH_KEYS.each_with_index.each_with_object({}) { |(key, index), acc| acc[key] = values[index] }
       end
 
-      def persist_refresh(uid, access_expiration, access_uid, csrf, expiration, namespace = '')
-        namespace ||= ''
-        key = refresh_key(uid, namespace)
-        update_refresh(uid, access_expiration, access_uid, csrf, namespace)
-        @redis_client.hset(key, :expiration, expiration)
-        @redis_client.expireat(key, expiration)
+      def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: nil)
+        key = full_refresh_key(uid, namespace)
+        update_refresh(
+          uid: uid,
+          access_expiration: access_expiration,
+          access_uid: access_uid,
+          csrf: csrf,
+          namespace: namespace
+        )
+        storage.hset(key, :expiration, expiration)
+        storage.expireat(key, expiration)
       end
 
-      def update_refresh(uid, access_expiration, access_uid, csrf, namespace = nil)
-        @redis_client.hmset(
-          refresh_key(uid, namespace),
+      def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: nil)
+        storage.hmset(
+          full_refresh_key(uid, namespace),
           :csrf, csrf,
           :access_expiration, access_expiration,
           :access_uid, access_uid
         )
       end
 
-      def all(namespace)
-        keys_in_namespace = @redis_client.keys(refresh_key('*', namespace))
+      def all_refresh_tokens(namespace)
+        keys_in_namespace = storage.keys(refresh_key('*', namespace))
         (keys_in_namespace || []).each_with_object({}) do |key, acc|
           uid = uid_from_key(key)
           acc[uid] = fetch_refresh(uid, namespace)
@@ -63,11 +69,11 @@ module JWTSessions
       end
 
       def destroy_refresh(uid, namespace)
-        @redis_client.del(refresh_key(uid, namespace))
+        storage.del(refresh_key(uid, namespace))
       end
 
       def destroy_access(uid)
-        @redis_client.del(access_key(uid))
+        storage.del(access_key(uid))
       end
 
       private
@@ -97,16 +103,20 @@ module JWTSessions
         URI.join(redis_base_url, redis_db_name).to_s
       end
 
-      def refresh_key(uid, namespace = nil)
-        if namespace
-          "#{prefix}_#{namespace}_refresh_#{uid}"
-        else
+      def full_refresh_key(uid, namespace)
+        "#{prefix}_#{namespace}_refresh_#{uid}"
+      end
+
+      def refresh_key(uid, namespace)
+        if namespace.to_s.empty?
           wildcard_refresh_key(uid)
+        else
+          full_refresh_key(uid, namespace)
         end
       end
 
       def wildcard_refresh_key(uid)
-        (@redis_client.keys(refresh_key(uid, '*')) || []).first
+        (storage.keys(refresh_key(uid, '*')) || []).first
       end
 
       def access_key(uid)

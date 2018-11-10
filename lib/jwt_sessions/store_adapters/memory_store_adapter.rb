@@ -3,31 +3,33 @@
 module JWTSessions
   module StoreAdapters
     class MemoryStoreAdapter < AbstractStoreAdapter
+      attr_reader :storage
+
       def initialize(options)
         raise ArgumentError, "Memory store doesn't support any options" if options.any?
-        @storage = Hash.new { |h, k| h[k] = {} }
+        @storage = Hash.new do |h, k|
+          h[k] = Hash.new { |hh, kk| hh[kk] = {} }
+        end
       end
 
       def fetch_access(uid)
-        access_token = get_value_if_not_expired(access_key(uid))
+        access_token = value_if_not_expired(uid, 'access', '')
         access_token.empty? ? {} : { csrf: access_token[:csrf] }
       end
 
       def persist_access(uid, csrf, expiration)
-        key = access_key(uid)
         access_token = { csrf: csrf, expiration: expiration }
-        @storage.store(key, access_token)
+        storage['']['access'].store(uid, access_token)
       end
 
       def fetch_refresh(uid, namespace)
-        namespaced_key = refresh_key(uid, namespace)
-        get_value_if_not_expired(namespaced_key)
+        value_if_not_expired(uid, 'refresh', namespace.to_s)
       end
 
-      def persist_refresh(uid, access_expiration, access_uid, csrf, expiration, namespace = '')
-        namespace ||= ''
+      def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: '')
         update_refresh_fields(
-          refresh_key(uid, namespace),
+          uid,
+          namespace.to_s,
           csrf: csrf,
           access_expiration: access_expiration,
           access_uid: access_uid,
@@ -35,61 +37,51 @@ module JWTSessions
         )
       end
 
-      def update_refresh(uid, access_expiration, access_uid, csrf, namespace = nil)
+      def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: '')
         update_refresh_fields(
-          refresh_key(uid, namespace),
+          uid,
+          namespace.to_s,
           csrf: csrf,
           access_expiration: access_expiration,
           access_uid: access_uid
         )
       end
 
-      def all(namespace)
-        regex = Regexp.new(
-          "^#{refresh_key('*', namespace)}$".
-          gsub(/([+|()])/, '\\\\\1').
-          gsub(/([^\\])\?/, '\\1.').
-          gsub(/([^\\])\*/, '\\1.*')
-        )
+      def all_refresh_tokens(namespace)
+        namespace_keys = namespace.nil? ? storage.keys : [namespace]
 
-        keys_in_namespace = @storage.keys.grep(regex)
+        namespace_keys.each_with_object({}) do |namespace_key, acc|
+          namespaced = storage[namespace_key]['refresh']
 
-        (keys_in_namespace || []).each_with_object({}) do |key, acc|
-          uid = uid_from_key(key)
-          acc[uid] = fetch_refresh(uid, namespace)
+          namespaced.keys.each do |uid|
+            value = namespaced[uid]
+            if value[:expiration] && value[:expiration] < Time.now.to_i
+              namespaced.delete(key)
+            else
+              acc[uid] = value
+            end
+          end
         end
       end
 
       def destroy_refresh(uid, namespace)
-        @storage.delete(refresh_key(uid, namespace))
+        storage[namespace.to_s]['refresh'].delete(uid)
       end
 
       def destroy_access(uid)
-        @storage.delete(access_key(uid))
+        storage['']['access'].delete(uid)
       end
 
       private
 
-      def get_value_if_not_expired(key)
-        @storage.reject! { |_, value| value[:expiration] && value[:expiration] < Time.now.to_i }
-        @storage[key]
+      def value_if_not_expired(key, token_type, namespace)
+        storage[namespace][token_type].reject! { |_, value| value[:expiration] && value[:expiration] < Time.now.to_i }
+        storage[namespace][token_type][key] || {}
       end
 
-      def update_refresh_fields(key, fields)
-        updated_refresh = get_value_if_not_expired(key).merge(fields)
-        @storage.store(key, updated_refresh)
-      end
-
-      def access_key(uid)
-        "access_#{uid}"
-      end
-
-      def refresh_key(uid, namespace = nil)
-        "#{namespace}_refresh_#{uid}"
-      end
-
-      def uid_from_key(key)
-        key.split('_').last
+      def update_refresh_fields(key, namespace, fields)
+        updated_refresh = value_if_not_expired(key, 'refresh', namespace).merge(fields)
+        storage[namespace]['refresh'].store(key, updated_refresh)
       end
     end
   end

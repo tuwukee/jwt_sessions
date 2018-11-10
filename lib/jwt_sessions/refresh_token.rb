@@ -27,7 +27,7 @@ module JWTSessions
       end
 
       def all(namespace, store)
-        tokens = store.all(namespace)
+        tokens = store.all_refresh_tokens(namespace)
         tokens.map do |uid, token_attrs|
           build_with_token_attrs(store, uid, token_attrs, namespace)
         end
@@ -46,14 +46,16 @@ module JWTSessions
       private
 
       def build_with_token_attrs(store, uid, token_attrs, namespace)
-        new(token_attrs[:csrf],
-            token_attrs[:access_uid],
-            token_attrs[:access_expiration],
-            store,
-            namespace: namespace,
-            payload: {},
-            uid: uid,
-            expiration: token_attrs[:expiration])
+        new(
+          token_attrs[:csrf],
+          token_attrs[:access_uid],
+          token_attrs[:access_expiration],
+          store,
+          namespace: namespace,
+          payload: {},
+          uid: uid,
+          expiration: token_attrs[:expiration]
+        )
       end
     end
 
@@ -61,7 +63,13 @@ module JWTSessions
       @csrf              = csrf
       @access_uid        = access_uid
       @access_expiration = access_expiration
-      store.update_refresh(uid, access_expiration, access_uid, csrf, namespace)
+      store.update_refresh(
+        uid: uid,
+        access_expiration: access_expiration,
+        access_uid: access_uid,
+        csrf: csrf,
+        namespace: namespace
+      )
     end
 
     def destroy
@@ -71,7 +79,14 @@ module JWTSessions
     private
 
     def persist_in_store
-      store.persist_refresh(uid, access_expiration, access_uid, csrf, expiration, namespace)
+      store.persist_refresh(
+        uid: uid,
+        access_expiration: access_expiration,
+        access_uid: access_uid,
+        csrf: csrf,
+        expiration: expiration,
+        namespace: namespace
+      )
     end
   end
 end

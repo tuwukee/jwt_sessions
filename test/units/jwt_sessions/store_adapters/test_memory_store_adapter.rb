@@ -26,35 +26,83 @@ class TestMemoryStoreAdapter < Minitest::Test
 
   def test_persist_and_fetch_refresh
     expiration = Time.now.to_i + 3600
-    store.persist_refresh('uid', expiration, 'access_uid', 'csrf', expiration, '')
+    store.persist_refresh(
+      uid: 'uid',
+      access_expiration: expiration,
+      access_uid: 'access_uid',
+      csrf: 'csrf',
+      expiration: expiration,
+      namespace: ''
+    )
     refresh = store.fetch_refresh('uid', '')
     assert_equal 'csrf', refresh[:csrf]
 
     expiration = Time.now.to_i - 3600
-    store.persist_refresh('uid', expiration, 'access_uid', 'csrf', expiration, '')
+    store.persist_refresh(
+      uid: 'uid',
+      access_expiration: expiration,
+      access_uid: 'access_uid',
+      csrf: 'csrf',
+      expiration: expiration,
+      namespace: ''
+    )
     refresh = store.fetch_refresh('uid', '')
     assert_nil refresh[:csrf]
   end
 
   def test_update_refresh
     expiration = Time.now.to_i + 3600
-    store.persist_refresh('uid', expiration, 'access_uid', 'csrf', expiration, '')
-    store.update_refresh('uid', expiration, 'access_uid', 'csrf2', '')
+    store.persist_refresh(
+      uid: 'uid',
+      access_expiration: expiration,
+      access_uid: 'access_uid',
+      csrf: 'csrf',
+      expiration: expiration,
+      namespace: ''
+    )
+    store.update_refresh(
+      uid: 'uid',
+      access_expiration: expiration,
+      access_uid: 'access_uid',
+      csrf: 'csrf2',
+      namespace: ''
+    )
     refresh = store.fetch_refresh('uid', '')
     assert_equal 'csrf2', refresh[:csrf]
   end
 
-  def test_all
+  def test_all_refresh_tokens
     expiration = Time.now.to_i + 3600
-    store.persist_refresh('uid', expiration, 'access_uid', 'csrf', expiration, 'ns')
-    store.persist_refresh('uid', expiration, 'access_uid', 'csrf', expiration, 'ns2')
-    refresh_tokens = store.all('ns')
+    store.persist_refresh(
+      uid: 'uid',
+      access_expiration: expiration,
+      access_uid: 'access_uid',
+      csrf: 'csrf',
+      expiration: expiration,
+      namespace: 'ns'
+    )
+    store.persist_refresh(
+      uid: 'uid',
+      access_expiration: expiration,
+      access_uid: 'access_uid',
+      csrf: 'csrf',
+      expiration: expiration,
+      namespace: 'ns2'
+    )
+    refresh_tokens = store.all_refresh_tokens('ns')
     assert_equal 1, refresh_tokens.count
   end
 
   def test_destroy_refresh
     expiration = Time.now.to_i + 3600
-    store.persist_refresh('uid', expiration, 'access_uid', 'csrf', expiration, '')
+    store.persist_refresh(
+      uid: 'uid',
+      access_expiration: expiration,
+      access_uid: 'access_uid',
+      csrf: 'csrf',
+      expiration: expiration,
+      namespace: ''
+    )
     store.destroy_refresh('uid', '')
     refresh = store.fetch_refresh('uid', '')
     assert_equal({}, refresh)
