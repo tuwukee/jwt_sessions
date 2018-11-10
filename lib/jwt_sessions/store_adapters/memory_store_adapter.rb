@@ -51,16 +51,7 @@ module JWTSessions
         namespace_keys = namespace.nil? ? storage.keys : [namespace]
 
         namespace_keys.each_with_object({}) do |namespace_key, acc|
-          namespaced = storage[namespace_key]['refresh']
-
-          namespaced.keys.each do |uid|
-            value = namespaced[uid]
-            if value[:expiration] && value[:expiration] < Time.now.to_i
-              namespaced.delete(key)
-            else
-              acc[uid] = value
-            end
-          end
+          select_keys(storage[namespace_key]['refresh'], acc)
         end
       end
 
@@ -82,6 +73,19 @@ module JWTSessions
       def update_refresh_fields(key, namespace, fields)
         updated_refresh = value_if_not_expired(key, 'refresh', namespace).merge(fields)
         storage[namespace]['refresh'].store(key, updated_refresh)
+      end
+
+      def select_keys(keys_hash, acc)
+        keys_hash.keys.each do |uid|
+          value = keys_hash[uid]
+          if value[:expiration] && value[:expiration] < Time.now.to_i
+            keys_hash.delete(key)
+          else
+            acc[uid] = value
+          end
+        end
+
+        acc
       end
     end
   end

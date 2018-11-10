@@ -5,6 +5,8 @@ module JWTSessions
     class RedisStoreAdapter < AbstractStoreAdapter
       attr_reader :prefix, :storage
 
+      REFRESH_KEYS = %i[csrf access_uid access_expiration expiration].freeze
+
       def initialize(token_prefix: JWTSessions.token_prefix, **options)
         @prefix = token_prefix
 
@@ -28,8 +30,6 @@ module JWTSessions
         storage.set(key, csrf)
         storage.expireat(key, expiration)
       end
-
-      REFRESH_KEYS = %i[csrf access_uid access_expiration expiration].freeze
 
       def fetch_refresh(uid, namespace)
         values = storage.hmget(refresh_key(uid, namespace), *REFRESH_KEYS).compact
