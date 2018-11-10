@@ -192,6 +192,16 @@ def current_user
 end
 ```
 
+Methods `authorize_refresh_request!` and `authorize_access_request!` will always try to fetch the tokens from the headers first and then from the cookies.
+For the cases when an endpoint must support only one specific token transport the next auth methods can be used instead:
+
+```ruby
+authorize_by_access_cookie!
+authorize_by_access_header!
+authorize_by_refresh_cookie!
+authorize_by_refresh_header!
+```
+
 ### Non-Rails usage
 
 You must include `JWTSessions::Authorization` module to your auth class and implement within it next methods:
@@ -441,6 +451,13 @@ class RefreshController < ApplicationController
   end
 end
 
+```
+
+For the cases when an endpoint must support only one specific token transport the next auth methods can be used instead:
+
+```ruby
+authorize_refresh_by_access_cookie!
+authorize_refresh_by_access_header!
 ```
 
 #### Refresh token hijack protection
