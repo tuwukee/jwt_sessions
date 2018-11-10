@@ -35,17 +35,4 @@ class TestJWTSessions < Minitest::Test
     assert_equal JWTSessions.access_cookie, JWTSessions.cookie_by('access')
     assert_equal JWTSessions.refresh_cookie, JWTSessions.cookie_by('refresh')
   end
-
-  def test_redis_url
-    assert_equal 'redis://127.0.0.1:6379/0', JWTSessions.redis_url
-  end
-
-  def test_redis_url_with_env_var
-    JWTSessions.instance_variable_set(:@redis_url, nil)
-    ENV['REDIS_URL'] = 'rediska://locallol:2018/'
-    assert_equal 'rediska://locallol:2018/0', JWTSessions.redis_url
-    ENV.delete('REDIS_URL')
-    JWTSessions.instance_variable_set(:@redis_url, nil)
-    assert_equal 'redis://127.0.0.1:6379/0', JWTSessions.redis_url
-  end
 end

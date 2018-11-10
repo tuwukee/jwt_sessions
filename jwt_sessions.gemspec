@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_dependency 'jwt', '>= 2.1', '< 3'
-  s.add_dependency 'redis', '>= 3', '< 5'
 
   s.add_development_dependency 'bundler', '~> 1.16'
   s.add_development_dependency 'minitest', '~> 5.11'

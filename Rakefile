@@ -16,10 +16,26 @@ RSpec::Core::RakeTask.new(:rails_spec) do |t|
 end
 desc 'Run rails tests'
 
-RSpec::Core::RakeTask.new(:sinatra_spec) do |t|
-  t.rspec_opts = '--require ./test/support/dummy_sinatra_api/spec/spec_helper.rb'
-  t.pattern = Dir.glob('test/support/dummy_sinatra_api/spec/*_spec.rb')
-end
-desc 'Run sinatra tests'
+['redis', 'memory'].each do |adapter|
+  RSpec::Core::RakeTask.new("rails_spec_with_#{adapter}_adapter") do |t|
+    ENV['STORE_ADAPTER'] = adapter
+    t.rspec_opts = '--require ./test/support/dummy_api/spec/rails_helper.rb'
+    t.pattern = Dir.glob('test/support/dummy_api/spec/**/*_spec.rb')
+  end
+  desc 'Run rails tests (with #{adapter} adapter)'
 
-task default: [:test, :rails_spec, :sinatra_spec]
+  RSpec::Core::RakeTask.new("sinatra_spec_with_#{adapter}_adapter") do |t|
+    ENV['STORE_ADAPTER'] = adapter
+    t.rspec_opts = '--require ./test/support/dummy_sinatra_api/spec/spec_helper.rb'
+    t.pattern = Dir.glob('test/support/dummy_sinatra_api/spec/*_spec.rb')
+  end
+  desc "Run sinatra tests (with #{adapter} adapter)"
+end
+
+task default: [
+  :test,
+  :sinatra_spec_with_redis_adapter,
+  :sinatra_spec_with_memory_adapter,
+  :rails_spec_with_redis_adapter,
+  :rails_spec_with_memory_adapter
+]

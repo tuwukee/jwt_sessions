@@ -14,7 +14,7 @@ XSS/CSRF safe JWT auth designed for SPA
   * [Rails integration](#rails-integration)
   * [Non-Rails usage](#non-rails-usage)
 - [Configuration](#configuration)
-    + [Redis](#redis)
+    + [Token store](#token-store)
     + [JWT signature](#jwt-signature)
     + [Request headers and cookies names](#request-headers-and-cookies-names)
     + [Expiration time](#expiration-time)
@@ -192,6 +192,16 @@ def current_user
 end
 ```
 
+Methods `authorize_refresh_request!` and `authorize_access_request!` will always try to fetch the tokens from the headers first and then from the cookies.
+For the cases when an endpoint must support only one specific token transport the next auth methods can be used instead:
+
+```ruby
+authorize_by_access_cookie!
+authorize_by_access_header!
+authorize_by_refresh_cookie!
+authorize_by_refresh_header!
+```
+
 ### Non-Rails usage
 
 You must include `JWTSessions::Authorization` module to your auth class and implement within it next methods:
@@ -281,21 +291,25 @@ end
 
 List of configurable settings with their default values.
 
-##### Redis
+##### Token store
 
-Default token store configurations
+In order to configure token store you should set up a store adapter in a following way: `JWTSessions.token_store = :redis, { redis_url: 'redis://127.0.0.1:6379/0' }` (options can be omitted). Currently supported stores are `:redis` and `:memory`. Please note, that if you want to use Redis as a store then you should have `redis` gem listed in your Gemfile. If you won't configure the adapter explicitly, this gem will try to load `redis` and use it, otherwise it would fallback to a `memory` adapter.
+
+Memory store accepts only `prefix` (used for redis db keys). Here is a default configuration for Redis:
 
 ```ruby
-JWTSessions.redis_host    = '127.0.0.1'
-JWTSessions.redis_port    = '6379'
-JWTSessions.redis_db_name = '0'
-JWTSessions.token_prefix  = 'jwt_' # used for redis db keys
+JwtSessions.token_store = :redis, {
+  redis_host: '127.0.0.1',
+  redis_port: '6379',
+  redis_db_name: '0',
+  token_prefix: 'jwt_'
+}
 ```
 
 You can also provide a Redis URL instead:
 
 ```ruby
-JWTSessions.redis_url = 'redis://localhost:6397'
+JwtSessions.token_store = :redis, { redis_url: 'redis://localhost:6397' }
 ```
 
 **NOTE:** if `REDIS_URL` environment variable is set it is used automatically.
@@ -437,6 +451,13 @@ class RefreshController < ApplicationController
   end
 end
 
+```
+
+For the cases when an endpoint must support only one specific token transport the next auth methods can be used instead:
+
+```ruby
+authorize_refresh_by_access_cookie!
+authorize_refresh_by_access_header!
 ```
 
 #### Refresh token hijack protection

@@ -15,23 +15,151 @@ describe 'Sinatra Application' do
     expect(last_response).to be_ok
   end
 
-  it 'should allow to log in' do
+  it 'allows to log in' do
     post '/api/v1/login', format: :json
     expect(last_response).to be_ok
     expect(json(last_response.body).keys.sort).to eq LOGIN_KEYS
   end
 
-  it 'should allow to refresh' do
-    post '/api/v1/login', format: :json
-    expect(last_response).to be_ok
-    refresh_token = json(last_response.body)['refresh']
-    header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, refresh_token
-    post '/api/v1/refresh', format: :json
-    expect(last_response).to be_ok
-    expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+  context 'allows to refresh by cookies and headers' do
+    before { post '/api/v1/login', format: :json }
+
+    it 'refreshes by headers' do
+      clear_cookies
+      refresh_token = json(last_response.body)['refresh']
+      header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, refresh_token
+      post '/api/v1/refresh', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+
+    it 'refreshes by cookies' do
+      refresh_token = json(last_response.body)['refresh']
+      csrf_token = json(last_response.body)['csrf']
+      set_cookie "#{JWTSessions.refresh_cookie}=#{refresh_token}"
+      header JWTSessions.csrf_header.downcase.gsub(/\s+/,'_').upcase, csrf_token
+      post '/api/v1/refresh', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
   end
 
-  it 'should allow to access' do
+  context 'allows to refresh by cookies only' do
+    before { post '/api/v1/login', format: :json }
+
+    it 'refreshes by cookies' do
+      refresh_token = json(last_response.body)['refresh']
+      csrf_token = json(last_response.body)['csrf']
+      set_cookie "#{JWTSessions.refresh_cookie}=#{refresh_token}"
+      header JWTSessions.csrf_header.downcase.gsub(/\s+/,'_').upcase, csrf_token
+      post '/api/v1/refresh_by_cookies', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+
+    it 'refreshes by headers' do
+      clear_cookies
+      refresh_token = json(last_response.body)['refresh']
+      header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, refresh_token
+      post '/api/v1/refresh_by_cookies', format: :json
+      expect(last_response).to_not be_ok
+      expect(json(last_response.body)['error']).to eq 'Unauthorized'
+    end
+  end
+
+  context 'allows to refresh by headers only' do
+    before { post '/api/v1/login', format: :json }
+
+    it 'refreshes by cookies' do
+      refresh_token = json(last_response.body)['refresh']
+      csrf_token = json(last_response.body)['csrf']
+      set_cookie "#{JWTSessions.refresh_cookie}=#{refresh_token}"
+      header JWTSessions.csrf_header.downcase.gsub(/\s+/,'_').upcase, csrf_token
+      post '/api/v1/refresh_by_headers', format: :json
+      expect(last_response).to_not be_ok
+      expect(json(last_response.body)['error']).to eq 'Unauthorized'
+    end
+
+    it 'refreshes by headers' do
+      clear_cookies
+      refresh_token = json(last_response.body)['refresh']
+      header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, refresh_token
+      post '/api/v1/refresh_by_headers', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+  end
+
+  context 'allows to refresh by access token by cookies and headers' do
+    before { post '/api/v1/login', format: :json }
+
+    it 'refreshes by headers' do
+      clear_cookies
+      access_token = json(last_response.body)['access']
+      header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, access_token
+      post '/api/v1/refresh_by_access', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+
+    it 'refreshes by cookies' do
+      access_token = json(last_response.body)['access']
+      csrf_token = json(last_response.body)['csrf']
+      set_cookie "#{JWTSessions.access_cookie}=#{access_token}"
+      header JWTSessions.csrf_header.downcase.gsub(/\s+/,'_').upcase, csrf_token
+      post '/api/v1/refresh_by_access', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+  end
+
+  context 'allows to refresh by access token by cookies only' do
+    before { post '/api/v1/login', format: :json }
+
+    it 'refreshes by cookies' do
+      access_token = json(last_response.body)['access']
+      csrf_token = json(last_response.body)['csrf']
+      set_cookie "#{JWTSessions.access_cookie}=#{access_token}"
+      header JWTSessions.csrf_header.downcase.gsub(/\s+/,'_').upcase, csrf_token
+      post '/api/v1/refresh_by_access_by_cookies', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+
+    it 'refreshes by headers' do
+      clear_cookies
+      access_token = json(last_response.body)['access']
+      header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, access_token
+      post '/api/v1/refresh_by_access_by_cookies', format: :json
+      expect(last_response).to_not be_ok
+      expect(json(last_response.body)['error']).to eq 'Unauthorized'
+    end
+  end
+
+  context 'allows to refresh by access token by headers only' do
+    before { post '/api/v1/login', format: :json }
+
+    it 'refreshes by cookies' do
+      access_token = json(last_response.body)['access']
+      csrf_token = json(last_response.body)['csrf']
+      set_cookie "#{JWTSessions.access_cookie}=#{access_token}"
+      header JWTSessions.csrf_header.downcase.gsub(/\s+/,'_').upcase, csrf_token
+      post '/api/v1/refresh_by_access_by_headers', format: :json
+      expect(last_response).to_not be_ok
+      expect(json(last_response.body)['error']).to eq 'Unauthorized'
+    end
+
+    it 'refreshes by headers' do
+      clear_cookies
+      access_token = json(last_response.body)['access']
+      header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, access_token
+      post '/api/v1/refresh_by_access_by_headers', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+  end
+
+  it 'allows to access' do
     post '/api/v1/login', format: :json
     expect(last_response).to be_ok
     access_token = json(last_response.body)['access']
@@ -41,7 +169,7 @@ describe 'Sinatra Application' do
     expect(json(last_response.body)['key']).to eq 'big access value'
   end
 
-  it 'should allow to access with refreshed token' do
+  it 'allows to access with refreshed token' do
     post '/api/v1/login', format: :json
     expect(last_response).to be_ok
     refresh_token = json(last_response.body)['refresh']

@@ -5,7 +5,6 @@ require 'uri'
 
 require 'jwt_sessions/errors'
 require 'jwt_sessions/token'
-require 'jwt_sessions/redis_token_store'
 require 'jwt_sessions/refresh_token'
 require 'jwt_sessions/csrf_token'
 require 'jwt_sessions/access_token'
@@ -13,11 +12,12 @@ require 'jwt_sessions/session'
 require 'jwt_sessions/authorization'
 require 'jwt_sessions/rails_authorization' if defined?(::Rails)
 require 'jwt_sessions/version'
+require 'jwt_sessions/store_adapters'
 
 module JWTSessions
   extend self
 
-  attr_writer :token_store
+  attr_accessor :redis_url
 
   NONE = 'none'
 
@@ -65,17 +65,6 @@ module JWTSessions
     end
   end
 
-  def redis_url
-    @redis_url ||= begin
-      redis_base_url = ENV['REDIS_URL'] || "redis://#{redis_host}:#{redis_port}"
-      URI.join(redis_base_url, redis_db_name).to_s
-    end
-  end
-
-  def redis_url=(url)
-    @redis_url = URI.join(url, redis_db_name).to_s
-  end
-
   def jwt_options
     @jwt_options ||= JWTOptions.new(*JWT::DefaultOptions::DEFAULT_OPTIONS.values)
   end
@@ -89,8 +78,30 @@ module JWTSessions
     @algorithm ||= DEFAULT_ALGORITHM
   end
 
+  def token_store=(args)
+    adapter, options = Array(args)
+    @token_store = StoreAdapters.build_by_name(adapter, options)
+  rescue NameError => e
+    raise e.class, "Token store adapter for :#{adapter} haven't been found", e.backtrace
+  end
+
   def token_store
-    RedisTokenStore.instance(redis_url, token_prefix)
+    unless instance_variable_defined?(:@token_store)
+      begin
+        self.token_store = :redis
+      rescue LoadError
+        warn <<~MSG
+          Warning! JWTSessions uses in-memory token store.
+          Unless token store is specified explicitly, JWTSessions uses Redis by default and fallbacks to in-memory token store.
+
+          To get rid of this message specify the memory store explicitly in the settings or make sure 'redis' gem is present in your Gemfile.
+        MSG
+
+        self.token_store = :memory
+      end
+    end
+
+    @token_store
   end
 
   def validate?
