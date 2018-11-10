@@ -14,10 +14,18 @@ module JWTSessions
         rescue Errors::Unauthorized
           cookie_based_auth(token_type)
         end
-        # triggers token decode and jwt claim checks
-        payload
-        invalid_authorization unless session_exists?(token_type)
-        check_csrf(token_type)
+
+        authorize_request(token_type)
+      end
+
+      define_method("authorize_#{token_type}_request_by_cookies!") do
+        cookie_based_auth(token_type)
+        authorize_request(token_type)
+      end
+
+      define_method("authorize_#{token_type}_request_by_headers!") do
+        cookieless_auth(token_type)
+        authorize_request(token_type)
       end
     end
 
@@ -28,13 +36,26 @@ module JWTSessions
         cookie_based_auth(:access)
       end
 
-      invalid_authorization if should_check_csrf? && @_csrf_check && !JWTSessions::Session.new.valid_access_request?(retrieve_csrf, claimless_payload)
+      invalid_authorization if refresh_by_access_invalid?
+    end
+
+    def authorize_refresh_by_access_request_by_cookies!
+      cookie_based_auth(:access)
+      invalid_authorization if refresh_by_access_invalid?
+    end
+
+    def authorize_refresh_by_access_request_by_headers!
+      cookieless_auth(:access)
     end
 
     private
 
     def invalid_authorization
       raise Errors::Unauthorized
+    end
+
+    def refresh_by_access_invalid?
+      should_check_csrf? && @_csrf_check && !JWTSessions::Session.new.valid_access_request?(retrieve_csrf, claimless_payload)
     end
 
     def check_csrf(token_type)
@@ -106,6 +127,14 @@ module JWTSessions
     # retrieves tokens payload without JWT claims validation
     def claimless_payload
       @_claimless_payload ||= Token.decode!(found_token).first
+    end
+
+    def authorize_request(token_type)
+      # triggers token decode and jwt claim checks
+      payload
+
+      invalid_authorization unless session_exists?(token_type)
+      check_csrf(token_type)
     end
   end
 end
