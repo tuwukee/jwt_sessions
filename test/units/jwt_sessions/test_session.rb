@@ -34,6 +34,17 @@ class TestSession < Minitest::Test
     assert_equal payload[:test], decoded_access['test']
   end
 
+  def test_refresh_expired
+    JWTSessions.refresh_exp_time = 0
+    session = JWTSessions::Session.new(payload: payload)
+    tokens = session.login
+    JWTSessions.refresh_exp_time = 604800
+
+    assert_raises JWTSessions::Errors::ClaimsVerification do
+      session.refresh(tokens[:refresh])
+    end
+  end
+
   def test_refresh_by_access_payload
     session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
     session.login
