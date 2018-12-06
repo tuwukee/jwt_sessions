@@ -298,7 +298,7 @@ In order to configure token store you should set up a store adapter in a followi
 Memory store accepts only `prefix` (used for redis db keys). Here is a default configuration for Redis:
 
 ```ruby
-JwtSessions.token_store = :redis, {
+JWTSessions.token_store = :redis, {
   redis_host: '127.0.0.1',
   redis_port: '6379',
   redis_db_name: '0',
@@ -309,7 +309,7 @@ JwtSessions.token_store = :redis, {
 You can also provide a Redis URL instead:
 
 ```ruby
-JwtSessions.token_store = :redis, { redis_url: 'redis://localhost:6397' }
+JWTSessions.token_store = :redis, { redis_url: 'redis://localhost:6397' }
 ```
 
 **NOTE:** if `REDIS_URL` environment variable is set it is used automatically.
