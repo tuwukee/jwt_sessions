@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'jwt'
+require "jwt"
 
 module JWTSessions
   class Token
@@ -18,14 +18,14 @@ module JWTSessions
       rescue JWT::DecodeError => e
         raise Errors::Unauthorized, e.message
       rescue StandardError
-        raise Errors::Unauthorized, 'could not decode a token'
+        raise Errors::Unauthorized, "could not decode a token"
       end
 
       def decode!(token)
         decode_options = { algorithm: JWTSessions.algorithm }
         JWT.decode(token, JWTSessions.public_key, false, decode_options)
       rescue StandardError
-        raise Errors::Unauthorized, 'could not decode a token'
+        raise Errors::Unauthorized, "could not decode a token"
       end
 
       def meta

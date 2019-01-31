@@ -11,7 +11,7 @@ module JWTSessions
         @prefix = token_prefix
 
         begin
-          require 'redis'
+          require "redis"
           @storage = configure_redis_client(options)
         rescue LoadError => e
           msg = "Could not load the 'redis' gem, please add it to your gemfile or " \
@@ -61,7 +61,7 @@ module JWTSessions
       end
 
       def all_refresh_tokens(namespace)
-        keys_in_namespace = storage.keys(refresh_key('*', namespace))
+        keys_in_namespace = storage.keys(refresh_key("*", namespace))
         (keys_in_namespace || []).each_with_object({}) do |key, acc|
           uid = uid_from_key(key)
           acc[uid] = fetch_refresh(uid, namespace)
@@ -80,7 +80,7 @@ module JWTSessions
 
       def configure_redis_client(redis_url: nil, redis_host: nil, redis_port: nil, redis_db_name: nil)
         if redis_url && (redis_host || redis_port || redis_db_name)
-          raise ArgumentError, 'redis_url cannot be passed along with redis_host, redis_port or redis_db_name options'
+          raise ArgumentError, "redis_url cannot be passed along with redis_host, redis_port or redis_db_name options"
         end
 
         redis_url ||= build_redis_url(
@@ -99,7 +99,7 @@ module JWTSessions
         redis_host ||= JWTSessions.redis_host
         redis_port ||= JWTSessions.redis_port
 
-        redis_base_url = ENV['REDIS_URL'] || "redis://#{redis_host}:#{redis_port}"
+        redis_base_url = ENV["REDIS_URL"] || "redis://#{redis_host}:#{redis_port}"
         URI.join(redis_base_url, redis_db_name).to_s
       end
 
@@ -116,7 +116,7 @@ module JWTSessions
       end
 
       def wildcard_refresh_key(uid)
-        (storage.keys(refresh_key(uid, '*')) || []).first
+        (storage.keys(refresh_key(uid, "*")) || []).first
       end
 
       def access_key(uid)
@@ -124,7 +124,7 @@ module JWTSessions
       end
 
       def uid_from_key(key)
-        key.split('_').last
+        key.split("_").last
       end
     end
   end
