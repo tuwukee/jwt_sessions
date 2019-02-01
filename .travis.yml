@@ -9,12 +9,9 @@ before_install:
   - gem update --system
   - sudo add-apt-repository ppa:chris-lea/libsodium -y
   - sudo apt-get update && sudo apt-get install libsodium-dev -y
-  - test $RAILS_VERSION =~ /^4\.2/ &&
-    gem uninstall -v '>= 2' -i $(rvm gemdir)@global -ax bundler || true &&
-    gem install bundler -v '< 2'
 gemfile: test/support/dummy_api/Gemfile
 env:
   - RAILS_VERSION="~> 5.2"
-  - RAILS_VERSION="~> 4.2"
+  - RAILS_VERSION="~> 5.1"
 services:
   - redis-server
