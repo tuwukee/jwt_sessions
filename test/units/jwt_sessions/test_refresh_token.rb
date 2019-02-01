@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'jwt_sessions'
+require "minitest/autorun"
+require "jwt_sessions"
 
 class TestRefreshToken < Minitest::Test
    attr_reader :csrf, :token, :access_uid
 
   def setup
-    JWTSessions.encryption_key = 'secure encryption'
+    JWTSessions.encryption_key = "secure encryption"
     @access_uid = SecureRandom.uuid
     @csrf = JWTSessions::CSRFToken.new
     @token = JWTSessions::RefreshToken.create(@csrf.encoded,
