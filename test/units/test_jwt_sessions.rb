@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'jwt_sessions'
+require "minitest/autorun"
+require "jwt_sessions"
 
 class TestJWTSessions < Minitest::Test
   def test_default_settings
@@ -30,9 +30,9 @@ class TestJWTSessions < Minitest::Test
   end
 
   def test_by_token_type
-    assert_equal JWTSessions.access_header, JWTSessions.header_by('access')
-    assert_equal JWTSessions.refresh_header, JWTSessions.header_by('refresh')
-    assert_equal JWTSessions.access_cookie, JWTSessions.cookie_by('access')
-    assert_equal JWTSessions.refresh_cookie, JWTSessions.cookie_by('refresh')
+    assert_equal JWTSessions.access_header, JWTSessions.header_by("access")
+    assert_equal JWTSessions.refresh_header, JWTSessions.header_by("refresh")
+    assert_equal JWTSessions.access_cookie, JWTSessions.cookie_by("access")
+    assert_equal JWTSessions.refresh_cookie, JWTSessions.cookie_by("refresh")
   end
 end

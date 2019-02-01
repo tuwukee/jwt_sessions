@@ -52,7 +52,7 @@ module JWTSessions
 
     def refresh_by_access_payload(&block)
       raise Errors::InvalidPayload if payload.nil?
-      ruid = retrieve_val_from(payload, :access, 'ruid', 'refresh uid')
+      ruid = retrieve_val_from(payload, :access, "ruid", "refresh uid")
       retrieve_refresh_token(ruid)
 
       check_access_uid_within_refresh_token(&block) if block_given?
@@ -62,7 +62,7 @@ module JWTSessions
 
     def flush_by_access_payload
       raise Errors::InvalidPayload if payload.nil?
-      ruid = retrieve_val_from(payload, :access, 'ruid', 'refresh uid')
+      ruid = retrieve_val_from(payload, :access, "ruid", "refresh uid")
       flush_by_uid(ruid)
     end
 
@@ -109,8 +109,8 @@ module JWTSessions
     end
 
     def valid_access_request?(external_csrf_token, external_payload)
-      ruid = retrieve_val_from(external_payload, :access, 'ruid', 'refresh uid')
-      uid  = retrieve_val_from(external_payload, :access, 'uid', 'access uid')
+      ruid = retrieve_val_from(external_payload, :access, "ruid", "refresh uid")
+      uid  = retrieve_val_from(external_payload, :access, "uid", "access uid")
 
       refresh_token = RefreshToken.find(ruid, JWTSessions.token_store)
       return false unless uid == refresh_token.access_uid
@@ -147,7 +147,7 @@ module JWTSessions
     def access_token_data(token)
       uid = token_uid(token, :access, @access_claims)
       data = store.fetch_access(uid)
-      raise Errors::Unauthorized, 'Access token not found' if data.empty?
+      raise Errors::Unauthorized, "Access token not found" if data.empty?
       data
     end
 
@@ -158,7 +158,7 @@ module JWTSessions
 
     def token_uid(token, type, claims)
       token_payload = JWTSessions::Token.decode(token, claims).first
-      uid           = token_payload.fetch('uid', nil)
+      uid           = token_payload.fetch("uid", nil)
       if uid.nil?
         message = "#{type.to_s.capitalize} token payload does not contain token uid"
         raise Errors::InvalidPayload, message
@@ -204,7 +204,7 @@ module JWTSessions
     end
 
     def check_access_uid_within_refresh_token
-      uid = retrieve_val_from(payload, :access, 'uid', 'access uid')
+      uid = retrieve_val_from(payload, :access, "uid", "access uid")
       access_uid = @_refresh.access_uid
       return if access_uid.size.zero?
       yield @_refresh.uid, @_refresh.access_expiration if access_uid != uid

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'jwt_sessions'
+require "minitest/autorun"
+require "jwt_sessions"
 
 class TestSession < Minitest::Test
   attr_reader :session, :payload, :tokens
@@ -9,29 +9,29 @@ class TestSession < Minitest::Test
   REFRESH_KEYS = %i[access access_expires_at csrf].freeze
 
   def setup
-    JWTSessions.encryption_key = 'encrypted'
-    @payload = { test: 'secret' }
+    JWTSessions.encryption_key = "encrypted"
+    @payload = { test: "secret" }
     @session = JWTSessions::Session.new(payload: payload)
     @tokens = session.login
   end
 
   def teardown
     redis = Redis.new
-    keys = redis.keys('jwt_*')
+    keys = redis.keys("jwt_*")
     keys.each { |k| redis.del(k) }
   end
 
   def test_login
     decoded_access = JWTSessions::Token.decode(tokens[:access]).first
     assert_equal LOGIN_KEYS, tokens.keys.sort
-    assert_equal payload[:test], decoded_access['test']
+    assert_equal payload[:test], decoded_access["test"]
   end
 
   def test_refresh
     refreshed_tokens = session.refresh(tokens[:refresh])
     decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
     assert_equal REFRESH_KEYS, refreshed_tokens.keys.sort
-    assert_equal payload[:test], decoded_access['test']
+    assert_equal payload[:test], decoded_access["test"]
   end
 
   def test_refresh_expired
@@ -48,14 +48,14 @@ class TestSession < Minitest::Test
   def test_refresh_by_access_payload
     session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
     session.login
-    access1 = session.instance_variable_get('@_access')
+    access1 = session.instance_variable_get("@_access")
     sleep(1)
     refreshed_tokens = session.refresh_by_access_payload
-    access2 = session.instance_variable_get('@_access')
+    access2 = session.instance_variable_get("@_access")
     decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
     assert_equal REFRESH_KEYS, refreshed_tokens.keys.sort
-    assert_equal payload[:test], decoded_access['test']
-    assert_equal session.instance_variable_get('@_refresh').uid, decoded_access['ruid']
+    assert_equal payload[:test], decoded_access["test"]
+    assert_equal session.instance_variable_get("@_refresh").uid, decoded_access["ruid"]
     assert_equal access2.expiration > access1.expiration, true
   end
 
@@ -67,8 +67,8 @@ class TestSession < Minitest::Test
     decoded_access = JWTSessions::Token.decode!(refreshed_tokens[:access]).first
     JWTSessions.access_exp_time = 3600
     assert_equal REFRESH_KEYS, refreshed_tokens.keys.sort
-    assert_equal payload[:test], decoded_access['test']
-    assert_equal session.instance_variable_get('@_refresh').uid, decoded_access['ruid']
+    assert_equal payload[:test], decoded_access["test"]
+    assert_equal session.instance_variable_get("@_refresh").uid, decoded_access["ruid"]
   end
 
   def test_refresh_by_access_payload_with_block_expired
@@ -81,8 +81,8 @@ class TestSession < Minitest::Test
     decoded_access = JWTSessions::Token.decode!(refreshed_tokens[:access]).first
     JWTSessions.access_exp_time = 3600
     assert_equal REFRESH_KEYS, refreshed_tokens.keys.sort
-    assert_equal payload[:test], decoded_access['test']
-    assert_equal session.instance_variable_get('@_refresh').uid, decoded_access['ruid']
+    assert_equal payload[:test], decoded_access["test"]
+    assert_equal session.instance_variable_get("@_refresh").uid, decoded_access["ruid"]
   end
 
   def test_refresh_by_access_payload_with_block_not_expired
@@ -98,7 +98,7 @@ class TestSession < Minitest::Test
   def test_refresh_by_access_payload_invalid_uid
     session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
     session.login
-    access1 = session.instance_variable_get('@_access')
+    access1 = session.instance_variable_get("@_access")
     # should execute the code block for the cases when access UID within the refresh token
     # does not match access UID from the session payload
     session2 = JWTSessions::Session.new(payload: access1.payload, refresh_by_access_allowed: true)
@@ -159,8 +159,8 @@ class TestSession < Minitest::Test
     end
 
     assert_equal REFRESH_KEYS, refreshed_tokens.keys.sort
-    assert_equal payload[:test], decoded_access['test']
-    assert_equal session.instance_variable_get('@_refresh').uid, decoded_access['ruid']
+    assert_equal payload[:test], decoded_access["test"]
+    assert_equal session.instance_variable_get("@_refresh").uid, decoded_access["ruid"]
   end
 
   def test_refresh_with_block_not_expired
@@ -181,7 +181,7 @@ class TestSession < Minitest::Test
     end
     decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
     assert_equal REFRESH_KEYS, refreshed_tokens.keys.sort
-    assert_equal payload[:test], decoded_access['test']
+    assert_equal payload[:test], decoded_access["test"]
   end
 
   def test_flush_by_token
@@ -221,7 +221,7 @@ class TestSession < Minitest::Test
   end
 
   def test_flush_namespaced
-    namespace = 'test_namespace'
+    namespace = "test_namespace"
     @session1 = JWTSessions::Session.new(payload: payload, namespace: namespace)
     @session2 = JWTSessions::Session.new(payload: payload, namespace: namespace)
     @session1.login
@@ -247,7 +247,7 @@ class TestSession < Minitest::Test
   end
 
   def test_flush_namespaced_access_tokens
-    namespace = 'test_namespace'
+    namespace = "test_namespace"
     @session1 = JWTSessions::Session.new(payload: payload, namespace: namespace)
     @session1.login
     refresh_token = @session1.instance_variable_get(:"@_refresh")
@@ -266,15 +266,15 @@ class TestSession < Minitest::Test
   end
 
   def test_refresh_after_flush_namespaced_access_tokens
-    namespace = 'test_namespace'
+    namespace = "test_namespace"
     session = JWTSessions::Session.new(payload: payload, namespace: namespace, refresh_by_access_allowed: true)
     session.login
 
     session.flush_namespaced_access_tokens
     ruid = session.instance_variable_get(:"@_refresh").uid
     refresh_token = JWTSessions::RefreshToken.find(ruid, JWTSessions.token_store, nil)
-    assert_equal '', refresh_token.access_uid
-    assert_equal '', refresh_token.access_expiration
+    assert_equal "", refresh_token.access_uid
+    assert_equal "", refresh_token.access_expiration
 
     # allows to refresh with un-expired but flushed access token payload
     session.refresh_by_access_payload do

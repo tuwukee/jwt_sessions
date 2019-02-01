@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'jwt_sessions'
+require "minitest/autorun"
+require "jwt_sessions"
 
 class TestTokenStore < Minitest::Test
   def teardown
@@ -15,22 +15,22 @@ class TestTokenStore < Minitest::Test
   end
 
   def test_setting_redis_token_store_with_default_prefix
-    JWTSessions.token_store = :redis, { redis_url: 'redis://127.0.0.1:6379/0' }
+    JWTSessions.token_store = :redis, { redis_url: "redis://127.0.0.1:6379/0" }
     assert_instance_of JWTSessions::StoreAdapters::RedisStoreAdapter, JWTSessions.token_store
-    assert_equal 'jwt_', JWTSessions.token_store.prefix
+    assert_equal "jwt_", JWTSessions.token_store.prefix
   end
 
   def test_setting_redis_token_store
-    JWTSessions.token_store = :redis, { redis_url: 'redis://127.0.0.1:6379/0', token_prefix: 'prefix' }
+    JWTSessions.token_store = :redis, { redis_url: "redis://127.0.0.1:6379/0", token_prefix: "prefix" }
     assert_instance_of JWTSessions::StoreAdapters::RedisStoreAdapter, JWTSessions.token_store
-    assert_equal 'prefix', JWTSessions.token_store.prefix
+    assert_equal "prefix", JWTSessions.token_store.prefix
   end
 
   def test_setting_redis_token_store_along_with_module_configuration
     JWTSessions.redis_port = 6378
     JWTSessions.token_store = :redis
 
-    assert_equal 'redis://127.0.0.1:6378/0', JWTSessions.token_store.storage.connection[:id]
+    assert_equal "redis://127.0.0.1:6378/0", JWTSessions.token_store.storage.connection[:id]
   end
 
   def test_setting_redis_token_store_without_options

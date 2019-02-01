@@ -45,7 +45,7 @@ All tokens are encoded and decoded by [ruby-jwt](https://github.com/jwt/ruby-jwt
 Put this line in your Gemfile
 
 ```ruby
-gem 'jwt_sessions'
+gem "jwt_sessions"
 ```
 
 Then run
@@ -70,7 +70,7 @@ class ApplicationController < ActionController::API
   private
 
   def not_authorized
-    render json: { error: 'Not authorized' }, status: :unauthorized
+    render json: { error: "Not authorized" }, status: :unauthorized
   end
 end
 ```
@@ -79,14 +79,14 @@ Specify an encryption key for JSON Web Tokens in `config/initializers/jwt_sessio
 It's adviced to store the key itself within the app secrets.
 
 ```ruby
-JWTSessions.algorithm = 'HS256'
+JWTSessions.algorithm = "HS256"
 JWTSessions.encryption_key = Rails.application.secrets.secret_jwt_encryption_key
 ```
 
 Most of the encryption algorithms require private and public keys to sign a token, yet HMAC only require a single key, so you can use a shortcat `encryption_key` to sign the token. For other algorithms you must specify a private and public keys separately.
 
 ```ruby
-JWTSessions.algorithm   = 'RS256'
+JWTSessions.algorithm   = "RS256"
 JWTSessions.private_key = OpenSSL::PKey::RSA.generate(2048)
 JWTSessions.public_key  = JWTSessions.private_key.public_key
 ```
@@ -124,7 +124,7 @@ class LoginController < ApplicationController
       session = JWTSessions::Session.new(payload: payload)
       render json: session.login
     else
-      render json: 'Invalid user', status: :unauthorized
+      render json: "Invalid user", status: :unauthorized
     end
   end
 end
@@ -188,7 +188,7 @@ The `payload` method is available to fetch encoded data from the token.
 
 ```ruby
 def current_user
-  @current_user ||= User.find(payload['user_id'])
+  @current_user ||= User.find(payload["user_id"])
 end
 ```
 
@@ -234,12 +234,12 @@ Example Sinatra app. \
 NOTE: Since rack updates HTTP headers by using `HTTP_` prefix, upcasing and using underscores for sake of simplicity JWTSessions tokens header names are converted to rack-style in this example.
 
 ```ruby
-require 'sinatra/base'
+require "sinatra/base"
 
-JWTSessions.access_header = 'authorization'
-JWTSessions.refresh_header = 'x_refresh_token'
-JWTSessions.csrf_header = 'x_csrf_token'
-JWTSessions.encryption_key = 'secret key'
+JWTSessions.access_header = "authorization"
+JWTSessions.refresh_header = "x_refresh_token"
+JWTSessions.csrf_header = "x_csrf_token"
+JWTSessions.encryption_key = "secret key"
 
 class SimpleApp < Sinatra::Base
   include JWTSessions::Authorization
@@ -257,28 +257,28 @@ class SimpleApp < Sinatra::Base
   end
 
   before do
-    content_type 'application/json'
+    content_type "application/json"
   end
 
-  post '/login' do
-    access_payload = { key: 'access value' }
-    refresh_payload = { key: 'refresh value' }
+  post "/login" do
+    access_payload = { key: "access value" }
+    refresh_payload = { key: "refresh value" }
     session = JWTSessions::Session.new(payload: access_payload, refresh_payload: refresh_payload)
     session.login.to_json
   end
 
   # POST /refresh
   # x_refresh_token: ...
-  post '/refresh' do
+  post "/refresh" do
     authorize_refresh_request!
-    access_payload = { key: 'reloaded access value' }
+    access_payload = { key: "reloaded access value" }
     session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
     session.refresh(found_token).to_json
   end
 
   # GET /payload
   # authorization: Bearer ...
-  get '/payload' do
+  get "/payload" do
     authorize_access_request!
     payload.to_json
   end
@@ -299,17 +299,17 @@ Memory store accepts only `prefix` (used for redis db keys). Here is a default c
 
 ```ruby
 JWTSessions.token_store = :redis, {
-  redis_host: '127.0.0.1',
-  redis_port: '6379',
-  redis_db_name: '0',
-  token_prefix: 'jwt_'
+  redis_host: "127.0.0.1",
+  redis_port: "6379",
+  redis_db_name: "0",
+  token_prefix: "jwt_"
 }
 ```
 
 You can also provide a Redis URL instead:
 
 ```ruby
-JWTSessions.token_store = :redis, { redis_url: 'redis://localhost:6397' }
+JWTSessions.token_store = :redis, { redis_url: "redis://localhost:6397" }
 ```
 
 **NOTE:** if `REDIS_URL` environment variable is set it is used automatically.
@@ -317,20 +317,20 @@ JWTSessions.token_store = :redis, { redis_url: 'redis://localhost:6397' }
 ##### JWT signature
 
 ```ruby
-JWTSessions.algorithm = 'HS256'
+JWTSessions.algorithm = "HS256"
 ```
 
-You need to specify a secret to use for HMAC, this setting doesn't have a default value.
+You need to specify a secret to use for HMAC, this setting doesn"t have a default value.
 
 ```ruby
-JWTSessions.encryption_key = 'secret'
+JWTSessions.encryption_key = "secret"
 ```
 
 If you are using another algorithm like RSA/ECDSA/EDDSA you should specify private and public keys.
 
 ```ruby
-JWTSessions.private_key = 'abcd'
-JWTSessions.public_key  = 'efjh'
+JWTSessions.private_key = "abcd"
+JWTSessions.public_key  = "efjh"
 ```
 
 NOTE: ED25519 and HS512256 require rbnacl installation in order to make it work.
@@ -354,7 +354,7 @@ class UsersController < ApplicationController
 
   def token_claims
     {
-      aud: ['admin', 'staff'],
+      aud: ["admin", "staff"],
       exp_leeway: 15 # will be used instead of default leeway only for exp claim
     }
   end
@@ -368,11 +368,11 @@ Claims are also supported by `JWTSessions::Session`, you can pass `access_claims
 Default request headers/cookies names can be re-configured
 
 ```ruby
-JWTSessions.access_header  = 'Authorization'
-JWTSessions.access_cookie  = 'jwt_access'
-JWTSessions.refresh_header = 'X-Refresh-Token'
-JWTSessions.refresh_cookie = 'jwt_refresh'
-JWTSessions.csrf_header    = 'X-CSRF-Token'
+JWTSessions.access_header  = "Authorization"
+JWTSessions.access_cookie  = "jwt_access"
+JWTSessions.refresh_header = "X-Refresh-Token"
+JWTSessions.refresh_cookie = "jwt_refresh"
+JWTSessions.csrf_header    = "X-CSRF-Token"
 ```
 
 ##### Expiration time
@@ -417,7 +417,7 @@ class LoginController < ApplicationController
 
       render json: { csrf: tokens[:csrf] }
     else
-      render json: 'Invalid email or password', status: :unauthorized
+      render json: "Invalid email or password", status: :unauthorized
     end
   end
 end
@@ -502,20 +502,20 @@ session.flush_by_uid(uid) # => 1
 It's possible to group sessions by custom namespaces
 
 ```ruby
-session = JWTSessions::Session.new(namespace: 'account-1')
+session = JWTSessions::Session.new(namespace: "account-1")
 ```
 
 and selectively flush sessions by namespace
 
 ```ruby
-session = JWTSessions::Session.new(namespace: 'ie-sessions')
+session = JWTSessions::Session.new(namespace: "ie-sessions")
 session.flush_namespaced # will flush all sessions which belong to the same namespace
 ```
 
 it's posible to flush access tokens only
 
 ```ruby
-session = JWTSessions::Session.new(namespace: 'ie-sessions')
+session = JWTSessions::Session.new(namespace: "ie-sessions")
 session.flush_namespaced_access_tokens # will flush all access tokens which belong to the same namespace, but will keep refresh tokens
 ```
 
@@ -556,7 +556,7 @@ class LoginController < ApplicationController
 
       render json: { access: tokens[:access], csrf: tokens[:csrf] }
     else
-      render json: 'Cannot login', status: :unauthorized
+      render json: "Cannot login", status: :unauthorized
     end
   end
 end
@@ -570,7 +570,7 @@ class RefreshController < ApplicationController
   end
 
   def access_payload
-    user = User.find_by!(email: payload['user_id'])
+    user = User.find_by!(email: payload["user_id"])
     { user_id: user.id, role: user.role, permissions: user.permissions }
   end
 end

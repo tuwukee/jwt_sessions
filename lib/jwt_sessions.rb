@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 
-require 'securerandom'
-require 'uri'
+require "securerandom"
+require "uri"
 
-require 'jwt_sessions/errors'
-require 'jwt_sessions/token'
-require 'jwt_sessions/refresh_token'
-require 'jwt_sessions/csrf_token'
-require 'jwt_sessions/access_token'
-require 'jwt_sessions/session'
-require 'jwt_sessions/authorization'
-require 'jwt_sessions/rails_authorization' if defined?(::Rails)
-require 'jwt_sessions/version'
-require 'jwt_sessions/store_adapters'
+require "jwt_sessions/errors"
+require "jwt_sessions/token"
+require "jwt_sessions/refresh_token"
+require "jwt_sessions/csrf_token"
+require "jwt_sessions/access_token"
+require "jwt_sessions/session"
+require "jwt_sessions/authorization"
+require "jwt_sessions/rails_authorization" if defined?(::Rails)
+require "jwt_sessions/version"
+require "jwt_sessions/store_adapters"
 
 module JWTSessions
   extend self
 
   attr_accessor :redis_url
 
-  NONE = 'none'
+  NONE = "none"
 
   JWTOptions = Struct.new(*JWT::DefaultOptions::DEFAULT_OPTIONS.keys)
 
@@ -35,18 +35,18 @@ module JWTSessions
                              refresh_header
                              token_prefix].freeze
 
-  DEFAULT_REDIS_HOST       = '127.0.0.1'
-  DEFAULT_REDIS_PORT       = '6379'
-  DEFAULT_REDIS_DB_NAME    = '0'
-  DEFAULT_TOKEN_PREFIX     = 'jwt_'
-  DEFAULT_ALGORITHM        = 'HS256'
+  DEFAULT_REDIS_HOST       = "127.0.0.1"
+  DEFAULT_REDIS_PORT       = "6379"
+  DEFAULT_REDIS_DB_NAME    = "0"
+  DEFAULT_TOKEN_PREFIX     = "jwt_"
+  DEFAULT_ALGORITHM        = "HS256"
   DEFAULT_ACCESS_EXP_TIME  = 3600 # 1 hour in seconds
   DEFAULT_REFRESH_EXP_TIME = 604800 # 1 week in seconds
-  DEFAULT_ACCESS_COOKIE    = 'jwt_access'
-  DEFAULT_ACCESS_HEADER    = 'Authorization'
-  DEFAULT_REFRESH_COOKIE   = 'jwt_refresh'
-  DEFAULT_REFRESH_HEADER   = 'X-Refresh-Token'
-  DEFAULT_CSRF_HEADER      = 'X-CSRF-Token'
+  DEFAULT_ACCESS_COOKIE    = "jwt_access"
+  DEFAULT_ACCESS_HEADER    = "Authorization"
+  DEFAULT_REFRESH_COOKIE   = "jwt_refresh"
+  DEFAULT_REFRESH_HEADER   = "X-Refresh-Token"
+  DEFAULT_CSRF_HEADER      = "X-CSRF-Token"
 
   DEFAULT_SETTINGS_KEYS.each do |setting|
     var_name = :"@#{setting}"
@@ -149,6 +149,6 @@ module JWTSessions
   def supported_algos
     # TODO once ECDSA is fixed in ruby-jwt it can be added to the list of algos just the same way others are added
     algos = JWT::Algos.constants - [:Unsupported, :Ecdsa]
-    algos.map { |algo| JWT::Algos.const_get(algo)::SUPPORTED }.flatten + [NONE, *JWT::Algos::Ecdsa::SUPPORTED.split(' ')]
+    algos.map { |algo| JWT::Algos.const_get(algo)::SUPPORTED }.flatten + [NONE, *JWT::Algos::Ecdsa::SUPPORTED.split(" ")]
   end
 end

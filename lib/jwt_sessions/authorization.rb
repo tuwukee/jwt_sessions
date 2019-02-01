@@ -67,15 +67,15 @@ module JWTSessions
     end
 
     def request_headers
-      raise Errors::Malconfigured, 'request_headers is not implemented'
+      raise Errors::Malconfigured, "request_headers is not implemented"
     end
 
     def request_cookies
-      raise Errors::Malconfigured, 'request_cookies is not implemented'
+      raise Errors::Malconfigured, "request_cookies is not implemented"
     end
 
     def request_method
-      raise Errors::Malconfigured, 'request_method is not implemented'
+      raise Errors::Malconfigured, "request_method is not implemented"
     end
 
     def valid_csrf_token?(csrf_token, token_type)
@@ -98,20 +98,20 @@ module JWTSessions
 
     def retrieve_csrf
       token = request_headers[JWTSessions.csrf_header]
-      raise Errors::Unauthorized, 'CSRF token is not found' unless token
+      raise Errors::Unauthorized, "CSRF token is not found" unless token
       token
     end
 
     def token_from_headers(token_type)
-      raw_token = request_headers[JWTSessions.header_by(token_type)] || ''
-      token = raw_token.split(' ')[-1]
-      raise Errors::Unauthorized, 'Token is not found' unless token
+      raw_token = request_headers[JWTSessions.header_by(token_type)] || ""
+      token = raw_token.split(" ")[-1]
+      raise Errors::Unauthorized, "Token is not found" unless token
       token
     end
 
     def token_from_cookies(token_type)
       token = request_cookies[JWTSessions.cookie_by(token_type)]
-      raise Errors::Unauthorized, 'Token is not found' unless token
+      raise Errors::Unauthorized, "Token is not found" unless token
       token
     end
 

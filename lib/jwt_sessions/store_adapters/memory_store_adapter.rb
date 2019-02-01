@@ -13,20 +13,20 @@ module JWTSessions
       end
 
       def fetch_access(uid)
-        access_token = value_if_not_expired(uid, 'access', '')
+        access_token = value_if_not_expired(uid, "access", "")
         access_token.empty? ? {} : { csrf: access_token[:csrf] }
       end
 
       def persist_access(uid, csrf, expiration)
         access_token = { csrf: csrf, expiration: expiration }
-        storage['']['access'].store(uid, access_token)
+        storage[""]["access"].store(uid, access_token)
       end
 
       def fetch_refresh(uid, namespace)
-        value_if_not_expired(uid, 'refresh', namespace.to_s)
+        value_if_not_expired(uid, "refresh", namespace.to_s)
       end
 
-      def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: '')
+      def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: "")
         update_refresh_fields(
           uid,
           namespace.to_s,
@@ -37,7 +37,7 @@ module JWTSessions
         )
       end
 
-      def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: '')
+      def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: "")
         update_refresh_fields(
           uid,
           namespace.to_s,
@@ -51,16 +51,16 @@ module JWTSessions
         namespace_keys = namespace.nil? ? storage.keys : [namespace]
 
         namespace_keys.each_with_object({}) do |namespace_key, acc|
-          select_keys(storage[namespace_key]['refresh'], acc)
+          select_keys(storage[namespace_key]["refresh"], acc)
         end
       end
 
       def destroy_refresh(uid, namespace)
-        storage[namespace.to_s]['refresh'].delete(uid)
+        storage[namespace.to_s]["refresh"].delete(uid)
       end
 
       def destroy_access(uid)
-        storage['']['access'].delete(uid)
+        storage[""]["access"].delete(uid)
       end
 
       private
@@ -71,8 +71,8 @@ module JWTSessions
       end
 
       def update_refresh_fields(key, namespace, fields)
-        updated_refresh = value_if_not_expired(key, 'refresh', namespace).merge(fields)
-        storage[namespace]['refresh'].store(key, updated_refresh)
+        updated_refresh = value_if_not_expired(key, "refresh", namespace).merge(fields)
+        storage[namespace]["refresh"].store(key, updated_refresh)
       end
 
       def select_keys(keys_hash, acc)

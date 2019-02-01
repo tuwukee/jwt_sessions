@@ -8,7 +8,7 @@ module JWTSessions
       @csrf       = csrf
       @uid        = uid
       @expiration = expiration
-      @payload    = payload.merge('uid' => uid, 'exp' => expiration.to_i)
+      @payload    = payload.merge("uid" => uid, "exp" => expiration.to_i)
       @store      = store
     end
 
@@ -17,11 +17,11 @@ module JWTSessions
     end
 
     def refresh_uid=(uid)
-      self.payload['ruid'] = uid
+      self.payload["ruid"] = uid
     end
 
     def refresh_uid
-      payload['ruid']
+      payload["ruid"]
     end
 
     def token
@@ -44,7 +44,7 @@ module JWTSessions
       # and to retrieve session's CSRF token
       def find(uid, store)
         token_attrs = store.fetch_access(uid)
-        raise Errors::Unauthorized, 'Access token not found' if token_attrs.empty?
+        raise Errors::Unauthorized, "Access token not found" if token_attrs.empty?
         build_with_token_attrs(store, uid, token_attrs)
       end
 
