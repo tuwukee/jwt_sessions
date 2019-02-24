@@ -11,6 +11,7 @@ XSS/CSRF safe JWT auth designed for SPA
 - [Synopsis](#synopsis)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
+  * [Creating a session](#creating-a-session)
   * [Rails integration](#rails-integration)
   * [Non-Rails usage](#non-rails-usage)
 - [Configuration](#configuration)
@@ -32,7 +33,9 @@ XSS/CSRF safe JWT auth designed for SPA
 
 Main goal of this gem is to provide configurable, manageable, and safe stateful sessions based on JSON Web Tokens.
 
-It's designed to be framework agnostic yet is easily integrable so Rails integration is also available out of the box.
+The gem stores JWT based sessions on the backend (currently, redis and memory stores are supported), making it possible to manage sessions, reset passwords, logout users in a reliable and secure way.
+
+It's designed to be framework agnostic yet is easily integrable so Rails integration is available out of the box.
 
 Core concept behind `jwt_sessions` is that each session is represented by a pair of tokens: access and refresh, and a session store is used to handle CSRF checks and refresh token hijacking. Both tokens have configurable expiration times, but in general refresh token is supposed to have a longer lifespan than an access token. Access token is used to retrieve secured resources and refresh token is used to renew the access token once it's expired. Default token store is based on redis.
 
@@ -56,7 +59,70 @@ bundle install
 
 ## Getting Started
 
-`Authorization` mixin is supposed to be included in your controllers and is used to retrieve access and refresh tokens from incoming requests and verify CSRF token if needed. It assumes that a token is either in a cookie or in a header (cookie and header names are configurable). It tries to retrieve it from headers first, then from cookies (CSRF check included) if the headers check failed.
+You should configure an encryption algorithm and specify the encryption key. By default the gem uses "HS256".
+
+```ruby
+JWTSessions.encryption_key = "secret"
+```
+
+`Authorization` mixin provides helper methods which are used to retrieve access and refresh tokens from incoming requests and verify CSRF token if needed. It assumes that a token is either in a cookie or in a header (cookie and header names are configurable). It tries to retrieve it from headers first, then from cookies (CSRF check included) if the headers check failed.
+
+### Creating a session
+
+Each token contains a payload with custom session info. A payload is a regular Ruby hash. \
+Usually, it contains user ID or other data which helps to identify current user but it's not necessary, the payload can be an empty hash as well. \
+
+```ruby
+> payload = { user_id: user.id }
+=> {:user_id=>1}
+```
+
+Generate the session with a custom payload. By default the same payload is sewn into the session's access and refresh tokens. \
+
+```ruby
+> session = JWTSessions::Session.new(payload: payload)
+=> #<JWTSessions::Session:0x00007fbe2cce9ea0...>
+```
+
+Sometimes it makes sense to keep different data within the payloads of access and refresh tokens. \
+So the access token may contain rich data including user settings, and etc., while the appropriate refresh token will include only the bare minimum. \
+When you want to perform a refresh you may need such data in the payload of the refresh token which will help to construct a payload of the new access token during refresh.
+
+```ruby
+session = JWTSessions::Session.new(payload: payload, refresh_payload: refresh_payload)
+```
+
+Now we can call `login` method on the session to retrieve the set of tokens.
+
+```ruby
+> session.login
+=> {:csrf=>"BmhxDRW5NAEIx...",
+    :access=>"eyJhbGciOiJIUzI1NiJ9...",
+    :access_expires_at=>"..."
+    :refresh=>"eyJhbGciOiJIUzI1NiJ9...",
+    :refresh_expires_at=>"..."}
+```
+
+Access/refresh tokens automatically contain expiration time in their payload. Yet expiration times are also added to the output just in case. \
+The token's payload will be available in the controllers once the access (or refresh) token is authorized.
+
+To perform the refresh do:
+
+```ruby
+> session.refresh(refresh_token)
+=> {:csrf=>"+pk2SQrXHRo1iV1x4O...",
+    :access=>"eyJhbGciOiJIUzI1...",
+    :access_expires_at=>"..."}
+```
+
+Available `JWTSessions::Session.new` options:
+
+- payload: a hash object with session data which will be included into access token payload and into `refresh_token` payload if `refresh_payload` is not provided.
+- refresh_payload: a hash object with session data which will be included into refresh token payload.
+- access_claims: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be included into access token. F.e. `{ aud: ["admin"] }` meaning that the token is used by "admin" audience. Optionally, the endpoint can automatically validate claims and provide access to tokens only with "admin"/"manager"/etc audiences. See `token_claims` method.
+- refresh_claims: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be included into refresh token.
+- namespace: a string object which helps to group sessions by a custom criteria. For example, sessions can be grouped by user ID, then it'll be possible to log out the user from all devises. More info [Sessions Namespace](#sessions-namespace).
+- refresh_by_access_allowed: a boolean value. Default is false. It links access to refresh tokens (adds refresh token ID to access payload), making it possible to perform session refresh by the last expired access token. See [Refresh with access token](#refresh-with-access-token).
 
 ### Rails integration
 
@@ -91,25 +157,6 @@ JWTSessions.private_key = OpenSSL::PKey::RSA.generate(2048)
 JWTSessions.public_key  = JWTSessions.private_key.public_key
 ```
 
-Generate access/refresh/csrf tokens with a custom payload. \
-The payload will be available in the controllers once the access (or refresh) token is authorized. \
-Access/refresh tokens contain expiration time in their payload. Yet expiration times are also added to the output just in case.
-
-```ruby
-> payload = { user_id: user.id }
-=> {:user_id=>1}
-
-> session = JWTSessions::Session.new(payload: payload)
-=> #<JWTSessions::Session:0x00007fbe2cce9ea0...>
-
-> session.login
-=> {:csrf=>"BmhxDRW5NAEIx...",
-    :access=>"eyJhbGciOiJIUzI1NiJ9...",
-    :access_expires_at=>"..."
-    :refresh=>"eyJhbGciOiJIUzI1NiJ9...",
-    :refresh_expires_at=>"..."}
-```
-
 You can build login controller to receive access, refresh and csrf tokens in exchange for user's login/password. \
 Refresh controller - to be able to get a new access token using refresh token after access is expired. \
 Here is example of a simple login controller, which returns set of tokens as a plain JSON response. \
@@ -128,12 +175,6 @@ class LoginController < ApplicationController
     end
   end
 end
-```
-
-Since it's not required to pass an access token when you want to perform a refresh you may need to have some data in the payload of the refresh token to allow you to construct a payload of the new access token during refresh.
-
-```ruby
-session = JWTSessions::Session.new(payload: payload, refresh_payload: refresh_payload)
 ```
 
 Now you can build a refresh endpoint. To protect the endpoint use before_action `authorize_refresh_request!`. \
@@ -245,7 +286,7 @@ class SimpleApp < Sinatra::Base
   include JWTSessions::Authorization
 
   def request_headers
-    env.inject({}){|acc, (k,v)| acc[$1.downcase] = v if k =~ /^http_(.*)/i; acc}
+    env.inject({}) { |acc, (k,v)| acc[$1.downcase] = v if k =~ /^http_(.*)/i; acc }
   end
 
   def request_cookies
