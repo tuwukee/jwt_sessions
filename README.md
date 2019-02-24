@@ -59,7 +59,7 @@ bundle install
 
 ## Getting Started
 
-You should configure an encryption algorithm and specify the encryption key. By default the gem uses "HS256".
+You should configure an encryption algorithm and specify the encryption key. By default the gem uses `HS256`.
 
 ```ruby
 JWTSessions.encryption_key = "secret"
