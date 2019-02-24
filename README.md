@@ -65,11 +65,11 @@ You should configure an encryption algorithm and specify the encryption key. By 
 JWTSessions.encryption_key = "secret"
 ```
 
-`Authorization` mixin provides helper methods which are used to retrieve access and refresh tokens from incoming requests and verify CSRF token if needed. It assumes that a token is either in a cookie or in a header (cookie and header names are configurable). It tries to retrieve it from headers first, then from cookies (CSRF check included) if the headers check failed.
+`Authorization` mixin provides helper methods which are used to retrieve access and refresh tokens from incoming requests and verify CSRF token if needed. It assumes that a token can be found either in a cookie or in a header (cookie and header names are configurable). It tries to retrieve it from headers first, then from cookies (CSRF check included) if the headers check failed.
 
 ### Creating a session
 
-Each token contains a payload with custom session info. A payload is a regular Ruby hash. \
+Each token contains a payload with custom session info. The payload is a regular Ruby hash. \
 Usually, it contains user ID or other data which helps to identify current user but it's not necessary, the payload can be an empty hash as well.
 
 ```ruby
@@ -86,13 +86,13 @@ Generate the session with a custom payload. By default the same payload is sewn 
 
 Sometimes it makes sense to keep different data within the payloads of access and refresh tokens. \
 So the access token may contain rich data including user settings, and etc., while the appropriate refresh token will include only the bare minimum. \
-When you want to perform a refresh you may need such data in the payload of the refresh token which will help to construct a payload of the new access token during refresh.
+When you want to perform a refresh you may need to have some data in the payload of the refresh token to help you reconstruct a payload for the new access token during refresh.
 
 ```ruby
 session = JWTSessions::Session.new(payload: payload, refresh_payload: refresh_payload)
 ```
 
-Now we can call `login` method on the session to retrieve the set of tokens.
+Now we can call `login` method on the session to retrieve a set of tokens.
 
 ```ruby
 > session.login
@@ -117,12 +117,12 @@ To perform the refresh do:
 
 Available `JWTSessions::Session.new` options:
 
-- **payload**: a hash object with session data which will be included into access token payload. Default is empty hash.
-- **refresh_payload**: a hash object with session data which will be included into refresh token payload. Default is value of access payload.
-- **access_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be included into access token. F.e. `{ aud: ["admin"] }` meaning that the token is used by "admin" audience. Optionally, the endpoint can automatically validate claims and provide access to tokens only with "admin"/"manager"/etc audiences. See `token_claims` method.
-- **refresh_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be included into refresh token.
+- **payload**: a hash object with session data which will be included into an access token payload. Default is empty hash.
+- **refresh_payload**: a hash object with session data which will be included into a refresh token payload. Default is value of the access payload.
+- **access_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be included into the access token. F.e. `{ aud: ["admin"] }` meaning that the token is used by "admin" audience. Optionally, the endpoint can automatically validate claims and provide access to tokens only with "admin"/"manager"/etc audiences. See `token_claims` method.
+- **refresh_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be included into the refresh token.
 - **namespace**: a string object which helps to group sessions by a custom criteria. For example, sessions can be grouped by user ID, then it'll be possible to log out the user from all devises. More info [Sessions Namespace](#sessions-namespace).
-- **refresh_by_access_allowed**: a boolean value. Default is false. It links access to refresh tokens (adds refresh token ID to access payload), making it possible to perform a session refresh by the last expired access token. See [Refresh with access token](#refresh-with-access-token).
+- **refresh_by_access_allowed**: a boolean value. Default is false. It links access and refresh tokens (adds refresh token ID to access payload), making it possible to perform a session refresh by the last expired access token. See [Refresh with access token](#refresh-with-access-token).
 
 ### Rails integration
 
