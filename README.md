@@ -116,8 +116,8 @@ To perform the refresh do:
 
 Available `JWTSessions::Session.new` options:
 
-- **payload**: a hash object with session data which will be included into an access token payload. Default is empty hash.
-- **refresh_payload**: a hash object with session data which will be included into a refresh token payload. Default is value of the access payload.
+- **payload**: a hash object with session data which will be included into an access token payload. Default is an empty hash.
+- **refresh_payload**: a hash object with session data which will be included into a refresh token payload. Default is a value of the access payload.
 - **access_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be validated within the access token payload. F.e. `{ aud: ["admin"], verify_aud: true }` meaning that the token can be used only by "admin" audience. Also, the endpoint can automatically validate claims instead. See `token_claims` method.
 - **refresh_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be validated within the refresh token payload.
 - **namespace**: a string object which helps to group sessions by a custom criteria. For example, sessions can be grouped by user ID, then it'll be possible to logout the user from all devises. More info [Sessions Namespace](#sessions-namespace).
@@ -129,8 +129,8 @@ Helper methods within `Authorization` mixin:
 - **authorize_refresh_request!**: validates refresh token within the request.
 - **found_token**: a raw token found within the request.
 - **payload**: a decoded token's payload.
-- **claimless_payload**: a decoded token's payload without claims validation (can be used for checking data of an expired token),
-- **token_claims**: the method should be defined by a developer, and it's expected to return a hash-like object with claims to be validated within a token's payload.
+- **claimless_payload**: a decoded token's payload without claims validation (can be used for checking data of an expired token).
+- **token_claims**: the method should be defined by a developer, and is expected to return a hash-like object with claims to be validated within a token's payload.
 
 ### Rails integration
 
