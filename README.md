@@ -85,8 +85,7 @@ Generate the session with a custom payload. By default the same payload is sewn 
 ```
 
 Sometimes it makes sense to keep different data within the payloads of access and refresh tokens. \
-So the access token may contain rich data including user settings, and etc., while the appropriate refresh token will include only the bare minimum. \
-When you want to perform a refresh you may need to have some data in the payload of the refresh token to help you reconstruct a payload for the new access token during refresh.
+The access token may contain rich data including user settings, etc., while the appropriate refresh token will include only the bare minimum which will be required to reconstruct a payload for the new access token during refresh.
 
 ```ruby
 session = JWTSessions::Session.new(payload: payload, refresh_payload: refresh_payload)
