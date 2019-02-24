@@ -119,10 +119,19 @@ Available `JWTSessions::Session.new` options:
 
 - **payload**: a hash object with session data which will be included into an access token payload. Default is empty hash.
 - **refresh_payload**: a hash object with session data which will be included into a refresh token payload. Default is value of the access payload.
-- **access_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be included into the access token. F.e. `{ aud: ["admin"] }` meaning that the token is used by "admin" audience. Optionally, the endpoint can automatically validate claims and provide access to tokens only with "admin"/"manager"/etc audiences. See `token_claims` method.
-- **refresh_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be included into the refresh token.
-- **namespace**: a string object which helps to group sessions by a custom criteria. For example, sessions can be grouped by user ID, then it'll be possible to log out the user from all devises. More info [Sessions Namespace](#sessions-namespace).
+- **access_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be validated within the access token payload. F.e. `{ aud: ["admin"], verify_aud: true }` meaning that the token can be used only by "admin" audience. Also, the endpoint can automatically validate claims instead. See `token_claims` method.
+- **refresh_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be validated within the refresh token payload.
+- **namespace**: a string object which helps to group sessions by a custom criteria. For example, sessions can be grouped by user ID, then it'll be possible to logout the user from all devises. More info [Sessions Namespace](#sessions-namespace).
 - **refresh_by_access_allowed**: a boolean value. Default is false. It links access and refresh tokens (adds refresh token ID to access payload), making it possible to perform a session refresh by the last expired access token. See [Refresh with access token](#refresh-with-access-token).
+
+Helper methods within `Authorization` mixin:
+
+- **authorize_access_request!**: validates access token within the request.
+- **authorize_refresh_request!**: validates refresh token within the request.
+- **found_token**: a raw token found within the request.
+- **payload**: a decoded token's payload.
+- **claimless_payload**: a decoded token's payload without claims validation (can be used for checking data of an expired token),
+- **token_claims**: the method should be defined by a developer, and it's expected to return a hash-like object with claims to be validated within a token's payload.
 
 ### Rails integration
 
@@ -396,6 +405,7 @@ class UsersController < ApplicationController
   def token_claims
     {
       aud: ["admin", "staff"],
+      verify_aud: true, # can be used locally instead of a global setting
       exp_leeway: 15 # will be used instead of default leeway only for exp claim
     }
   end
