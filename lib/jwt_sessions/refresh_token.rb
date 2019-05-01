@@ -13,15 +13,23 @@ module JWTSessions
       @access_uid        = access_uid
       @access_expiration = access_expiration
       @store             = store
-      @uid               = options.fetch(:uid, SecureRandom.uuid)
-      @expiration        = options.fetch(:expiration, JWTSessions.refresh_expiration)
+      @uid               = options.fetch(:uid, nil) || SecureRandom.uuid
+      @expiration        = options.fetch(:expiration, nil) || JWTSessions.refresh_expiration
       @namespace         = options.fetch(:namespace, nil)
       @token             = Token.encode(options.fetch(:payload, {}).merge("uid" => uid, "exp" => expiration.to_i))
     end
 
     class << self
-      def create(csrf, access_uid, access_expiration, store, payload, namespace)
-        inst = new(csrf, access_uid, access_expiration, store, payload: payload, namespace: namespace)
+      def create(csrf, access_uid, access_expiration, store, payload, namespace, expiration = JWTSessions.refresh_expiration)
+        inst = new(
+          csrf,
+          access_uid,
+          access_expiration,
+          store,
+          payload: payload,
+          namespace: namespace,
+          expiration: expiration
+        )
         inst.send(:persist_in_store)
         inst
       end
