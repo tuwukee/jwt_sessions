@@ -257,7 +257,6 @@ module JWTSessions
         @_csrf.encoded,
         payload,
         store,
-        SecureRandom.uuid,
         JWTSessions.custom_access_expiration(@_access_exp)
       )
       @access_token = @_access.token
