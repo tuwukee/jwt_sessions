@@ -27,11 +27,35 @@ class TestSession < Minitest::Test
     assert_equal payload[:test], decoded_access["test"]
   end
 
+  def test_login_with_custom_exp
+    @new_session = JWTSessions::Session.new(
+      payload: payload,
+      access_exp: 18000, # 5 hours in seconds
+      refresh_exp: 18000
+    )
+    assert_equal false, tokens[:refresh_expires_at] == tokens[:access_expires_at]
+    new_tokens = @new_session.login
+    assert_equal LOGIN_KEYS, new_tokens.keys.sort
+    assert_equal new_tokens[:refresh_expires_at], new_tokens[:access_expires_at]
+  end
+
   def test_refresh
     refreshed_tokens = session.refresh(tokens[:refresh])
     decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
     assert_equal REFRESH_KEYS, refreshed_tokens.keys.sort
     assert_equal payload[:test], decoded_access["test"]
+  end
+
+  def test_refresh_with_custom_exp
+    @new_session = JWTSessions::Session.new(
+      payload: payload,
+      access_exp: 18000, # 5 hours in seconds
+      refresh_exp: 18000
+    )
+    new_tokens = @new_session.login
+    refreshed_tokens = @new_session.refresh(new_tokens[:refresh])
+    assert_equal LOGIN_KEYS, new_tokens.keys.sort
+    assert_equal new_tokens[:refresh_expires_at], new_tokens[:access_expires_at]
   end
 
   def test_refresh_expired
