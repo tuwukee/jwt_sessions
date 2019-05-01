@@ -122,6 +122,8 @@ Available `JWTSessions::Session.new` options:
 - **refresh_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be validated within the refresh token payload.
 - **namespace**: a string object which helps to group sessions by a custom criteria. For example, sessions can be grouped by user ID, then it'll be possible to logout the user from all devises. More info [Sessions Namespace](#sessions-namespace).
 - **refresh_by_access_allowed**: a boolean value. Default is false. It links access and refresh tokens (adds refresh token ID to access payload), making it possible to perform a session refresh by the last expired access token. See [Refresh with access token](#refresh-with-access-token).
+- **access_exp**: an integer value. Contains an access token expiration time in seconds. The value overrides global settings. See [Expiration time](#expiration-time).
+- **refresh_exp**: an integer value. Contains a refresh token expiration time in seconds. The value overrides global settings. See [Expiration time](#expiration-time).
 
 Helper methods within `Authorization` mixin:
 
@@ -433,6 +435,8 @@ Access token must have a short life span, while refresh tokens can be stored for
 JWTSessions.access_exp_time = 3600 # 1 hour in seconds
 JWTSessions.refresh_exp_time = 604800 # 1 week in seconds
 ```
+
+It's defined globally, but can be overridden on a session level. See `JWTSessions::Session.new` options for more info.
 
 #### CSRF and cookies
 
