@@ -29,8 +29,8 @@ module JWTSessions
     end
 
     class << self
-      def create(csrf, payload, store)
-        new(csrf, payload, store).tap do |inst|
+      def create(csrf, payload, store, uid = SecureRandom.uuid, expiration = JWTSessions.access_expiration)
+        new(csrf, payload, store, uid, expiration).tap do |inst|
           store.persist_access(inst.uid, inst.csrf, inst.expiration)
         end
       end

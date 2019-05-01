@@ -136,6 +136,14 @@ module JWTSessions
     Time.now.to_i + refresh_exp_time.to_i
   end
 
+  def custom_access_expiration(time)
+    Time.now.to_i + (time || access_exp_time).to_i
+  end
+
+  def custom_refresh_expiration(time)
+    Time.now.to_i + (time || refresh_exp_time).to_i
+  end
+
   def header_by(token_type)
     send("#{token_type}_header")
   end

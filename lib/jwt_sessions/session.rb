@@ -20,6 +20,8 @@ module JWTSessions
       @refresh_claims            = options.fetch(:refresh_claims, {})
       @namespace                 = options.fetch(:namespace, nil)
       @refresh_by_access_allowed = options.fetch(:refresh_by_access_allowed, false)
+      @_access_exp               = options.fetch(:access_exp, nil)
+      @_refresh_exp              = options.fetch(:refresh_exp, nil)
     end
 
     def login
@@ -237,18 +239,27 @@ module JWTSessions
     end
 
     def create_refresh_token
-      @_refresh = RefreshToken.create(@_csrf.encoded,
-                                      @_access.uid,
-                                      @_access.expiration,
-                                      store,
-                                      refresh_payload,
-                                      namespace)
+      @_refresh = RefreshToken.create(
+        @_csrf.encoded,
+        @_access.uid,
+        @_access.expiration,
+        store,
+        refresh_payload,
+        namespace,
+        JWTSessions.custom_refresh_expiration(@_refresh_exp)
+      )
       @refresh_token = @_refresh.token
       link_access_to_refresh
     end
 
     def create_access_token
-      @_access = AccessToken.create(@_csrf.encoded, payload, store)
+      @_access = AccessToken.create(
+        @_csrf.encoded,
+        payload,
+        store,
+        SecureRandom.uuid,
+        JWTSessions.custom_access_expiration(@_access_exp)
+      )
       @access_token = @_access.token
     end
   end
