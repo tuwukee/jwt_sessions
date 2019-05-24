@@ -5,7 +5,6 @@ require 'jwt'
 require 'jwt_sessions'
 require 'sinatra'
 require 'sinatra/namespace'
-require 'pry'
 
 JWTSessions.encryption_key = 'secret key'
 JWTSessions.token_store = ENV['STORE_ADAPTER'] || 'redis'

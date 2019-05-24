@@ -55,7 +55,7 @@ class TestSession < Minitest::Test
     new_tokens = @new_session.login
     refreshed_tokens = @new_session.refresh(new_tokens[:refresh])
     assert_equal LOGIN_KEYS, new_tokens.keys.sort
-    assert_equal refreshed_tokens[:refresh_expires_at], refreshed_tokens[:access_expires_at]
+    assert_equal false, refreshed_tokens[:refresh_expires_at] == new_tokens[:refresh_expires_at]
   end
 
   def test_refresh_expired

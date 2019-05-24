@@ -2,7 +2,6 @@
 
 require "minitest/autorun"
 require "jwt_sessions"
-require "pry"
 
 nacl_supported_versions = {
   "ruby"  => ["~> 2.2.6", "~> 2.3.0", "~> 2.4.2"],
