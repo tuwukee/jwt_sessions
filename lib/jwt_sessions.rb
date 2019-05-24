@@ -155,8 +155,7 @@ module JWTSessions
   private
 
   def supported_algos
-    # TODO once ECDSA is fixed in ruby-jwt it can be added to the list of algos just the same way others are added
-    algos = JWT::Algos.constants - [:Unsupported, :Ecdsa]
-    algos.map { |algo| JWT::Algos.const_get(algo)::SUPPORTED }.flatten + [NONE, *JWT::Algos::Ecdsa::SUPPORTED.split(" ")]
+    algos = JWT::Algos.constants - [:Unsupported]
+    algos.map { |algo| JWT::Algos.const_get(algo)::SUPPORTED }.flatten + [NONE]
   end
 end
