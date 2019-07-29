@@ -295,7 +295,6 @@ class TestSession < Minitest::Test
     session.login
 
     session.flush_namespaced_access_tokens
-
     ruid = session.instance_variable_get(:"@_refresh").uid
     refresh_token = JWTSessions::RefreshToken.find(ruid, JWTSessions.token_store, namespace)
     assert_equal "", refresh_token.access_uid

@@ -46,8 +46,8 @@ class TestRefreshToken < Minitest::Test
     access_uid_2 = SecureRandom.uuid
     csrf_2       = JWTSessions::CSRFToken.new
     token_2      = JWTSessions::RefreshToken.create(
-      @csrf.encoded,
-      @access_uid,
+      csrf_2.encoded,
+      access_uid_2,
       JWTSessions.access_expiration - 5,
       JWTSessions.token_store,
       {},
