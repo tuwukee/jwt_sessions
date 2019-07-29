@@ -31,7 +31,7 @@ module JWTSessions
         storage.expireat(key, expiration)
       end
 
-      def fetch_refresh(uid, namespace, first_match: false)
+      def fetch_refresh(uid, namespace, first_match = false)
         key    = first_match ? first_refresh_key(uid) : full_refresh_key(uid, namespace)
         values = storage.hmget(key, *REFRESH_KEYS).compact
 
