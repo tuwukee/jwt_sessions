@@ -7,6 +7,8 @@ class TestRefreshToken < Minitest::Test
    attr_reader :csrf, :token, :access_uid
 
   def setup
+    JWTSessions::Session.flush_all
+
     JWTSessions.encryption_key = "secure encryption"
     @access_uid = SecureRandom.uuid
     @csrf = JWTSessions::CSRFToken.new
@@ -38,5 +40,19 @@ class TestRefreshToken < Minitest::Test
     assert_raises JWTSessions::Errors::Unauthorized do
       JWTSessions::RefreshToken.find(token.uid, JWTSessions.token_store, nil)
     end
+  end
+
+  def test_all
+    access_uid_2 = SecureRandom.uuid
+    csrf_2       = JWTSessions::CSRFToken.new
+    token_2      = JWTSessions::RefreshToken.create(
+      @csrf.encoded,
+      @access_uid,
+      JWTSessions.access_expiration - 5,
+      JWTSessions.token_store,
+      {},
+      nil
+    )
+    assert_equal [token.token, token_2.token].sort, JWTSessions::RefreshToken.all(nil, JWTSessions.token_store).map(&:token).sort
   end
 end
