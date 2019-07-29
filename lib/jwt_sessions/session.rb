@@ -114,7 +114,7 @@ module JWTSessions
       ruid = retrieve_val_from(external_payload, :access, "ruid", "refresh uid")
       uid  = retrieve_val_from(external_payload, :access, "uid", "access uid")
 
-      refresh_token = RefreshToken.find(ruid, JWTSessions.token_store)
+      refresh_token = RefreshToken.find(ruid, JWTSessions.token_store, first_match: true)
       return false unless uid == refresh_token.access_uid
 
       CSRFToken.new(refresh_token.csrf).valid_authenticity_token?(external_csrf_token)
