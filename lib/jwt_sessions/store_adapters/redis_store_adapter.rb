@@ -31,8 +31,9 @@ module JWTSessions
         storage.expireat(key, expiration)
       end
 
-      def fetch_refresh(uid, namespace)
-        values = storage.hmget(refresh_key(uid, namespace), *REFRESH_KEYS).compact
+      def fetch_refresh(uid, namespace, first_match = false)
+        key    = first_match ? first_refresh_key(uid) : full_refresh_key(uid, namespace)
+        values = storage.hmget(key, *REFRESH_KEYS).compact
 
         return {} if values.length != REFRESH_KEYS.length
         REFRESH_KEYS.each_with_index.each_with_object({}) { |(key, index), acc| acc[key] = values[index] }
@@ -69,7 +70,8 @@ module JWTSessions
       end
 
       def destroy_refresh(uid, namespace)
-        storage.del(refresh_key(uid, namespace))
+        key = full_refresh_key(uid, namespace)
+        storage.del(key)
       end
 
       def destroy_access(uid)
@@ -107,16 +109,14 @@ module JWTSessions
         "#{prefix}_#{namespace}_refresh_#{uid}"
       end
 
-      def refresh_key(uid, namespace)
-        if namespace.to_s.empty?
-          wildcard_refresh_key(uid)
-        else
-          full_refresh_key(uid, namespace)
-        end
+      def first_refresh_key(uid)
+        key = full_refresh_key(uid, "*")
+        (storage.keys(key) || []).first
       end
 
-      def wildcard_refresh_key(uid)
-        (storage.keys(refresh_key(uid, "*")) || []).first
+      def refresh_key(uid, namespace)
+        namespace = "*" if namespace.to_s.empty?
+        full_refresh_key(uid, namespace)
       end
 
       def access_key(uid)

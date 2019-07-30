@@ -22,7 +22,7 @@ module JWTSessions
         storage[""]["access"].store(uid, access_token)
       end
 
-      def fetch_refresh(uid, namespace)
+      def fetch_refresh(uid, namespace, _first_match = false)
         value_if_not_expired(uid, "refresh", namespace.to_s)
       end
 

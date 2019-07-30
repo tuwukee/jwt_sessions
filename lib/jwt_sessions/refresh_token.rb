@@ -41,8 +41,10 @@ module JWTSessions
         end
       end
 
-      def find(uid, store, namespace = nil)
-        token_attrs = store.fetch_refresh(uid, namespace)
+      # first_match should be set to true when
+      # we need to search through the all namespaces
+      def find(uid, store, namespace = nil, first_match: false)
+        token_attrs = store.fetch_refresh(uid, namespace, first_match)
         raise Errors::Unauthorized, "Refresh token not found" if token_attrs.empty?
         build_with_token_attrs(store, uid, token_attrs, namespace)
       end
