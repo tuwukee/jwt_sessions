@@ -83,7 +83,7 @@ module JWTSessions
     end
 
     def session_exists?(token_type)
-      JWTSessions::Session.new.session_exists?(found_token, token_type)
+      JWTSessions::Session.new.session_exists?(found_token, token_type, true)
     end
 
     def cookieless_auth(token_type)
