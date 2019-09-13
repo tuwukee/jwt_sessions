@@ -90,6 +90,29 @@ describe 'Sinatra Application' do
     end
   end
 
+  context 'allows to refresh with namespace' do
+    before { post '/api/v1/login_namespaced', format: :json }
+
+    it 'refreshes by headers' do
+      clear_cookies
+      refresh_token = json(last_response.body)['refresh']
+      header JWTSessions.refresh_header.downcase.gsub(/\s+/,'_').upcase, refresh_token
+      post '/api/v1/refresh_namespaced', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+
+    it 'refreshes by cookies' do
+      refresh_token = json(last_response.body)['refresh']
+      csrf_token = json(last_response.body)['csrf']
+      set_cookie "#{JWTSessions.refresh_cookie}=#{refresh_token}"
+      header JWTSessions.csrf_header.downcase.gsub(/\s+/,'_').upcase, csrf_token
+      post '/api/v1/refresh_namespaced', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+  end
+
   context 'allows to refresh by access token by cookies and headers' do
     before { post '/api/v1/login', format: :json }
 

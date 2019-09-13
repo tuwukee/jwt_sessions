@@ -11,7 +11,8 @@ module JWTSessions
         raise NotImplementedError
       end
 
-      def fetch_refresh(_uid, _namespace)
+      # Set first_match to true to look up through all namespaces
+      def fetch_refresh(_uid, _namespace, _first_match)
         raise NotImplementedError
       end
 

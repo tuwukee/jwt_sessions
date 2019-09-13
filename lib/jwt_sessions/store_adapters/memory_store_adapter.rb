@@ -22,8 +22,16 @@ module JWTSessions
         storage[""]["access"].store(uid, access_token)
       end
 
-      def fetch_refresh(uid, namespace, _first_match = false)
-        value_if_not_expired(uid, "refresh", namespace.to_s)
+      def fetch_refresh(uid, namespace, first_match = false)
+        if first_match
+          storage.keys.each do |namespace_key|
+            val = value_if_not_expired(uid, "refresh", namespace_key)
+            return val unless val.empty?
+          end
+          {}
+        else
+          value_if_not_expired(uid, "refresh", namespace.to_s)
+        end
       end
 
       def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: "")

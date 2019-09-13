@@ -37,7 +37,7 @@ module JWTSessions
     end
 
     def session_exists?(token, token_type = :access)
-      send(:"#{token_type}_token_data", token)
+      send(:"#{token_type}_token_data", token, true)
       true
     rescue Errors::Unauthorized
       false
@@ -142,20 +142,20 @@ module JWTSessions
     end
 
     def refresh_csrf(refresh_token)
-      refresh_token_instance = refresh_token_data(refresh_token)
+      refresh_token_instance = refresh_token_data(refresh_token, true)
       CSRFToken.new(refresh_token_instance.csrf)
     end
 
-    def access_token_data(token)
+    def access_token_data(token, _first_match = false)
       uid = token_uid(token, :access, @access_claims)
       data = store.fetch_access(uid)
       raise Errors::Unauthorized, "Access token not found" if data.empty?
       data
     end
 
-    def refresh_token_data(token)
+    def refresh_token_data(token, first_match = false)
       uid = token_uid(token, :refresh, @refresh_claims)
-      retrieve_refresh_token(uid)
+      retrieve_refresh_token(uid, first_match: first_match)
     end
 
     def token_uid(token, type, claims)
@@ -177,8 +177,8 @@ module JWTSessions
       val
     end
 
-    def retrieve_refresh_token(uid)
-      @_refresh = RefreshToken.find(uid, store, namespace)
+    def retrieve_refresh_token(uid, first_match: false)
+      @_refresh = RefreshToken.find(uid, store, namespace, first_match: first_match)
     end
 
     def tokens_hash

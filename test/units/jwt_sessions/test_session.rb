@@ -69,6 +69,18 @@ class TestSession < Minitest::Test
     end
   end
 
+  def test_refresh_with_namespace
+    @new_session = JWTSessions::Session.new(
+      payload: payload,
+      namespace: "custom-namespace"
+    )
+    new_tokens = @new_session.login
+    refreshed_tokens = @new_session.refresh(new_tokens[:refresh])
+    decoded_access = JWTSessions::Token.decode(refreshed_tokens[:access]).first
+    assert_equal REFRESH_KEYS, refreshed_tokens.keys.sort
+    assert_equal payload[:test], decoded_access["test"]
+  end
+
   def test_refresh_by_access_payload
     session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
     session.login

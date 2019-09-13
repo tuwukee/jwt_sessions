@@ -110,6 +110,34 @@ namespace '/api/v1' do
     session.refresh_by_access_payload.to_json
   end
 
+  post '/login_namespaced' do
+    access_payload = { key: 'hellooo' }
+    refresh_payload = { refresh_key: 'im a humble value' }
+
+    namespace = "custom-namespace"
+    session = JWTSessions::Session.new(
+      payload: access_payload,
+      refresh_payload: refresh_payload,
+      namespace: namespace
+    )
+
+    session.login.to_json
+  end
+
+  post '/refresh_namespaced' do
+    authorize_refresh_request!
+    access_payload = payload.merge({ key: 'reloaded hellooo' })
+
+    namespace = "custom-namespace"
+    session = JWTSessions::Session.new(
+      payload: access_payload,
+      refresh_payload: payload,
+      namespace: namespace
+    )
+
+    session.refresh(found_token).to_json
+  end
+
   get '/payload' do
     authorize_access_request!
     payload.to_json
