@@ -7,7 +7,7 @@ end
 
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem "rails", ENV.fetch("RAILS_VERSION", "~> 5.2")
+gem "rails", ENV.fetch("RAILS_VERSION", "~> 6.0")
 # Use sqlite3 as the database for Active Record
 gem "sqlite3", "~> 1.4"
 # Use Puma as the app server
@@ -36,6 +36,7 @@ group :development, :test do
   gem "rspec-rails", "~> 3.7"
   gem "factory_bot_rails", "~> 4.8"
   gem "capybara"
+  gem "rb-readline"
 end
 
 group :development do
