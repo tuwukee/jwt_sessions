@@ -455,7 +455,7 @@ session.masked_csrf(access_token)
 
 Sometimes it is not secure enough to store the refresh tokens in web / JS clients. \
 This is why you have the option to only use an access token and to not pass the refresh token to the client at all. \
-Session accepts `refresh_by_access_allowed: true` setting, which links the access token to the corresponding refresh token. \
+Session accepts `refresh_by_access_allowed: true` setting, which links the access token to the corresponding refresh token. 
 
 Example Rails login controller, which passes an access token token via cookies and renders CSRF:
 
@@ -490,7 +490,18 @@ tokens  = session.refresh_by_access_payload
 
 In case of token forgery and successful refresh performed by an attacker the original user will have to logout. \
 To protect the endpoint use the before_action `authorize_refresh_by_access_request!`. \
-Refresh should be performed once the access token is already expired and we need to use the `claimless_payload` method in order to skip JWT expiration validation (and other claims) in order to proceed. \
+Refresh should be performed once the access token is already expired and we need to use the `claimless_payload` method in order to skip JWT expiration validation (and other claims) in order to proceed. 
+
+Optionally `refresh_by_access_payload` accepts a block argument (the same way `refresh` method does).
+The block will be called if the refresh action is performed before the access token is expired. 
+Thereby it's possible to prohibit users from making refresh calls while their access token is still active.
+
+```ruby
+tokens = session.refresh_by_access_allowed do
+  # here goes malicious activity alert
+  raise JWTSession::Errors::Unauthorized, "Refresh action is performed before the expiration of the access token."
+end
+``` 
 
 Example Rails refresh by access controller with cookies as token transport:
 
