@@ -497,9 +497,9 @@ The block will be called if the refresh action is performed before the access to
 Thereby it's possible to prohibit users from making refresh calls while their access token is still active.
 
 ```ruby
-tokens = session.refresh_by_access_allowed do
+tokens = session.refresh_by_access_payload do
   # here goes malicious activity alert
-  raise JWTSession::Errors::Unauthorized, "Refresh action is performed before the expiration of the access token."
+  raise JWTSessions::Errors::Unauthorized, "Refresh action is performed before the expiration of the access token."
 end
 ``` 
 
