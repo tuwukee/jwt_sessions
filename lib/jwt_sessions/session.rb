@@ -47,9 +47,9 @@ module JWTSessions
       csrf(access_token).token
     end
 
-    def refresh(refresh_token, &block)
+    def refresh(refresh_token, access_destroy = true, &block)
       refresh_token_data(refresh_token)
-      refresh_by_uid(&block)
+      refresh_by_uid(access_destroy, &block)
     end
 
     def refresh_by_access_payload(&block)
@@ -130,9 +130,9 @@ module JWTSessions
       refresh_csrf(refresh_token).valid_authenticity_token?(csrf_token)
     end
 
-    def refresh_by_uid(&block)
+    def refresh_by_uid(access_destroy = true, &block)
       check_refresh_on_time(&block) if block_given?
-      AccessToken.destroy(@_refresh.access_uid, store)
+      AccessToken.destroy(@_refresh.access_uid, store) if access_destroy
       issue_tokens_after_refresh
     end
 
