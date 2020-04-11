@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         ruby: ['2.6', '2.7']
-        rails: ['5.2', '6.0']
+        rails: ['5.2.3', '6.0']
 
     name: Ruby ${{ matrix.ruby }} Rails ${{ matrix.rails }} run
 
@@ -35,6 +35,7 @@ jobs:
           sudo apt-get install -y libsodium23
           sudo apt-get install libsqlite3-dev
           gem install bundler
-          gem install rake -v=12.3
+          bundle install --jobs 4 --retry 3
           bundle install --gemfile test/support/dummy_api/Gemfile --jobs 4 --retry 3
-          bundle exec rake -t
+          bundle install --gemfile test/support/dummy_sinatra_api/Gemfile --jobs 4 --retry 3
+          rake
