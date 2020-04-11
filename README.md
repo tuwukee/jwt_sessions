@@ -15,11 +15,11 @@ XSS/CSRF safe JWT auth designed for SPA
     - [Rails integration](#rails-integration)
     - [Non-Rails usage](#non-rails-usage)
   - [Configuration](#configuration)
-        - [Token store](#token-store)
-        - [JWT signature](#jwt-signature)
-        - [Request headers and cookies names](#request-headers-and-cookies-names)
-        - [Expiration time](#expiration-time)
-        - [Exceptions](#exceptions)
+      - [Token store](#token-store)
+      - [JWT signature](#jwt-signature)
+      - [Request headers and cookies names](#request-headers-and-cookies-names)
+      - [Expiration time](#expiration-time)
+      - [Exceptions](#exceptions)
       - [CSRF and cookies](#csrf-and-cookies)
         - [Refresh with access token](#refresh-with-access-token)
       - [Refresh token hijack protection](#refresh-token-hijack-protection)
@@ -444,11 +444,11 @@ It is defined globally, but can be overridden on a session level. See `JWTSessio
 
 ##### Exceptions
 
-`JWTSessions::Errors::Error` - base class, all possible exceptions are inhereted from it.
-`JWTSessions::Errors::Malconfigured` - some required gem settings are empty, or methods are not implemented.
-`JWTSessions::Errors::InvalidPayload` - token's payload doesn't contain required keys or they are invalid.
-`JWTSessions::Errors::Unauthorized` - token can't be decoded or JWT claims are invalid.
-`JWTSessions::Errors::ClaimsVerification` - JWT claims are invalid (inherited from `JWTSessions::Errors::Unauthorized`).
+`JWTSessions::Errors::Error` - base class, all possible exceptions are inhereted from it. \
+`JWTSessions::Errors::Malconfigured` - some required gem settings are empty, or methods are not implemented. \
+`JWTSessions::Errors::InvalidPayload` - token's payload doesn't contain required keys or they are invalid. \
+`JWTSessions::Errors::Unauthorized` - token can't be decoded or JWT claims are invalid. \
+`JWTSessions::Errors::ClaimsVerification` - JWT claims are invalid (inherited from `JWTSessions::Errors::Unauthorized`). \
 `JWTSessions::Errors::Expired` - token is expired (inherited from `JWTSessions::Errors::Unauthorized`).
 
 #### CSRF and cookies
