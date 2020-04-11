@@ -1,0 +1,41 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ruby: ['2.6', '2.7']
+        rails: ['5.2.3', '6.0']
+
+    name: Ruby ${{ matrix.ruby }} Rails ${{ matrix.rails }} run
+
+    services:
+      redis:
+        image: redis
+        ports:
+        - 6379:6379
+        options: --entrypoint redis-server
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Build and test with Rake
+        env:
+          RAILS_VERSION: ${{ matrix.rails }}
+        run: |
+          gem update --system
+          sudo apt-get update
+          sudo apt-get install -y libsodium23
+          sudo apt-get install libsqlite3-dev
+          gem install bundler
+          bundle install --jobs 4 --retry 3
+          bundle install --gemfile test/support/dummy_api/Gemfile --jobs 4 --retry 3
+          bundle install --gemfile test/support/dummy_sinatra_api/Gemfile --jobs 4 --retry 3
+          rake
