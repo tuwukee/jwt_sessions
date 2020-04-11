@@ -5,5 +5,6 @@ module JWTSessions
     class InvalidPayload < Error; end
     class Unauthorized < Error; end
     class ClaimsVerification < Unauthorized; end
+    class Expired < ClaimsVerification; end
   end
 end

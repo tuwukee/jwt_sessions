@@ -142,7 +142,7 @@ class TestToken < Minitest::Test
 
   def test_payload_exp_time
     token = JWTSessions::Token.encode(payload.merge(exp: Time.now.to_i - (3600 * 24)))
-    assert_raises JWTSessions::Errors::Unauthorized do
+    assert_raises JWTSessions::Errors::Expired do
       JWTSessions::Token.decode(token)
     end
   end
