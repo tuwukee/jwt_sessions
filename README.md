@@ -448,8 +448,8 @@ It is defined globally, but can be overridden on a session level. See `JWTSessio
 `JWTSessions::Errors::Malconfigured` - some required gem settings are empty, or methods are not implemented.
 `JWTSessions::Errors::InvalidPayload` - token's payload doesn't contain required keys or they are invalid.
 `JWTSessions::Errors::Unauthorized` - token can't be decoded or JWT claims are invalid.
-`JWTSessions::Errors::ClaimsVerification` - JWT claims are invalid (inhereted from `JWTSessions::Errors::Unauthorized`).
-`JWTSessions::Errors::Expired` - token is expired (inhereted from `JWTSessions::Errors::Unauthorized`).
+`JWTSessions::Errors::ClaimsVerification` - JWT claims are invalid (inherited from `JWTSessions::Errors::Unauthorized`).
+`JWTSessions::Errors::Expired` - token is expired (inherited from `JWTSessions::Errors::Unauthorized`).
 
 #### CSRF and cookies
 
