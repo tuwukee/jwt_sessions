@@ -32,5 +32,5 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libsodium23
           gem install bundler
-          bundle install --path test/support/dummy_api --jobs 4 --retry 3
+          bundle install --gemfile test/support/dummy_api/Gemfile --jobs 4 --retry 3
           bundle exec rake
