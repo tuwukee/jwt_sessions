@@ -1,7 +1,7 @@
 # This is a basic workflow to help you get started with Actions
 
 name: CI
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   build:
@@ -29,6 +29,9 @@ jobs:
           RAILS_VERSION: 6.0
         run: |
           gem update --system
+          sudo add-apt-repository ppa:chris-lea/libsodium;
+          sudo echo "deb http://ppa.launchpad.net/chris-lea/libsodium/ubuntu trusty main" >> /etc/apt/sources.list;
+          sudo echo "deb-src http://ppa.launchpad.net/chris-lea/libsodium/ubuntu trusty main" >> /etc/apt/sources.list;
           sudo apt-get update && sudo apt-get install libsodium18
           gem install bundler
           bundle install --path test/support/dummy_api --jobs 4 --retry 3
