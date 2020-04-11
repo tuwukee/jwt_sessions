@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        ruby: ['2.5', '2.6', '2.7']
+        ruby: ['2.6', '2.7']
     name: Ruby ${{ matrix.ruby }} run
 
     services:
@@ -28,6 +28,7 @@ jobs:
         env:
           RAILS_VERSION: 6.0
         run: |
+          gem update --system
           sudo apt-get update && sudo apt-get install libsodium18
           gem install bundler
           bundle install --path test/support/dummy_api --jobs 4 --retry 3
