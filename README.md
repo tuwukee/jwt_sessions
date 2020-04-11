@@ -15,10 +15,11 @@ XSS/CSRF safe JWT auth designed for SPA
     - [Rails integration](#rails-integration)
     - [Non-Rails usage](#non-rails-usage)
   - [Configuration](#configuration)
-        - [Token store](#token-store)
-        - [JWT signature](#jwt-signature)
-        - [Request headers and cookies names](#request-headers-and-cookies-names)
-        - [Expiration time](#expiration-time)
+      - [Token store](#token-store)
+      - [JWT signature](#jwt-signature)
+      - [Request headers and cookies names](#request-headers-and-cookies-names)
+      - [Expiration time](#expiration-time)
+      - [Exceptions](#exceptions)
       - [CSRF and cookies](#csrf-and-cookies)
         - [Refresh with access token](#refresh-with-access-token)
       - [Refresh token hijack protection](#refresh-token-hijack-protection)
@@ -441,6 +442,15 @@ JWTSessions.refresh_exp_time = 604800 # 1 week in seconds
 
 It is defined globally, but can be overridden on a session level. See `JWTSessions::Session.new` options for more info.
 
+##### Exceptions
+
+`JWTSessions::Errors::Error` - base class, all possible exceptions are inhereted from it. \
+`JWTSessions::Errors::Malconfigured` - some required gem settings are empty, or methods are not implemented. \
+`JWTSessions::Errors::InvalidPayload` - token's payload doesn't contain required keys or they are invalid. \
+`JWTSessions::Errors::Unauthorized` - token can't be decoded or JWT claims are invalid. \
+`JWTSessions::Errors::ClaimsVerification` - JWT claims are invalid (inherited from `JWTSessions::Errors::Unauthorized`). \
+`JWTSessions::Errors::Expired` - token is expired (inherited from `JWTSessions::Errors::Unauthorized`).
+
 #### CSRF and cookies
 
 When you use cookies as your tokens transport it becomes vulnerable to CSRF. That is why both the login and refresh methods of the `Session` class produce CSRF tokens for you. `Authorization` mixin expects that this token is sent with all requests except GET and HEAD in a header specified among this gem's settings (`X-CSRF-Token` by default). Verification will be done automatically and the `Authorization` exception will be raised in case of a mismatch between the token from the header and the one stored in the session. \
@@ -455,7 +465,7 @@ session.masked_csrf(access_token)
 
 Sometimes it is not secure enough to store the refresh tokens in web / JS clients. \
 This is why you have the option to only use an access token and to not pass the refresh token to the client at all. \
-Session accepts `refresh_by_access_allowed: true` setting, which links the access token to the corresponding refresh token. 
+Session accepts `refresh_by_access_allowed: true` setting, which links the access token to the corresponding refresh token.
 
 Example Rails login controller, which passes an access token token via cookies and renders CSRF:
 
@@ -490,10 +500,10 @@ tokens  = session.refresh_by_access_payload
 
 In case of token forgery and successful refresh performed by an attacker the original user will have to logout. \
 To protect the endpoint use the before_action `authorize_refresh_by_access_request!`. \
-Refresh should be performed once the access token is already expired and we need to use the `claimless_payload` method in order to skip JWT expiration validation (and other claims) in order to proceed. 
+Refresh should be performed once the access token is already expired and we need to use the `claimless_payload` method in order to skip JWT expiration validation (and other claims) in order to proceed.
 
 Optionally `refresh_by_access_payload` accepts a block argument (the same way `refresh` method does).
-The block will be called if the refresh action is performed before the access token is expired. 
+The block will be called if the refresh action is performed before the access token is expired.
 Thereby it's possible to prohibit users from making refresh calls while their access token is still active.
 
 ```ruby
@@ -501,7 +511,7 @@ tokens = session.refresh_by_access_payload do
   # here goes malicious activity alert
   raise JWTSessions::Errors::Unauthorized, "Refresh action is performed before the expiration of the access token."
 end
-``` 
+```
 
 Example Rails refresh by access controller with cookies as token transport:
 
