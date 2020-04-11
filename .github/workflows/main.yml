@@ -37,4 +37,4 @@ jobs:
           gem install bundler
           gem install rake -v=12.3
           bundle install --gemfile test/support/dummy_api/Gemfile --jobs 4 --retry 3
-          bundle exec rake
+          bundle exec rake -t
