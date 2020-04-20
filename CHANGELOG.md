@@ -8,7 +8,7 @@ Features:
 
 Bugfixes:
 
-- fix lookup for refresh token for namespaced sessions
+- fixed lookup for refresh token for namespaced sessions
 
 Support:
 
