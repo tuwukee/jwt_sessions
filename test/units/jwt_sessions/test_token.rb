@@ -110,11 +110,11 @@ class TestToken < Minitest::Test
   def test_token_leeway_decode
     JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
     JWTSessions.jwt_options.leeway = 50
-    token   = JWTSessions::Token.encode(payload.merge(exp: Time.now.to_i - 20))
+    token   = JWTSessions::Token.encode(payload.merge("exp" => Time.now.to_i - 20))
     decoded = JWTSessions::Token.decode(token).first
     assert_equal payload["user_id"], decoded["user_id"]
     assert_equal payload["secret"], decoded["secret"]
-    token   = JWTSessions::Token.encode(payload.merge(exp: Time.now.to_i - 100))
+    token   = JWTSessions::Token.encode(payload.merge("exp" => Time.now.to_i - 100))
     assert_raises JWTSessions::Errors::Unauthorized do
       JWTSessions::Token.decode(token)
     end
@@ -141,7 +141,7 @@ class TestToken < Minitest::Test
   end
 
   def test_payload_exp_time
-    token = JWTSessions::Token.encode(payload.merge(exp: Time.now.to_i - (3600 * 24)))
+    token = JWTSessions::Token.encode(payload.merge("exp" => Time.now.to_i - (3600 * 24)))
     assert_raises JWTSessions::Errors::Expired do
       JWTSessions::Token.decode(token)
     end
