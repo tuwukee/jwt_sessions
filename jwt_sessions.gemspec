@@ -14,9 +14,16 @@ Gem::Specification.new do |s|
   s.homepage    = "http://rubygems.org/gems/jwt_sessions"
   s.license     = "MIT"
 
-  s.files         = Dir["lib/**/*", "LICENSE", "README.md"]
+  s.files         = Dir["lib/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
   s.test_files    = Dir["test/units/*", "test/units/**/*"]
   s.require_paths = ["lib"]
+
+  s.metadata      = {
+    "homepage_uri"    => "https://github.com/tuwukee/jwt_sessions",
+    "changelog_uri"   => "https://github.com/tuwukee/jwt_sessions/blob/master/CHANGELOG.md",
+    "source_code_uri" => "https://github.com/tuwukee/jwt_sessions",
+    "bug_tracker_uri" => "https://github.com/tuwukee/jwt_sessions/issues"
+  }
 
   s.add_dependency "jwt", ">= 2.1.1", "< 3"
 

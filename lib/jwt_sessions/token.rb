@@ -4,6 +4,8 @@ require "jwt"
 
 module JWTSessions
   class Token
+    DECODE_ERROR = "cannot decode the token"
+
     class << self
       def encode(payload)
         exp_payload = meta.merge(payload)
@@ -19,15 +21,15 @@ module JWTSessions
         raise Errors::ClaimsVerification, e.message
       rescue JWT::DecodeError => e
         raise Errors::Unauthorized, e.message
-      rescue StandardError
-        raise Errors::Unauthorized, "could not decode a token"
+      rescue StandardError => e
+        raise Errors::Unauthorized, DECODE_ERROR
       end
 
       def decode!(token)
         decode_options = { algorithm: JWTSessions.algorithm }
         JWT.decode(token, JWTSessions.public_key, false, decode_options)
       rescue StandardError
-        raise Errors::Unauthorized, "could not decode a token"
+        raise Errors::Unauthorized, DECODE_ERROR
       end
 
       def meta
