@@ -31,7 +31,7 @@ module JWTSessions
       end
 
       def meta
-        { exp: JWTSessions.access_expiration }
+        { "exp" => JWTSessions.access_expiration }
       end
     end
   end
