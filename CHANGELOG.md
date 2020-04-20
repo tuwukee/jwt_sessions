@@ -1,3 +1,17 @@
+## 2.5.1 (April 20, 2020)
+
+Features:
+
+- added changelog
+
+Bugfixes:
+
+- fixed double exp key in payload
+
+Support:
+
+- moved decode error text to a constant within token class
+
 ## 2.5.0 (April 12, 2020)
 
 Features:
