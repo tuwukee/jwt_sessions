@@ -21,7 +21,7 @@ module JWTSessions
         raise Errors::ClaimsVerification, e.message
       rescue JWT::DecodeError => e
         raise Errors::Unauthorized, e.message
-      rescue StandardError => e
+      rescue StandardError
         raise Errors::Unauthorized, DECODE_ERROR
       end
 
