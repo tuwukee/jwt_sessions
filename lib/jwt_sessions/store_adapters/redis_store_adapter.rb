@@ -12,7 +12,7 @@ module JWTSessions
 
         begin
           require "redis"
-          @storage = configure_redis_client(options)
+          @storage = configure_redis_client(**options)
         rescue LoadError => e
           msg = "Could not load the 'redis' gem, please add it to your gemfile or " \
                 "configure a different adapter (e.g. JWTSessions.store_adapter = :memory)"
