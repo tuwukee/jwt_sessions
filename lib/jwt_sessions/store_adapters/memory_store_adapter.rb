@@ -5,7 +5,7 @@ module JWTSessions
     class MemoryStoreAdapter < AbstractStoreAdapter
       attr_reader :storage
 
-      def initialize(options)
+      def initialize(**options)
         raise ArgumentError, "Memory store doesn't support any options" if options.any?
         @storage = Hash.new do |h, k|
           h[k] = Hash.new { |hh, kk| hh[kk] = {} }
