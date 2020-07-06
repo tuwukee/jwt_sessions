@@ -9,7 +9,7 @@ module JWTSessions
     def self.build_by_name(adapter, options = nil)
       camelized_adapter = adapter.to_s.split('_').map(&:capitalize).join
       adapter_class_name = "#{camelized_adapter}StoreAdapter"
-      StoreAdapters.const_get(adapter_class_name).new(options || {})
+      StoreAdapters.const_get(adapter_class_name).new(**(options || {}))
     end
   end
 end
