@@ -1,3 +1,9 @@
+## 2.5.2 (July 06, 2020)
+
+Bugfixes:
+
+- fixed `Using the last argument as keyword parameters is deprecated;` warnings
+
 ## 2.5.1 (April 20, 2020)
 
 Features:
