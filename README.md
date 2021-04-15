@@ -592,6 +592,13 @@ session = JWTSessions::Session.new(namespace: "ie-sessions")
 session.flush_namespaced # will flush all sessions which belong to the same namespace
 ```
 
+Selectively flush one single session inside a namespace by its access token:
+
+```ruby
+session = JWTSessions::Session.new(namespace: "ie-sessions", payload: payload)
+session.flush_by_access_payload # will flush a specific session which belongs to an existing namespace
+```
+
 Flush access tokens only:
 
 ```ruby
