@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         ruby: ['2.6', '2.7']
-        rails: ['5.2.3', '6.0']
+        rails: ['5.2.3', '6.0', '6.1']
 
     name: Ruby ${{ matrix.ruby }} Rails ${{ matrix.rails }} run
 
@@ -38,4 +38,4 @@ jobs:
           bundle install --jobs 4 --retry 3
           bundle install --gemfile test/support/dummy_api/Gemfile --jobs 4 --retry 3
           bundle install --gemfile test/support/dummy_sinatra_api/Gemfile --jobs 4 --retry 3
-          rake
+          BUNDLE_GEMFILE=test/support/dummy_api/Gemfile bundle exec rake
