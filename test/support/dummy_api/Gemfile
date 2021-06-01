@@ -11,7 +11,7 @@ gem "rails", ENV.fetch("RAILS_VERSION", "~> 6.0")
 # Use sqlite3 as the database for Active Record
 gem "sqlite3", "~> 1.4"
 # Use Puma as the app server
-gem "puma", "~> 3.7"
+gem "puma", ">= 4"
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem "jbuilder", "~> 2.5"
 # Use Redis adapter to run Action Cable in production
@@ -31,12 +31,15 @@ gem "redis"
 eval_gemfile "../dummy_sinatra_api/Gemfile"
 
 group :development, :test do
+  gem "pry"
   gem "pry-byebug", "~> 3.4"
   gem "pry-rails", "~> 0.3.4"
-  gem "rspec-rails", "~> 3.7"
+  gem "rspec-rails", ">= 4"
   gem "factory_bot_rails", "~> 4.8"
   gem "capybara"
   gem "rb-readline"
+  gem "minitest"
+  gem "rack-test"
 end
 
 group :development do

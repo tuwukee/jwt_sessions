@@ -38,4 +38,4 @@ jobs:
           bundle install --jobs 4 --retry 3
           bundle install --gemfile test/support/dummy_api/Gemfile --jobs 4 --retry 3
           bundle install --gemfile test/support/dummy_sinatra_api/Gemfile --jobs 4 --retry 3
-          bundle exec rake -t
+          BUNDLE_GEMFILE=test/support/dummy_api/Gemfile bundle exec rake

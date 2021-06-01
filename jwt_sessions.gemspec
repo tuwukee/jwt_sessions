@@ -28,7 +28,5 @@ Gem::Specification.new do |s|
   s.add_dependency "jwt", ">= 2.2.3", "< 3"
 
   s.add_development_dependency "bundler", ">= 1.16"
-  s.add_development_dependency "minitest", "~> 5.11"
-  s.add_development_dependency "pry", "~> 0.11"
   s.add_development_dependency "rake", "~> 12.3"
 end

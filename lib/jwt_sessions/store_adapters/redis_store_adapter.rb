@@ -62,7 +62,7 @@ module JWTSessions
       end
 
       def all_refresh_tokens(namespace)
-        keys_in_namespace = storage.keys(refresh_key("*", namespace))
+        keys_in_namespace =  scan_keys(refresh_key("*", namespace))
         (keys_in_namespace || []).each_with_object({}) do |key, acc|
           uid = uid_from_key(key)
           acc[uid] = fetch_refresh(uid, namespace)
@@ -111,7 +111,7 @@ module JWTSessions
 
       def first_refresh_key(uid)
         key = full_refresh_key(uid, "*")
-        (storage.keys(key) || []).first
+        (scan_keys(key) || []).first
       end
 
       def refresh_key(uid, namespace)
@@ -125,6 +125,21 @@ module JWTSessions
 
       def uid_from_key(key)
         key.split("_").last
+      end
+
+      def scan_keys(key_pattern)
+        cursor = 0
+        all_keys = []
+
+        loop do
+          cursor, keys = storage.scan(cursor, match: key_pattern, count: 1000)
+
+          all_keys |= keys
+
+          break if cursor == "0"
+        end
+
+        all_keys
       end
     end
   end

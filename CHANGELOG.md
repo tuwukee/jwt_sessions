@@ -1,3 +1,16 @@
+## 2.6.0 (June 01, 2021)
+
+Features:
+
+- added support for TLS Redis settings
+
+Support:
+
+- updated jwt to '>= 2.2.3'
+- switched to redis scan when looking for keys
+- removed extra gems from gemspec deps
+- updated gems in dummy apps
+
 ## 2.5.2 (July 06, 2020)
 
 Bugfixes:
