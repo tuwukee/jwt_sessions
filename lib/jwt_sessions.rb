@@ -155,7 +155,7 @@ module JWTSessions
   private
 
   def supported_algos
-    algos = JWT::Algos.constants - [:Unsupported]
-    algos.map { |algo| JWT::Algos.const_get(algo)::SUPPORTED }.flatten + [NONE]
+    algos = JWT::Algos::ALGOS - [JWT::Algos::Unsupported]
+    algos.map { |algo| algo::SUPPORTED }.flatten + [NONE]
   end
 end
