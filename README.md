@@ -369,6 +369,15 @@ JWTSessions.token_store = :redis, { redis_url: "redis://localhost:6397" }
 
 **NOTE:** if `REDIS_URL` environment variable is set it is used automatically.
 
+SSL, timeout, reconnect, etc. redis settings are supported:
+```ruby
+JWTSessions.token_store = :redis, {
+  read_timeout: 1.5,
+  reconnect_attempts: 10,
+  ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE }
+}
+```
+
 ##### JWT signature
 
 ```ruby

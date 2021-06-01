@@ -62,7 +62,7 @@ module JWTSessions
       end
 
       def all_refresh_tokens(namespace)
-        keys_in_namespace =  scan_keys(refresh_key("*", namespace))
+        keys_in_namespace = scan_keys(refresh_key("*", namespace))
         (keys_in_namespace || []).each_with_object({}) do |key, acc|
           uid = uid_from_key(key)
           acc[uid] = fetch_refresh(uid, namespace)
@@ -80,7 +80,7 @@ module JWTSessions
 
       private
 
-      def configure_redis_client(redis_url: nil, redis_host: nil, redis_port: nil, redis_db_name: nil)
+      def configure_redis_client(redis_url: nil, redis_host: nil, redis_port: nil, redis_db_name: nil, **options)
         if redis_url && (redis_host || redis_port || redis_db_name)
           raise ArgumentError, "redis_url cannot be passed along with redis_host, redis_port or redis_db_name options"
         end
@@ -91,7 +91,7 @@ module JWTSessions
           redis_db_name: redis_db_name
         )
 
-        Redis.new(url: redis_url)
+        Redis.new(options.merge(url: redis_url))
       end
 
       def build_redis_url(redis_host: nil, redis_port: nil, redis_db_name: nil)
@@ -133,7 +133,6 @@ module JWTSessions
 
         loop do
           cursor, keys = storage.scan(cursor, match: key_pattern, count: 1000)
-
           all_keys |= keys
 
           break if cursor == "0"

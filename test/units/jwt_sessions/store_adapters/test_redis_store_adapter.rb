@@ -20,13 +20,18 @@ class TestRedisStoreAdapter < Minitest::Test
     end
   end
 
-  def test_error_on_unknown_option
-    assert_raises ArgumentError do
-      JWTSessions::StoreAdapters::RedisStoreAdapter.new(
-        redis_url: "redis://127.0.0.1:6379/0",
-        something: "something"
-      )
-    end
+  def test_support_of_extra_options
+    adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new(
+      redis_url: "redis://127.0.0.1:6379",
+      ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE },
+      reconnect_delay: 2,
+      timeout: 8
+    )
+    options = adapter.storage.instance_variable_get(:@options)
+
+    assert_equal 8, options[:timeout]
+    assert_equal 2, options[:reconnect_delay]
+    assert_equal 0, options[:ssl_params][:verify_mode]
   end
 
   def test_default_url

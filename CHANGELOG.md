@@ -2,7 +2,7 @@
 
 Features:
 
-- added support for TLS Redis settings
+- added support for all Redis settings
 
 Support:
 
