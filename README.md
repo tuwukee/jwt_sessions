@@ -153,11 +153,11 @@ end
 ```
 
 Specify an encryption key for JSON Web Tokens in `config/initializers/jwt_session.rb` \
-It is advisable to store the key itself within the app secrets.
+It is advisable to store the key itself in a secure way, f.e. within app credentials.
 
 ```ruby
 JWTSessions.algorithm = "HS256"
-JWTSessions.encryption_key = Rails.application.secrets.secret_jwt_encryption_key
+JWTSessions.encryption_key = Rails.application.credentials.secret_jwt_encryption_key
 ```
 
 Most of the encryption algorithms require private and public keys to sign a token. However, HMAC requires only a single key and you can use the `encryption_key` shortcut to sign the token. For other algorithms you must specify private and public keys separately.
