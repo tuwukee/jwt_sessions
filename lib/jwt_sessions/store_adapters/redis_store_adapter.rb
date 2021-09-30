@@ -7,16 +7,20 @@ module JWTSessions
 
       REFRESH_KEYS = %i[csrf access_uid access_expiration expiration].freeze
 
-      def initialize(token_prefix: JWTSessions.token_prefix, **options)
+      def initialize(token_prefix: JWTSessions.token_prefix, redis_client: nil, **options)
         @prefix = token_prefix
 
-        begin
-          require "redis"
-          @storage = configure_redis_client(**options)
-        rescue LoadError => e
-          msg = "Could not load the 'redis' gem, please add it to your gemfile or " \
-                "configure a different adapter (e.g. JWTSessions.store_adapter = :memory)"
-          raise e.class, msg, e.backtrace
+        if redis_client
+          @storage = redis_client
+        else
+          begin
+            require "redis"
+            @storage = configure_redis_client(**options)
+          rescue LoadError => e
+            msg = "Could not load the 'redis' gem, please add it to your gemfile or " \
+                  "configure a different adapter (e.g. JWTSessions.store_adapter = :memory)"
+            raise e.class, msg, e.backtrace
+          end
         end
       end
 
