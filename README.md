@@ -378,6 +378,12 @@ JWTSessions.token_store = :redis, {
 }
 ```
 
+If you already have a configured Redis client, you can pass it among the options to reduce opened connections to a Redis server:
+
+```ruby
+JWTSessions.token_store = :redis, {redis_client: Redis.current}
+```
+
 ##### JWT signature
 
 ```ruby

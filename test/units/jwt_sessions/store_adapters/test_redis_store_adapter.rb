@@ -77,4 +77,10 @@ class TestRedisStoreAdapter < Minitest::Test
     adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new
     assert_equal "redis://127.0.0.2:6322/0", adapter.storage.connection[:id]
   end
+
+  def test_configuration_via_redis_client
+    client = Object.new
+    adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new(redis_client: client)
+    assert_equal client, adapter.storage
+  end
 end
