@@ -1,3 +1,9 @@
+## 2.7.0 (October 05, 2021)
+
+Features:
+
+- added redis_client setting to JWTSessions::StoreAdapters::RedisStoreAdapter
+
 ## 2.6.0 (June 01, 2021)
 
 Features:
