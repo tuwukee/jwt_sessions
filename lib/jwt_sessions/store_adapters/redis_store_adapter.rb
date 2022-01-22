@@ -40,7 +40,10 @@ module JWTSessions
         values = storage.hmget(key, *REFRESH_KEYS).compact
 
         return {} if values.length != REFRESH_KEYS.length
-        REFRESH_KEYS.each_with_index.each_with_object({}) { |(key, index), acc| acc[key] = values[index] }
+        REFRESH_KEYS
+          .each_with_index
+          .each_with_object({}) { |(key, index), acc| acc[key] = values[index] }
+          .merge({ namespace: namespace })
       end
 
       def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: nil)
@@ -69,7 +72,10 @@ module JWTSessions
         keys_in_namespace = scan_keys(refresh_key("*", namespace))
         (keys_in_namespace || []).each_with_object({}) do |key, acc|
           uid = uid_from_key(key)
-          acc[uid] = fetch_refresh(uid, namespace)
+          # to be able to properly initialize namespaced tokens extract their namespaces
+          # and pass down to fetch_refresh
+          token_namespace = namespace.to_s.empty? ? namespace_from_key(key) : namespace
+          acc[uid] = fetch_refresh(uid, token_namespace)
         end
       end
 
@@ -129,6 +135,14 @@ module JWTSessions
 
       def uid_from_key(key)
         key.split("_").last
+      end
+
+      def namespace_from_key(key)
+        ns_regexp.match(key)&.[](:namespace)
+      end
+
+      def ns_regexp
+        @ns_regexp ||= Regexp.new("#{prefix}_(?<namespace>.+)_refresh")
       end
 
       def scan_keys(key_pattern)
