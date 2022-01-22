@@ -1,3 +1,9 @@
+## 2.7.1 (January 22, 2022)
+
+Bugfixes:
+
+- Correctly init namespaced refresh tokens when fetching all tokens from Redis
+
 ## 2.7.0 (October 05, 2021)
 
 Features:
