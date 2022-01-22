@@ -138,7 +138,11 @@ module JWTSessions
       end
 
       def namespace_from_key(key)
-        key.split("_")[-3]
+        ns_regexp.match(key)&.[](:namespace)
+      end
+
+      def ns_regexp
+        @ns_regexp ||= Regexp.new("#{prefix}_(?<namespace>.+)_refresh")
       end
 
       def scan_keys(key_pattern)
