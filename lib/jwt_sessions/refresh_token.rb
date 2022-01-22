@@ -61,7 +61,7 @@ module JWTSessions
           token_attrs[:access_uid],
           token_attrs[:access_expiration],
           store,
-          namespace: namespace,
+          namespace: token_attrs[:namespace] || namespace,
           payload: {},
           uid: uid,
           expiration: token_attrs[:expiration]
