@@ -1,3 +1,9 @@
+## 2.7.2 (January 24, 2022)
+
+Bugfixes:
+
+- 2.7.1 version didn't include the correct patch
+
 ## 2.7.1 (January 22, 2022)
 
 Bugfixes:
