@@ -9,8 +9,15 @@ jobs:
 
     strategy:
       matrix:
-        ruby: ['2.6', '2.7']
-        rails: ['5.2.3', '6.0', '6.1']
+        ruby: ['2.6', '2.7', '3.0']
+        rails: ['5.2.3', '6.0', '6.1', '7.0']
+        exclude:
+          - ruby: '2.6'
+            rails: '7.0'
+          - ruby: '3.0'
+            rails: '5.2.3'
+          - ruby: '3.0'
+            rails: '6.0'
 
     name: Ruby ${{ matrix.ruby }} Rails ${{ matrix.rails }} run
 
@@ -23,7 +30,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
       - name: Build and test with Rake
