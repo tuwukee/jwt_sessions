@@ -31,9 +31,6 @@ gem "redis"
 eval_gemfile "../dummy_sinatra_api/Gemfile"
 
 group :development, :test do
-  gem "pry"
-  gem "pry-byebug", "~> 3.4"
-  gem "pry-rails", "~> 0.3.4"
   gem "rspec-rails", ">= 4.0"
   gem "factory_bot_rails", "~> 4.8"
   gem "capybara"
