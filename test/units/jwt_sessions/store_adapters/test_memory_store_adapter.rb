@@ -17,43 +17,43 @@ class TestMemoryStoreAdapter < Minitest::Test
   end
 
   def test_persist_and_fetch_access
-    store.persist_access("uid", "csrf", Time.now.to_i + 3600)
-    assert_equal({ csrf: "csrf" }, store.fetch_access("uid"))
+    store.persist_access("uuid", "csrf", Time.now.to_i + 3600)
+    assert_equal({ csrf: "csrf" }, store.fetch_access("uuid"))
 
-    store.persist_access("uid", "csrf", Time.now.to_i - 3600)
-    assert_equal({}, store.fetch_access("uid"))
+    store.persist_access("uuid", "csrf", Time.now.to_i - 3600)
+    assert_equal({}, store.fetch_access("uuid"))
   end
 
   def test_persist_and_fetch_refresh
     expiration = Time.now.to_i + 3600
     store.persist_refresh(
-      uid: "uid",
+      uuid: "uuid",
       access_expiration: expiration,
-      access_uid: "access_uid",
+      access_uuid: "access_uuid",
       csrf: "csrf",
       expiration: expiration,
       namespace: ""
     )
-    refresh = store.fetch_refresh("uid", "")
+    refresh = store.fetch_refresh("uuid", "")
     assert_equal "csrf", refresh[:csrf]
 
     expiration = Time.now.to_i - 3600
     store.persist_refresh(
-      uid: "uid",
+      uuid: "uuid",
       access_expiration: expiration,
-      access_uid: "access_uid",
+      access_uuid: "access_uuid",
       csrf: "csrf",
       expiration: expiration,
       namespace: ""
     )
-    refresh = store.fetch_refresh("uid", "")
+    refresh = store.fetch_refresh("uuid", "")
     assert_nil refresh[:csrf]
   end
 
   def test_update_refresh
     expiration = Time.now.to_i + 3600
     store.persist_refresh(
-      uid: "uid",
+      uuid: "uuid",
       access_expiration: expiration,
       access_uid: "access_uid",
       csrf: "csrf",

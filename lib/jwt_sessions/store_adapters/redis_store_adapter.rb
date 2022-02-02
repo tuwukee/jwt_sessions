@@ -5,7 +5,7 @@ module JWTSessions
     class RedisStoreAdapter < AbstractStoreAdapter
       attr_reader :prefix, :storage
 
-      REFRESH_KEYS = %i[csrf access_uid access_expiration expiration].freeze
+      REFRESH_KEYS = %i[csrf access_uuid access_expiration expiration].freeze
 
       def initialize(token_prefix: JWTSessions.token_prefix, **options)
         @prefix = token_prefix
@@ -20,31 +20,31 @@ module JWTSessions
         end
       end
 
-      def fetch_access(uid)
-        csrf = storage.get(access_key(uid))
+      def fetch_access(uuid)
+        csrf = storage.get(access_key(uuid))
         csrf.nil? ? {} : { csrf: csrf }
       end
 
-      def persist_access(uid, csrf, expiration)
-        key = access_key(uid)
+      def persist_access(uuid, csrf, expiration)
+        key = access_key(uuid)
         storage.set(key, csrf)
         storage.expireat(key, expiration)
       end
 
-      def fetch_refresh(uid, namespace, first_match = false)
-        key    = first_match ? first_refresh_key(uid) : full_refresh_key(uid, namespace)
+      def fetch_refresh(uuid, namespace, first_match = false)
+        key    = first_match ? first_refresh_key(uuid) : full_refresh_key(uuid, namespace)
         values = storage.hmget(key, *REFRESH_KEYS).compact
 
         return {} if values.length != REFRESH_KEYS.length
         REFRESH_KEYS.each_with_index.each_with_object({}) { |(key, index), acc| acc[key] = values[index] }
       end
 
-      def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: nil)
-        key = full_refresh_key(uid, namespace)
+      def persist_refresh(uuid:, access_expiration:, access_uuid:, csrf:, expiration:, namespace: nil)
+        key = full_refresh_key(uuid, namespace)
         update_refresh(
-          uid: uid,
+          uuid: uuid,
           access_expiration: access_expiration,
-          access_uid: access_uid,
+          access_uuid: access_uuid,
           csrf: csrf,
           namespace: namespace
         )
@@ -52,30 +52,30 @@ module JWTSessions
         storage.expireat(key, expiration)
       end
 
-      def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: nil)
+      def update_refresh(uuid:, access_expiration:, access_uuid:, csrf:, namespace: nil)
         storage.hmset(
-          full_refresh_key(uid, namespace),
+          full_refresh_key(uuid, namespace),
           :csrf, csrf,
           :access_expiration, access_expiration,
-          :access_uid, access_uid
+          :access_uuid, access_uuid
         )
       end
 
       def all_refresh_tokens(namespace)
         keys_in_namespace = storage.keys(refresh_key("*", namespace))
         (keys_in_namespace || []).each_with_object({}) do |key, acc|
-          uid = uid_from_key(key)
-          acc[uid] = fetch_refresh(uid, namespace)
+          uuid = uuid_from_key(key)
+          acc[uuid] = fetch_refresh(uuid, namespace)
         end
       end
 
-      def destroy_refresh(uid, namespace)
-        key = full_refresh_key(uid, namespace)
+      def destroy_refresh(uuid, namespace)
+        key = full_refresh_key(uuid, namespace)
         storage.del(key)
       end
 
-      def destroy_access(uid)
-        storage.del(access_key(uid))
+      def destroy_access(uuid)
+        storage.del(access_key(uuid))
       end
 
       private
@@ -105,25 +105,25 @@ module JWTSessions
         URI.join(redis_base_url, redis_db_name).to_s
       end
 
-      def full_refresh_key(uid, namespace)
-        "#{prefix}_#{namespace}_refresh_#{uid}"
+      def full_refresh_key(uuid, namespace)
+        "#{prefix}_#{namespace}_refresh_#{uuid}"
       end
 
-      def first_refresh_key(uid)
-        key = full_refresh_key(uid, "*")
+      def first_refresh_key(uuid)
+        key = full_refresh_key(uuid, "*")
         (storage.keys(key) || []).first
       end
 
-      def refresh_key(uid, namespace)
+      def refresh_key(uuid, namespace)
         namespace = "*" if namespace.to_s.empty?
-        full_refresh_key(uid, namespace)
+        full_refresh_key(uuid, namespace)
       end
 
-      def access_key(uid)
-        "#{prefix}_access_#{uid}"
+      def access_key(uuid)
+        "#{prefix}_access_#{uuid}"
       end
 
-      def uid_from_key(key)
+      def uuid_from_key(key)
         key.split("_").last
       end
     end

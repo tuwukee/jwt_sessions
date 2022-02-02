@@ -12,46 +12,46 @@ module JWTSessions
         end
       end
 
-      def fetch_access(uid)
-        access_token = value_if_not_expired(uid, "access", "")
+      def fetch_access(uuid)
+        access_token = value_if_not_expired(uuid, "access", "")
         access_token.empty? ? {} : { csrf: access_token[:csrf] }
       end
 
-      def persist_access(uid, csrf, expiration)
+      def persist_access(uuid, csrf, expiration)
         access_token = { csrf: csrf, expiration: expiration }
-        storage[""]["access"].store(uid, access_token)
+        storage[""]["access"].store(uuid, access_token)
       end
 
-      def fetch_refresh(uid, namespace, first_match = false)
+      def fetch_refresh(uuid, namespace, first_match = false)
         if first_match
           storage.keys.each do |namespace_key|
-            val = value_if_not_expired(uid, "refresh", namespace_key)
+            val = value_if_not_expired(uuid, "refresh", namespace_key)
             return val unless val.empty?
           end
           {}
         else
-          value_if_not_expired(uid, "refresh", namespace.to_s)
+          value_if_not_expired(uuid, "refresh", namespace.to_s)
         end
       end
 
-      def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: "")
+      def persist_refresh(uuid:, access_expiration:, access_uuid:, csrf:, expiration:, namespace: "")
         update_refresh_fields(
-          uid,
+          uuid,
           namespace.to_s,
           csrf: csrf,
           access_expiration: access_expiration,
-          access_uid: access_uid,
+          access_uuid: access_uuid,
           expiration: expiration
         )
       end
 
-      def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: "")
+      def update_refresh(uuid:, access_expiration:, access_uuid:, csrf:, namespace: "")
         update_refresh_fields(
-          uid,
+          uuid,
           namespace.to_s,
           csrf: csrf,
           access_expiration: access_expiration,
-          access_uid: access_uid
+          access_uuid: access_uuid
         )
       end
 
@@ -63,12 +63,12 @@ module JWTSessions
         end
       end
 
-      def destroy_refresh(uid, namespace)
-        storage[namespace.to_s]["refresh"].delete(uid)
+      def destroy_refresh(uuid, namespace)
+        storage[namespace.to_s]["refresh"].delete(uuid)
       end
 
-      def destroy_access(uid)
-        storage[""]["access"].delete(uid)
+      def destroy_access(uuid)
+        storage[""]["access"].delete(uuid)
       end
 
       private
@@ -84,12 +84,12 @@ module JWTSessions
       end
 
       def select_keys(keys_hash, acc)
-        keys_hash.keys.each do |uid|
-          value = keys_hash[uid]
+        keys_hash.keys.each do |uuid|
+          value = keys_hash[uuid]
           if value[:expiration] && value[:expiration] < Time.now.to_i
             keys_hash.delete(key)
           else
-            acc[uid] = value
+            acc[uuid] = value
           end
         end
 

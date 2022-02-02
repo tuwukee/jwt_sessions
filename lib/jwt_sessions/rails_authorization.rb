@@ -17,7 +17,7 @@ module JWTSessions
     end
 
     def request_method
-      request.method
+      request.request_method
     end
   end
 end

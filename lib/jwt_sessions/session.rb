@@ -49,36 +49,36 @@ module JWTSessions
 
     def refresh(refresh_token, &block)
       refresh_token_data(refresh_token)
-      refresh_by_uid(&block)
+      refresh_by_uuid(&block)
     end
 
     def refresh_by_access_payload(&block)
       raise Errors::InvalidPayload if payload.nil?
-      ruid = retrieve_val_from(payload, :access, "ruid", "refresh uid")
-      retrieve_refresh_token(ruid)
+      ruuid = retrieve_val_from(payload, :access, "ruuid", "refresh uuid")
+      retrieve_refresh_token(ruuid)
 
-      check_access_uid_within_refresh_token(&block) if block_given?
+      check_access_uuid_within_refresh_token(&block) if block_given?
 
-      refresh_by_uid(&block)
+      refresh_by_uuid(&block)
     end
 
     def flush_by_access_payload
       raise Errors::InvalidPayload if payload.nil?
-      ruid = retrieve_val_from(payload, :access, "ruid", "refresh uid")
-      flush_by_uid(ruid)
+      ruuid = retrieve_val_from(payload, :access, "ruuid", "refresh uuid")
+      flush_by_uuid(ruuid)
     end
 
     # flush the session by refresh token
     def flush_by_token(token)
-      uid = token_uid(token, :refresh, @refresh_claims)
-      flush_by_uid(uid)
+      uuid = token_uuid(token, :refresh, @refresh_claims)
+      flush_by_uuid(uuid)
     end
 
-    # flush the session by refresh token uid
-    def flush_by_uid(uid)
-      token = retrieve_refresh_token(uid)
+    # flush the session by refresh token uuid
+    def flush_by_uuid(uuid)
+      token = retrieve_refresh_token(uuid)
 
-      AccessToken.destroy(token.access_uid, store)
+      AccessToken.destroy(token.access_uuid, store)
       token.destroy
     end
 
@@ -87,7 +87,7 @@ module JWTSessions
       return 0 unless namespace
       tokens = RefreshToken.all(namespace, store)
       tokens.each do |token|
-        AccessToken.destroy(token.access_uid, store)
+        AccessToken.destroy(token.access_uuid, store)
         # unlink refresh token from the current access token
         token.update(nil, nil, token.csrf)
       end.count
@@ -97,7 +97,7 @@ module JWTSessions
       return 0 unless namespace
       tokens = RefreshToken.all(namespace, store)
       tokens.each do |token|
-        AccessToken.destroy(token.access_uid, store)
+        AccessToken.destroy(token.access_uuid, store)
         token.destroy
       end.count
     end
@@ -105,17 +105,17 @@ module JWTSessions
     def self.flush_all(store = JWTSessions.token_store)
       tokens = RefreshToken.all(nil, store)
       tokens.each do |token|
-        AccessToken.destroy(token.access_uid, store)
+        AccessToken.destroy(token.access_uuid, store)
         token.destroy
       end.count
     end
 
     def valid_access_request?(external_csrf_token, external_payload)
-      ruid = retrieve_val_from(external_payload, :access, "ruid", "refresh uid")
-      uid  = retrieve_val_from(external_payload, :access, "uid", "access uid")
+      ruuid = retrieve_val_from(external_payload, :access, "ruuid", "refresh uuid")
+      uuid  = retrieve_val_from(external_payload, :access, "uuid", "access uuid")
 
-      refresh_token = RefreshToken.find(ruid, JWTSessions.token_store, first_match: true)
-      return false unless uid == refresh_token.access_uid
+      refresh_token = RefreshToken.find(ruuid, JWTSessions.token_store, first_match: true)
+      return false unless uuid == refresh_token.access_uuid
 
       CSRFToken.new(refresh_token.csrf).valid_authenticity_token?(external_csrf_token)
     end
@@ -130,9 +130,9 @@ module JWTSessions
       refresh_csrf(refresh_token).valid_authenticity_token?(csrf_token)
     end
 
-    def refresh_by_uid(&block)
+    def refresh_by_uuid(&block)
       check_refresh_on_time(&block) if block_given?
-      AccessToken.destroy(@_refresh.access_uid, store)
+      AccessToken.destroy(@_refresh.access_uuid, store)
       issue_tokens_after_refresh
     end
 
@@ -147,25 +147,25 @@ module JWTSessions
     end
 
     def access_token_data(token, _first_match = false)
-      uid = token_uid(token, :access, @access_claims)
-      data = store.fetch_access(uid)
+      uuid = token_uuid(token, :access, @access_claims)
+      data = store.fetch_access(uuid)
       raise Errors::Unauthorized, "Access token not found" if data.empty?
       data
     end
 
     def refresh_token_data(token, first_match = false)
-      uid = token_uid(token, :refresh, @refresh_claims)
-      retrieve_refresh_token(uid, first_match: first_match)
+      uuid = token_uuid(token, :refresh, @refresh_claims)
+      retrieve_refresh_token(uuid, first_match: first_match)
     end
 
-    def token_uid(token, type, claims)
+    def token_uuid(token, type, claims)
       token_payload = JWTSessions::Token.decode(token, claims).first
-      uid           = token_payload.fetch("uid", nil)
-      if uid.nil?
-        message = "#{type.to_s.capitalize} token payload does not contain token uid"
+      uuid          = token_payload.fetch("uuid", nil)
+      if uuid.nil?
+        message = "#{type.to_s.capitalize} token payload does not contain token uuid"
         raise Errors::InvalidPayload, message
       end
-      uid
+      uuid
     end
 
     def retrieve_val_from(token_payload, type, val_key, val_name)
@@ -177,8 +177,8 @@ module JWTSessions
       val
     end
 
-    def retrieve_refresh_token(uid, first_match: false)
-      @_refresh = RefreshToken.find(uid, store, namespace, first_match: first_match)
+    def retrieve_refresh_token(uuid, first_match: false)
+      @_refresh = RefreshToken.find(uuid, store, namespace, first_match: first_match)
     end
 
     def tokens_hash
@@ -202,14 +202,14 @@ module JWTSessions
     def check_refresh_on_time
       expiration = @_refresh.access_expiration
       return if expiration.size.zero?
-      yield @_refresh.uid, expiration if expiration.to_i > Time.now.to_i
+      yield @_refresh.uuid, expiration if expiration.to_i > Time.now.to_i
     end
 
-    def check_access_uid_within_refresh_token
-      uid = retrieve_val_from(payload, :access, "uid", "access uid")
-      access_uid = @_refresh.access_uid
-      return if access_uid.size.zero?
-      yield @_refresh.uid, @_refresh.access_expiration if access_uid != uid
+    def check_access_uuid_within_refresh_token
+      uuid = retrieve_val_from(payload, :access, "uuid", "access uuid")
+      access_uuid = @_refresh.access_uuid
+      return if access_uuid.size.zero?
+      yield @_refresh.uuid, @_refresh.access_expiration if access_uuid != uuid
     end
 
     def issue_tokens_after_refresh
@@ -221,14 +221,14 @@ module JWTSessions
     end
 
     def update_refresh_token
-      @_refresh.update(@_access.uid, @_access.expiration, @_csrf.encoded)
+      @_refresh.update(@_access.uuid, @_access.expiration, @_csrf.encoded)
       @refresh_token = @_refresh.token
       link_access_to_refresh
     end
 
     def link_access_to_refresh
       return unless refresh_by_access_allowed
-      @_access.refresh_uid = @_refresh.uid
+      @_access.refresh_uuid = @_refresh.uuid
       @access_token = @_access.token
       @payload = @_access.payload
     end
@@ -241,7 +241,7 @@ module JWTSessions
     def create_refresh_token
       @_refresh = RefreshToken.create(
         @_csrf.encoded,
-        @_access.uid,
+        @_access.uuid,
         @_access.expiration,
         store,
         refresh_payload,

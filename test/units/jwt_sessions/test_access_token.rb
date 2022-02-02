@@ -4,7 +4,7 @@ require "minitest/autorun"
 require "jwt_sessions"
 
 class TestAccessToken < Minitest::Test
-   attr_reader :access_token, :uid
+   attr_reader :access_token, :uuid
 
   def setup
     JWTSessions.encryption_key = "secret key"

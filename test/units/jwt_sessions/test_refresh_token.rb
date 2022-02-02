@@ -4,7 +4,7 @@ require "minitest/autorun"
 require "jwt_sessions"
 
 class TestRefreshToken < Minitest::Test
-   attr_reader :csrf, :token, :access_uid
+   attr_reader :csrf, :token, :access_uuid
 
   def setup
     JWTSessions::Session.flush_all
