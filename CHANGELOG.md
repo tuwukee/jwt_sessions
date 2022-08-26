@@ -1,3 +1,13 @@
+## 2.7.3 (August 26, 2022)
+
+Bugfixes:
+
+- compatibility with jwt 2.5
+
+Support:
+
+- add rspec to development deps
+
 ## 2.7.2 (January 24, 2022)
 
 Bugfixes:
