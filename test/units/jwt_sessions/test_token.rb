@@ -24,7 +24,7 @@ class TestToken < Minitest::Test
 
   def teardown
     JWTSessions.algorithm = JWTSessions::DEFAULT_ALGORITHM
-    JWTSessions.instance_variable_set(:"@jwt_options", JWTSessions::JWTOptions.new(*JWT::DefaultOptions::DEFAULT_OPTIONS.values))
+    JWTSessions.instance_variable_set(:"@jwt_options", JWT::Configuration::Container.new.decode.to_h)
   end
 
   def test_rsa_token_decode
@@ -73,7 +73,7 @@ class TestToken < Minitest::Test
 
   def test_token_sub_claim
     JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
-    JWTSessions.jwt_options.verify_sub = true
+    JWTSessions.jwt_options[:verify_sub] = true
     token   = JWTSessions::Token.encode(payload.merge(sub: "subject"))
     decoded = JWTSessions::Token.decode(token, { sub: "subject" }).first
     assert_equal payload["user_id"], decoded["user_id"]
@@ -85,7 +85,7 @@ class TestToken < Minitest::Test
 
   def test_token_iss_claim
     JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
-    JWTSessions.jwt_options.verify_iss = true
+    JWTSessions.jwt_options[:verify_iss] = true
     token   = JWTSessions::Token.encode(payload.merge(iss: "Me"))
     decoded = JWTSessions::Token.decode(token, { iss: "Me" }).first
     assert_equal payload["user_id"], decoded["user_id"]
@@ -97,7 +97,7 @@ class TestToken < Minitest::Test
 
   def test_token_aud_claim
     JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
-    JWTSessions.jwt_options.verify_aud = true
+    JWTSessions.jwt_options[:verify_aud] = true
     token   = JWTSessions::Token.encode(payload.merge(aud: ["young", "old"]))
     decoded = JWTSessions::Token.decode(token, { aud: ["young"] }).first
     assert_equal payload["user_id"], decoded["user_id"]
@@ -109,7 +109,7 @@ class TestToken < Minitest::Test
 
   def test_token_leeway_decode
     JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
-    JWTSessions.jwt_options.leeway = 50
+    JWTSessions.jwt_options[:leeway] = 50
     token   = JWTSessions::Token.encode(payload.merge("exp" => Time.now.to_i - 20))
     decoded = JWTSessions::Token.decode(token).first
     assert_equal payload["user_id"], decoded["user_id"]
