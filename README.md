@@ -409,11 +409,11 @@ jwt_sessions only uses `exp` claim by default when it decodes tokens and you can
 setting `jwt_options`. You can also specify leeway to account for clock skew.
 
 ```ruby
-JWTSessions.jwt_options.verify_iss = true
-JWTSessions.jwt_options.verify_sub = true
-JWTSessions.jwt_options.verify_iat = true
-JWTSessions.jwt_options.verify_aud = true
-JWTSessions.jwt_options.leeway     = 30 # seconds
+JWTSessions.jwt_options[:verify_iss] = true
+JWTSessions.jwt_options[:verify_sub] = true
+JWTSessions.jwt_options[:verify_iat] = true
+JWTSessions.jwt_options[:verify_aud] = true
+JWTSessions.jwt_options[:leeway]     = 30 # seconds
 ```
 
 To pass options like `sub`, `aud`, `iss`, or leeways you should specify a method called `token_claims` in your controller.
