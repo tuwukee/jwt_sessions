@@ -21,8 +21,6 @@ module JWTSessions
 
   NONE = "none"
 
-  JWTOptions = Struct.new(*JWT::DefaultOptions::DEFAULT_OPTIONS.keys)
-
   DEFAULT_SETTINGS_KEYS = %i[access_cookie
                              access_exp_time
                              access_header
@@ -66,7 +64,7 @@ module JWTSessions
   end
 
   def jwt_options
-    @jwt_options ||= JWTOptions.new(*JWT::DefaultOptions::DEFAULT_OPTIONS.values)
+    @jwt_options ||= JWT::Configuration::Container.new.decode.to_h
   end
 
   def algorithm=(algo)
