@@ -37,9 +37,11 @@ module JWTSessions
 
       def fetch_refresh(uid, namespace, first_match = false)
         key    = first_match ? first_refresh_key(uid) : full_refresh_key(uid, namespace)
-        values = storage.hmget(key, *REFRESH_KEYS).compact
+        return {} if key.nil?
 
+        values = storage.hmget(key, *REFRESH_KEYS).compact
         return {} if values.length != REFRESH_KEYS.length
+        
         REFRESH_KEYS
           .each_with_index
           .each_with_object({}) { |(key, index), acc| acc[key] = values[index] }
