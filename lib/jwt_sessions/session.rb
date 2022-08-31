@@ -89,7 +89,7 @@ module JWTSessions
       tokens.each do |token|
         AccessToken.destroy(token.access_uid, store)
         # unlink refresh token from the current access token
-        token.update(nil, nil, token.csrf)
+        token.update(0, 0, token.csrf)
       end.count
     end
 

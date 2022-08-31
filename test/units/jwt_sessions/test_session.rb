@@ -309,8 +309,8 @@ class TestSession < Minitest::Test
     session.flush_namespaced_access_tokens
     ruid = session.instance_variable_get(:"@_refresh").uid
     refresh_token = JWTSessions::RefreshToken.find(ruid, JWTSessions.token_store, namespace)
-    assert_equal "", refresh_token.access_uid
-    assert_equal "", refresh_token.access_expiration
+    assert_equal "0", refresh_token.access_uid
+    assert_equal "0", refresh_token.access_expiration
 
     # allows to refresh with un-expired but flushed access token payload
     session.refresh_by_access_payload do
