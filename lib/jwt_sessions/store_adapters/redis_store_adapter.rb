@@ -41,7 +41,7 @@ module JWTSessions
 
         values = storage.hmget(key, *REFRESH_KEYS).compact
         return {} if values.length != REFRESH_KEYS.length
-        
+
         REFRESH_KEYS
           .each_with_index
           .each_with_object({}) { |(key, index), acc| acc[key] = values[index] }

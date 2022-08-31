@@ -208,7 +208,7 @@ module JWTSessions
     def check_access_uid_within_refresh_token
       uid = retrieve_val_from(payload, :access, "uid", "access uid")
       access_uid = @_refresh.access_uid
-      return if access_uid.size.zero?
+      return if access_uid == "0"
       yield @_refresh.uid, @_refresh.access_expiration if access_uid != uid
     end
 

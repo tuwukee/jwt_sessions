@@ -320,8 +320,8 @@ class TestSession < Minitest::Test
     access_token = JWTSessions::AccessToken.find(auid, JWTSessions.token_store)
     refresh_token = JWTSessions::RefreshToken.find(ruid, JWTSessions.token_store, namespace)
 
-    assert_equal false, access_token.uid.size.zero?
-    assert_equal false, access_token.expiration.size.zero?
+    assert "0" != access_token.uid
+    assert "0" != access_token.expiration
     assert_equal access_token.uid.to_s, refresh_token.access_uid
     assert_equal access_token.expiration.to_s, refresh_token.access_expiration
   end
