@@ -1,11 +1,14 @@
-## 2.7.3 (August 26, 2022)
-
-Bugfixes:
-
-- compatibility with jwt 2.5
+## 2.7.4 (August 31, 2022)
 
 Support:
 
+- compatibility with redis 5.0
+
+## 2.7.3 (August 26, 2022)
+
+Support:
+
+- compatibility with jwt 2.5
 - add rspec to development deps
 
 ## 2.7.2 (January 24, 2022)
