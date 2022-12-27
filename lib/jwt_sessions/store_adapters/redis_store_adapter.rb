@@ -6,6 +6,7 @@ module JWTSessions
       attr_reader :prefix, :storage
 
       REFRESH_KEYS = %i[csrf access_uid access_expiration expiration].freeze
+      DEFAULT_POOL_SIZE = 5
 
       def initialize(token_prefix: JWTSessions.token_prefix, redis_client: nil, **options)
         @prefix = token_prefix
@@ -101,8 +102,10 @@ module JWTSessions
           redis_port: redis_port,
           redis_db_name: redis_db_name
         )
-
-        RedisClient.new(options.merge(url: redis_url))
+        pool_size = options.delete(:pool_size) || DEFAULT_POOL_SIZE
+        RedisClient.
+          config(**options.merge(url: redis_url)).
+          new_pool(size: pool_size)
       end
 
       def build_redis_url(redis_host: nil, redis_port: nil, redis_db_name: nil)

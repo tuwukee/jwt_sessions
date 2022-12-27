@@ -82,4 +82,12 @@ class TestRedisStoreAdapter < Minitest::Test
     adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new(redis_client: client)
     assert_equal client, adapter.storage
   end
+
+  def test_redis_pool_size
+    default_adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new
+    assert_equal 5, default_adapter.storage.instance_variable_get(:@pool).size
+
+    adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new(pool_size: 10)
+    assert_equal 10, adapter.storage.instance_variable_get(:@pool).size
+  end
 end
