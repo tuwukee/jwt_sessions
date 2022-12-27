@@ -31,8 +31,7 @@ module JWTSessions
 
       def persist_access(uid, csrf, expiration)
         key = access_key(uid)
-        storage.call("SET", key, csrf)
-        storage.call("EXPIREAT", key, expiration)
+        storage.call("SET", key, csrf, ex: expiration)
       end
 
       def fetch_refresh(uid, namespace, first_match = false)
