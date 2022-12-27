@@ -1,7 +1,7 @@
 # jwt_sessions
 [![Gem Version](https://badge.fury.io/rb/jwt_sessions.svg)](https://badge.fury.io/rb/jwt_sessions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/53de11b8334933b1c0ef/maintainability)](https://codeclimate.com/github/tuwukee/jwt_sessions/maintainability)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c86efdfca81448919ec3e1c1e48fc152)](https://www.codacy.com/app/tuwukee/jwt_sessions?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tuwukee/jwt_sessions&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6ba02043e42144a9af96c9675207a5c4)](https://www.codacy.com/gh/tuwukee/jwt_sessions/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tuwukee/jwt_sessions&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/tuwukee/jwt_sessions.svg?branch=master)](https://travis-ci.org/tuwukee/jwt_sessions)
 
 XSS/CSRF safe JWT auth designed for SPA
@@ -348,7 +348,7 @@ List of configurable settings with their default values.
 
 ##### Token store
 
-In order to configure a token store you should set up a store adapter in a following way: `JWTSessions.token_store = :redis, { redis_url: 'redis://127.0.0.1:6379/0' }` (options can be omitted). Currently supported stores are `:redis` and `:memory`. Please note, that if you want to use Redis as a store then you should have `redis` gem listed in your Gemfile. If you do not configure the adapter explicitly, this gem will try to load `redis` and use it. Otherwise it will fall back to a `memory` adapter.
+In order to configure a token store you should set up a store adapter in a following way: `JWTSessions.token_store = :redis, { redis_url: 'redis://127.0.0.1:6379/0' }` (options can be omitted). Currently supported stores are `:redis` and `:memory`. Please note, that if you want to use Redis as a store then you should have `redis-client` gem listed in your Gemfile. If you do not configure the adapter explicitly, this gem will try to load `redis-client` and use it. Otherwise it will fall back to a `memory` adapter.
 
 Memory store only accepts a `prefix` (used for Redis db keys). Here is a default configuration for Redis:
 
@@ -357,9 +357,11 @@ JWTSessions.token_store = :redis, {
   redis_host: "127.0.0.1",
   redis_port: "6379",
   redis_db_name: "0",
-  token_prefix: "jwt_"
+  token_prefix: "jwt_",
+  pool_size: Integer(ENV.fetch("RAILS_MAX_THREADS", 5))
 }
 ```
+On default `pool_size` is set to 5. Override it with the value of max number of parallel redis connections in your app.
 
 You can also provide a Redis URL instead:
 
@@ -381,7 +383,7 @@ JWTSessions.token_store = :redis, {
 If you already have a configured Redis client, you can pass it among the options to reduce opened connections to a Redis server:
 
 ```ruby
-JWTSessions.token_store = :redis, {redis_client: Redis.current}
+JWTSessions.token_store = :redis, {redis_client: redis_pool}
 ```
 
 ##### JWT signature

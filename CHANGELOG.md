@@ -1,3 +1,14 @@
+## 3.0.0 (December 27, 2022)
+
+Features:
+
+- replace `redis` with `redis-client`
+- add `pool_size` setting to support concurrency within `redis-client`'s connection pool
+
+Support:
+
+- upgrade `jwt` to 2.6 in dependencies
+
 ## 2.7.4 (August 31, 2022)
 
 Support:
