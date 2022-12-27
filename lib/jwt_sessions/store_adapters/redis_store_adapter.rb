@@ -14,10 +14,10 @@ module JWTSessions
           @storage = redis_client
         else
           begin
-            require "redis"
+            require "redis-client"
             @storage = configure_redis_client(**options)
           rescue LoadError => e
-            msg = "Could not load the 'redis' gem, please add it to your gemfile or " \
+            msg = "Could not load the 'redis-client' gem, please add it to your gemfile or " \
                   "configure a different adapter (e.g. JWTSessions.store_adapter = :memory)"
             raise e.class, msg, e.backtrace
           end
@@ -25,21 +25,20 @@ module JWTSessions
       end
 
       def fetch_access(uid)
-        csrf = storage.get(access_key(uid))
+        csrf = storage.call("GET", access_key(uid))
         csrf.nil? ? {} : { csrf: csrf }
       end
 
       def persist_access(uid, csrf, expiration)
         key = access_key(uid)
-        storage.set(key, csrf)
-        storage.expireat(key, expiration)
+        storage.call("SET", key, csrf, ex: expiration)
       end
 
       def fetch_refresh(uid, namespace, first_match = false)
         key    = first_match ? first_refresh_key(uid) : full_refresh_key(uid, namespace)
         return {} if key.nil?
 
-        values = storage.hmget(key, *REFRESH_KEYS).compact
+        values = storage.call("HMGET", key, *REFRESH_KEYS).compact
         return {} if values.length != REFRESH_KEYS.length
 
         REFRESH_KEYS
@@ -57,12 +56,12 @@ module JWTSessions
           csrf: csrf,
           namespace: namespace
         )
-        storage.hset(key, :expiration, expiration)
-        storage.expireat(key, expiration)
+        storage.call("HSET", key, :expiration, expiration)
+        storage.call("EXPIREAT", key, expiration)
       end
 
       def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: nil)
-        storage.hmset(
+        storage.call("HMSET",
           full_refresh_key(uid, namespace),
           :csrf, csrf,
           :access_expiration, access_expiration,
@@ -83,11 +82,11 @@ module JWTSessions
 
       def destroy_refresh(uid, namespace)
         key = full_refresh_key(uid, namespace)
-        storage.del(key)
+        storage.call("DEL", key)
       end
 
       def destroy_access(uid)
-        storage.del(access_key(uid))
+        storage.call("DEL", access_key(uid))
       end
 
       private
@@ -103,7 +102,7 @@ module JWTSessions
           redis_db_name: redis_db_name
         )
 
-        Redis.new(options.merge(url: redis_url))
+        RedisClient.new(options.merge(url: redis_url))
       end
 
       def build_redis_url(redis_host: nil, redis_port: nil, redis_db_name: nil)
@@ -152,7 +151,7 @@ module JWTSessions
         all_keys = []
 
         loop do
-          cursor, keys = storage.scan(cursor, match: key_pattern, count: 1000)
+          cursor, keys = storage.call("SCAN", cursor, match: key_pattern, count: 1000)
           all_keys |= keys
 
           break if cursor == "0"
