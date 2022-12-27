@@ -16,9 +16,9 @@ class TestSession < Minitest::Test
   end
 
   def teardown
-    redis = Redis.new
-    keys = redis.keys("jwt_*")
-    keys.each { |k| redis.del(k) }
+    redis = RedisClient.new
+    keys = redis.call("KEYS", "jwt_*")
+    keys.each { |k| redis.call("DEL", k) }
   end
 
   def test_login

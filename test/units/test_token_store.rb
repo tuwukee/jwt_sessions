@@ -30,7 +30,7 @@ class TestTokenStore < Minitest::Test
     JWTSessions.redis_port = 6378
     JWTSessions.token_store = :redis
 
-    assert_equal "redis://127.0.0.1:6378/0", JWTSessions.token_store.storage.connection[:id]
+    assert_equal "redis://127.0.0.1:6378/0", JWTSessions.token_store.storage.config.server_url
   end
 
   def test_setting_redis_token_store_without_options
