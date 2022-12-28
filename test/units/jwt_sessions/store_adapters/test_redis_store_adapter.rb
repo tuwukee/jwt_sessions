@@ -90,4 +90,13 @@ class TestRedisStoreAdapter < Minitest::Test
     adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new(pool_size: 10)
     assert_equal 10, adapter.storage.instance_variable_get(:@pool).size
   end
+
+  def test_persist_access
+    adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new
+    expire_at = Time.now.to_i + 10
+    adapter.persist_access("test_access_token_exp", "test_csrf", expire_at)
+    ttl = adapter.storage.call("TTL", "jwt__access_test_access_token_exp")
+    assert_operator ttl, :<=, 10
+    adapter.storage.call("DEL", "jwt__access_test_access_token_exp")
+  end
 end

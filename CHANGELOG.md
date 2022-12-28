@@ -1,3 +1,9 @@
+## 3.0.1 (December 28, 2022)
+
+Support:
+
+- fix bug with expire/expireat
+
 ## 3.0.0 (December 27, 2022)
 
 Features:
