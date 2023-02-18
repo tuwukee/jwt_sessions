@@ -60,10 +60,10 @@ bundle install
 
 ## Getting Started
 
-You should configure an encryption algorithm and specify the encryption key. By default the gem uses the `HS256` signing algorithm.
+You should configure an algorithm and specify the signing key. By default the gem uses the `HS256` signing algorithm.
 
 ```ruby
-JWTSessions.encryption_key = "secret"
+JWTSessions.signing_key = "secret"
 ```
 
 `Authorization` mixin provides helper methods which are used to retrieve the access and refresh tokens from incoming requests and verify the CSRF token if needed. It assumes that a token can be found either in a cookie or in a header (cookie and header names are configurable). It tries to retrieve the token from headers first and then from cookies (CSRF check included) if the header check fails.
@@ -152,15 +152,15 @@ class ApplicationController < ActionController::API
 end
 ```
 
-Specify an encryption key for JSON Web Tokens in `config/initializers/jwt_session.rb` \
+Specify a signing key for JSON Web Tokens in `config/initializers/jwt_session.rb` \
 It is advisable to store the key itself in a secure way, f.e. within app credentials.
 
 ```ruby
 JWTSessions.algorithm = "HS256"
-JWTSessions.encryption_key = Rails.application.credentials.secret_jwt_encryption_key
+JWTSessions.signing_key = Rails.application.credentials.secret_jwt_signing_key
 ```
 
-Most of the encryption algorithms require private and public keys to sign a token. However, HMAC requires only a single key and you can use the `encryption_key` shortcut to sign the token. For other algorithms you must specify private and public keys separately.
+Most of the algorithms require private and public keys to sign a token. However, HMAC requires only a single key and you can use the `signing_key` shortcut to sign the token. For other algorithms you must specify private and public keys separately.
 
 ```ruby
 JWTSessions.algorithm   = "RS256"
@@ -294,7 +294,7 @@ require "sinatra/base"
 JWTSessions.access_header = "authorization"
 JWTSessions.refresh_header = "x_refresh_token"
 JWTSessions.csrf_header = "x_csrf_token"
-JWTSessions.encryption_key = "secret key"
+JWTSessions.signing_key = "secret key"
 
 class SimpleApp < Sinatra::Base
   include JWTSessions::Authorization
@@ -395,7 +395,7 @@ JWTSessions.algorithm = "HS256"
 You need to specify a secret to use for HMAC as this setting does not have a default value.
 
 ```ruby
-JWTSessions.encryption_key = "secret"
+JWTSessions.signing_key = "secret"
 ```
 
 If you are using another algorithm like RSA/ECDSA/EDDSA you should specify private and public keys.

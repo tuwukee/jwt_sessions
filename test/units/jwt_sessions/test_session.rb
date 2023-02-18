@@ -9,7 +9,7 @@ class TestSession < Minitest::Test
   REFRESH_KEYS = %i[access access_expires_at csrf].freeze
 
   def setup
-    JWTSessions.encryption_key = "encrypted"
+    JWTSessions.signing_key = "security"
     @payload = { test: "secret" }
     @session = JWTSessions::Session.new(payload: payload)
     @tokens = session.login
