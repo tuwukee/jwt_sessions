@@ -19,7 +19,7 @@ class TestToken < Minitest::Test
 
   def setup
     @payload = { "user_id" => 1, "secret" => "mystery" }
-    JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
+    JWTSessions.signing_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
   end
 
   def teardown
@@ -70,7 +70,7 @@ class TestToken < Minitest::Test
   end
 
   def test_hmac_token_decode
-    JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
+    JWTSessions.signing_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
     token   = JWTSessions::Token.encode(payload)
     decoded = JWTSessions::Token.decode(token).first
     assert_equal payload["user_id"], decoded["user_id"]
@@ -78,7 +78,7 @@ class TestToken < Minitest::Test
   end
 
   def test_token_sub_claim
-    JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
+    JWTSessions.signing_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
     JWTSessions.jwt_options[:verify_sub] = true
     token   = JWTSessions::Token.encode(payload.merge(sub: "subject"))
     decoded = JWTSessions::Token.decode(token, { sub: "subject" }).first
@@ -90,7 +90,7 @@ class TestToken < Minitest::Test
   end
 
   def test_token_iss_claim
-    JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
+    JWTSessions.signing_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
     JWTSessions.jwt_options[:verify_iss] = true
     token   = JWTSessions::Token.encode(payload.merge(iss: "Me"))
     decoded = JWTSessions::Token.decode(token, { iss: "Me" }).first
@@ -102,7 +102,7 @@ class TestToken < Minitest::Test
   end
 
   def test_token_aud_claim
-    JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
+    JWTSessions.signing_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
     JWTSessions.jwt_options[:verify_aud] = true
     token   = JWTSessions::Token.encode(payload.merge(aud: ["young", "old"]))
     decoded = JWTSessions::Token.decode(token, { aud: ["young"] }).first
@@ -114,7 +114,7 @@ class TestToken < Minitest::Test
   end
 
   def test_token_leeway_decode
-    JWTSessions.encryption_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
+    JWTSessions.signing_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
     JWTSessions.jwt_options[:leeway] = 50
     token   = JWTSessions::Token.encode(payload.merge("exp" => Time.now.to_i - 20))
     decoded = JWTSessions::Token.decode(token).first

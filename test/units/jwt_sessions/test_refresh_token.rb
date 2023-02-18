@@ -9,7 +9,7 @@ class TestRefreshToken < Minitest::Test
   def setup
     JWTSessions::Session.flush_all
 
-    JWTSessions.encryption_key = "secure encryption"
+    JWTSessions.signing_key = "secure key"
     @access_uid = SecureRandom.uuid
     @csrf = JWTSessions::CSRFToken.new
     @token = JWTSessions::RefreshToken.create(@csrf.encoded,

@@ -7,7 +7,7 @@ class TestAccessToken < Minitest::Test
    attr_reader :access_token, :uid
 
   def setup
-    JWTSessions.encryption_key = "secret key"
+    JWTSessions.signing_key = "secret key"
     @payload = { user_id: 1 }
     @csrf = JWTSessions::CSRFToken.new
     @uid = SecureRandom.uuid

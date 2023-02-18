@@ -1,3 +1,9 @@
+## 3.1.0 (February 18, 20222)
+
+Features:
+
+- rename `encryption_key=` to `signing_key=` (keep the alias for backward compatibility)
+
 ## 3.0.1 (December 28, 2022)
 
 Support:

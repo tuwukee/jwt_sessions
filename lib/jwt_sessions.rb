@@ -121,10 +121,12 @@ module JWTSessions
   end
 
   # should be used for hmac only
-  def encryption_key=(key)
+  def signing_key=(key)
     @public_key  = key
     @private_key = key
   end
+  # alias for backward compatibility
+  alias encryption_key= signing_key=
 
   def access_expiration
     Time.now.to_i + access_exp_time.to_i

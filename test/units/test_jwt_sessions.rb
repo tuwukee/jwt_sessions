@@ -18,7 +18,7 @@ class TestJWTSessions < Minitest::Test
     assert_equal JWTSessions::DEFAULT_CSRF_HEADER, JWTSessions.csrf_header
   end
 
-  def test_encryption_key
+  def test_signing_key
     JWTSessions.encryption_key = nil
     assert_raises JWTSessions::Errors::Malconfigured do
       JWTSessions.private_key
