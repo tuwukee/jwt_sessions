@@ -78,7 +78,8 @@ module JWTSessions
           # to be able to properly initialize namespaced tokens extract their namespaces
           # and pass down to fetch_refresh
           token_namespace = namespace.to_s.empty? ? namespace_from_key(key) : namespace
-          acc[uid] = fetch_refresh(uid, token_namespace)
+          token_attrs = fetch_refresh(uid, token_namespace)
+          acc[uid] = token_attrs unless token_attrs.empty?
         end
       end
 

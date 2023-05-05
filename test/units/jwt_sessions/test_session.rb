@@ -326,6 +326,16 @@ class TestSession < Minitest::Test
     assert_equal access_token.expiration.to_s, refresh_token.access_expiration
   end
 
+  def test_flush_namespaced_access_tokens_after_flush_namespaced
+    namespace = "test_namespace"
+    session = JWTSessions::Session.new(payload: payload, namespace: namespace)
+    session.login
+
+    assert_equal 1, session.flush_namespaced
+    # it should not throw an error
+    assert_equal 0, session.flush_namespaced_access_tokens
+  end
+
   def test_flush_all
     refresh_token = @session.instance_variable_get(:"@_refresh")
     flushed_count = JWTSessions::Session.flush_all
