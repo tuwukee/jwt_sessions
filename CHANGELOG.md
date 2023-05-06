@@ -1,4 +1,10 @@
-## 3.1.0 (February 18, 20222)
+## 3.1.1 (May 6, 2023)
+
+Bugfixes:
+
+- fix bug with flushing empty refresh tokens (Unsupported command argument type: NilClass (TypeError))
+
+## 3.1.0 (February 18, 2023)
 
 Features:
 
