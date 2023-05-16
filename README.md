@@ -119,7 +119,7 @@ Available `JWTSessions::Session.new` options:
 
 - **payload**: a hash object with session data which will be included into an access token payload. Default is an empty hash.
 - **refresh_payload**: a hash object with session data which will be included into a refresh token payload. Default is the value of the access payload.
-- **access_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be validated within the access token payload. For example, `{ "aud" => ["admin"], "verify_aud" => true }` means that the token can be used only by "admin" audience. Also, the endpoint can automatically validate claims instead. See `token_claims` method.
+- **access_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be validated within the access token payload. For example, `JWTSessions::Session.new(payload: { user_id: 1, aud: ['admin'], verify_aud: true })` means that the token can be used only by "admin" audience. Also, the endpoint can automatically validate claims instead. See `token_claims` method.
 - **refresh_claims**: a hash object with [JWT claims](https://github.com/jwt/ruby-jwt#support-for-reserved-claim-names) which will be validated within the refresh token payload.
 - **namespace**: a string object which helps to group sessions by a custom criteria. For example, sessions can be grouped by user ID, making it possible to logout the user from all devices. More info [Sessions Namespace](#sessions-namespace).
 - **refresh_by_access_allowed**: a boolean value. Default is false. It links access and refresh tokens (adds refresh token ID to access payload), making it possible to perform a session refresh by the last expired access token. See [Refresh with access token](#refresh-with-access-token).
@@ -426,9 +426,9 @@ class UsersController < ApplicationController
 
   def token_claims
     {
-      "aud" => ["admin", "staff"],
-      "verify_aud" => true, # can be used locally instead of a global setting
-      "exp_leeway" => 15 # will be used instead of default leeway only for exp claim
+      aud: ["admin", "staff"],
+      verify_aud: true, # can be used locally instead of a global setting
+      exp_leeway: 15 # will be used instead of default leeway only for exp claim
     }
   end
 end
