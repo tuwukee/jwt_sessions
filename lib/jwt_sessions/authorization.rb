@@ -48,10 +48,6 @@ module JWTSessions
       cookieless_auth(:access)
     end
 
-    def decode_access_token
-      @_raw_token = token_from_headers(:access, required: false) || token_from_cookies(:access, required: false)
-    end
-
     private
 
     def invalid_authorization
@@ -125,11 +121,21 @@ module JWTSessions
       @_raw_token
     end
 
+    def fetch_access_token
+      if respond_to?(:request_headers)
+        token = token_from_headers(:access, required: false)
+        return token if token
+      end
+
+      token_from_cookies(:access, required: false) if respond_to?(:request_cookies)
+    end
+
     def payload
       return @_payload if defined? @_payload
 
       claims = respond_to?(:token_claims) ? token_claims : {}
-      @_payload = found_token ? Token.decode(found_token, claims).first : {}
+      token = found_token || fetch_access_token
+      @_payload = token ? Token.decode(token, claims).first : {}
     end
 
     # retrieves tokens payload without JWT claims validation

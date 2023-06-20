@@ -1,3 +1,9 @@
+## 3.2.0 (June 20, 2023)
+
+Features:
+
+ - payload can be accessed without auth - it's going to be resolved into an empty hash.
+
 ## 3.1.1 (May 6, 2023)
 
 Bugfixes:

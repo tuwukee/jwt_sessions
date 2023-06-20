@@ -131,11 +131,9 @@ Helper methods within `Authorization` mixin:
 - **authorize_access_request!**: validates access token within the request.
 - **authorize_refresh_request!**: validates refresh token within the request.
 - **found_token**: a raw token found within the request.
-- **payload**: a decoded token's payload.
+- **payload**: a decoded token's payload. Returns an empty hash in case the token is absent in the request headers/cookies.
 - **claimless_payload**: a decoded token's payload without claims validation (can be used for checking data of an expired token).
 - **token_claims**: the method should be defined by a developer and is expected to return a hash-like object with claims to be validated within a token's payload.
-- **decode_access_token**: decodes header or cookie access token. Useful when validation is not required, but
-optional access to the payload is required
 
 ### Rails integration
 
