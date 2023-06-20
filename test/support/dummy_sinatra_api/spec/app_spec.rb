@@ -182,6 +182,39 @@ describe 'Sinatra Application' do
     end
   end
 
+  context 'allows accessing by cookies or headers' do
+    before { post '/api/v1/login', format: :json }
+
+    it 'has access to the payload by header' do
+      access_token = json(last_response.body)['access']
+      header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, access_token
+
+      get '/api/v1/payload_without_authorize', format: :json
+
+      expect(last_response).to be_ok
+      expect(json(last_response.body)['key']).to eq 'big access value'
+    end
+
+    it 'has access to the payload by cookie' do
+      access_token = json(last_response.body)['access']
+      csrf_token = json(last_response.body)['csrf']
+      set_cookie "#{JWTSessions.access_cookie}=#{access_token}"
+      header JWTSessions.csrf_header.downcase.gsub(/\s+/,'_').upcase, csrf_token
+
+      get '/api/v1/payload_without_authorize', format: :json
+
+      expect(last_response).to be_ok
+      expect(json(last_response.body)['key']).to eq 'big access value'
+    end
+  end
+
+  it 'does not raise error when accessing payload' do
+    get '/api/v1/nil_payload', format: :json
+
+    expect(last_response).to be_ok
+    expect(json(last_response.body)['key']).to be_nil
+  end
+
   it 'allows to access' do
     post '/api/v1/login', format: :json
     expect(last_response).to be_ok

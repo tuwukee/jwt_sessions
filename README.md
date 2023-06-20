@@ -134,6 +134,8 @@ Helper methods within `Authorization` mixin:
 - **payload**: a decoded token's payload.
 - **claimless_payload**: a decoded token's payload without claims validation (can be used for checking data of an expired token).
 - **token_claims**: the method should be defined by a developer and is expected to return a hash-like object with claims to be validated within a token's payload.
+- **decode_access_token**: decodes header or cookie access token. Useful when validation is not required, but
+optional access to the payload is required
 
 ### Rails integration
 

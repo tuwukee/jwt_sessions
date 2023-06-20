@@ -48,6 +48,10 @@ module JWTSessions
       cookieless_auth(:access)
     end
 
+    def decode_access_token
+      @_raw_token = token_from_headers(:access, required: false) || token_from_cookies(:access, required: false)
+    end
+
     private
 
     def invalid_authorization
@@ -102,16 +106,18 @@ module JWTSessions
       token
     end
 
-    def token_from_headers(token_type)
+    def token_from_headers(token_type, required: true)
       raw_token = request_headers[JWTSessions.header_by(token_type)] || ""
       token = raw_token.split(" ")[-1]
-      raise Errors::Unauthorized, "Token is not found" unless token
+      raise Errors::Unauthorized, "Token is not found" if !token && required
+
       token
     end
 
-    def token_from_cookies(token_type)
+    def token_from_cookies(token_type, required: true)
       token = request_cookies[JWTSessions.cookie_by(token_type)]
-      raise Errors::Unauthorized, "Token is not found" unless token
+      raise Errors::Unauthorized, "Token is not found" if !token && required
+
       token
     end
 
@@ -120,8 +126,10 @@ module JWTSessions
     end
 
     def payload
+      return @_payload if defined? @_payload
+
       claims = respond_to?(:token_claims) ? token_claims : {}
-      @_payload ||= Token.decode(found_token, claims).first
+      @_payload = found_token ? Token.decode(found_token, claims).first : {}
     end
 
     # retrieves tokens payload without JWT claims validation
