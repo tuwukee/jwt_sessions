@@ -6,6 +6,10 @@ require "jwt_sessions"
 class TestAuthorization < Minitest::Test
   include JWTSessions::Authorization
 
+  def setup
+    JWTSessions.signing_key = "abcdefghijklmnopqrstuvwxyzABCDEF"
+  end
+
   def test_payload_when_token_is_nil
     @_raw_token = nil
 
