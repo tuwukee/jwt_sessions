@@ -209,7 +209,7 @@ describe 'Sinatra Application' do
   end
 
   it 'does not raise error when accessing payload' do
-    get '/api/v1/nil_payload', format: :json
+    get '/api/v1/payload_without_authorize', format: :json
 
     expect(last_response).to be_ok
     expect(json(last_response.body)['key']).to be_nil

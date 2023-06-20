@@ -154,11 +154,6 @@ namespace "/api/v1" do
   end
 
   get "/payload_without_authorize" do
-    decode_access_token
-    payload.to_json
-  end
-
-  get "/nil_payload" do
     payload.to_json
   end
 end
