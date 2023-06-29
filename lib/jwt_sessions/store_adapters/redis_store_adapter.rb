@@ -80,7 +80,7 @@ module JWTSessions
 
       private
 
-      def configure_redis_client(redis_url: nil, redis_host: nil, redis_port: nil, redis_db_name: nil)
+      def configure_redis_client(redis_url: nil, redis_host: nil, redis_port: nil, redis_db_name: nil, redis_password: nil, redis_cluster: false)
         if redis_url && (redis_host || redis_port || redis_db_name)
           raise ArgumentError, "redis_url cannot be passed along with redis_host, redis_port or redis_db_name options"
         end
@@ -91,7 +91,14 @@ module JWTSessions
           redis_db_name: redis_db_name
         )
 
-        Redis.new(url: redis_url)
+        config = if redis_cluster
+                   { cluster: redis_url.split(','),
+                     password: redis_password }
+                 else
+                   { url: redis_url }
+                 end
+
+        Redis.new(config)
       end
 
       def build_redis_url(redis_host: nil, redis_port: nil, redis_db_name: nil)

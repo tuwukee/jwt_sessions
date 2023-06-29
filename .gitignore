@@ -5,3 +5,4 @@ test/dummy_api/tmp/
 test/support/.DS_Store
 Gemfile.lock
 .DS_Store
+.idea
