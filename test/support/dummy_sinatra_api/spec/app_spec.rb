@@ -182,6 +182,29 @@ describe 'Sinatra Application' do
     end
   end
 
+  context 'allows to refresh by access token with namespace' do
+    before { post '/api/v1/login_namespaced_with_refresh_by_access_allowed', format: :json }
+
+    it 'refreshes by headers' do
+      clear_cookies
+      access_token = json(last_response.body)['access']
+      header JWTSessions.access_header.downcase.gsub(/\s+/,'_').upcase, access_token
+      post '/api/v1/refresh_by_access_namespaced', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+
+    it 'refreshes by cookies' do
+      access_token = json(last_response.body)['access']
+      csrf_token = json(last_response.body)['csrf']
+      set_cookie "#{JWTSessions.access_cookie}=#{access_token}"
+      header JWTSessions.csrf_header.downcase.gsub(/\s+/,'_').upcase, csrf_token
+      post '/api/v1/refresh_by_access_namespaced', format: :json
+      expect(last_response).to be_ok
+      expect(json(last_response.body).keys.sort).to eq REFRESH_KEYS
+    end
+  end
+
   context 'allows accessing by cookies or headers' do
     before { post '/api/v1/login', format: :json }
 
