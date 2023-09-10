@@ -55,11 +55,11 @@ module JWTSessions
     end
 
     def refresh_by_access_invalid?
-      should_check_csrf? && @_csrf_check && !JWTSessions::Session.new.valid_access_request?(retrieve_csrf, claimless_payload)
+      @_csrf_check && should_check_csrf? && !JWTSessions::Session.new.valid_access_request?(retrieve_csrf, claimless_payload)
     end
 
     def check_csrf(token_type)
-      invalid_authorization if should_check_csrf? && @_csrf_check && !valid_csrf_token?(retrieve_csrf, token_type)
+      invalid_authorization if @_csrf_check && should_check_csrf? && !valid_csrf_token?(retrieve_csrf, token_type)
     end
 
     def should_check_csrf?
