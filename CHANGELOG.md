@@ -1,3 +1,9 @@
+## 3.2.1 (September 11, 2023)
+
+Support:
+
+ - switched the positions of #should_check_csrf? and @_csrf_check in the code logic for the sake of minor perf improvement.
+
 ## 3.2.0 (June 20, 2023)
 
 Features:
