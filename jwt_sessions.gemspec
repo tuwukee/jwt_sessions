@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 $LOAD_PATH.push File.expand_path("../lib", __FILE__)
 
 require "jwt_sessions/version"
@@ -25,9 +26,9 @@ Gem::Specification.new do |s|
     "bug_tracker_uri" => "https://github.com/tuwukee/jwt_sessions/issues"
   }
 
-  s.add_dependency "jwt", "~> 2.6", "< 3"
+  s.add_dependency "jwt", ">= 2.8", "< 3"
 
-  s.add_development_dependency "bundler", ">= 1.16"
-  s.add_development_dependency "rake", "~> 12.3"
-  s.add_development_dependency "rspec", "~> 3.11"
+  s.add_development_dependency "bundler", ">= 2"
+  s.add_development_dependency "rake", "~> 13.1"
+  s.add_development_dependency "rspec", "~> 3.13"
 end
