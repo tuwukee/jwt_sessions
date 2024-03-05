@@ -35,17 +35,17 @@ class TestRedisStoreAdapter < Minitest::Test
   def test_default_url
     adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new
 
-    assert_equal "redis://127.0.0.1:6379/0", adapter.storage.config.server_url
+    assert_equal "redis://127.0.0.1:6379", adapter.storage.config.server_url
   end
 
   def test_url_with_env_var
     ENV["REDIS_URL"] = "redis://locallol:2018/"
     adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new
-    assert_equal "redis://locallol:2018/0", adapter.storage.config.server_url
+    assert_equal "redis://locallol:2018", adapter.storage.config.server_url
 
     ENV.delete("REDIS_URL")
     adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new
-    assert_equal "redis://127.0.0.1:6379/0", adapter.storage.config.server_url
+    assert_equal "redis://127.0.0.1:6379", adapter.storage.config.server_url
   end
 
   def test_configuration_via_host_port_and_db
@@ -68,13 +68,13 @@ class TestRedisStoreAdapter < Minitest::Test
 
   def test_configuration_via_redis_url
     adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new(redis_url: "redis://127.0.0.2:6322")
-    assert_equal "redis://127.0.0.2:6322/0", adapter.storage.config.server_url
+    assert_equal "redis://127.0.0.2:6322", adapter.storage.config.server_url
   end
 
   def test_configuration_via_redis_url_in_module
-    JWTSessions.redis_url = "redis://127.0.0.2:6322"
+    JWTSessions.redis_url = "redis://127.0.0.2:6323"
     adapter = JWTSessions::StoreAdapters::RedisStoreAdapter.new
-    assert_equal "redis://127.0.0.2:6322/0", adapter.storage.config.server_url
+    assert_equal "redis://127.0.0.2:6323", adapter.storage.config.server_url
   end
 
   def test_configuration_via_redis_client
