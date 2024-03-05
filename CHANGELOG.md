@@ -1,3 +1,10 @@
+## 3.2.2 (March 5, 2024)
+
+Support:
+
+ - upgrade `jwt` to 2.8 in dependencies
+ - upgrade development dependencies
+
 ## 3.2.1 (September 11, 2023)
 
 Support:

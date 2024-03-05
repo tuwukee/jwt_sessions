@@ -7,7 +7,7 @@ require "jwt_sessions/version"
 Gem::Specification.new do |s|
   s.name        = "jwt_sessions"
   s.version     = JWTSessions::VERSION
-  s.date        = "2023-09-11"
+  s.date        = "2024-03-05"
   s.summary     = "JWT Sessions"
   s.description = "XSS/CSRF safe JWT auth designed for SPA"
   s.authors     = ["Julija Alieckaja"]
