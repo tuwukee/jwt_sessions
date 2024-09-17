@@ -2,7 +2,6 @@
 [![Gem Version](https://badge.fury.io/rb/jwt_sessions.svg)](https://badge.fury.io/rb/jwt_sessions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/53de11b8334933b1c0ef/maintainability)](https://codeclimate.com/github/tuwukee/jwt_sessions/maintainability)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6ba02043e42144a9af96c9675207a5c4)](https://www.codacy.com/gh/tuwukee/jwt_sessions/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tuwukee/jwt_sessions&amp;utm_campaign=Badge_Grade)
-[![Build Status](https://travis-ci.org/tuwukee/jwt_sessions.svg?branch=master)](https://travis-ci.org/tuwukee/jwt_sessions)
 
 XSS/CSRF safe JWT auth designed for SPA
 
