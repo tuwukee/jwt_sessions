@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
     "bug_tracker_uri" => "https://github.com/tuwukee/jwt_sessions/issues"
   }
 
-  s.add_dependency "jwt", ">= 2.8", "< 3"
+  s.add_dependency "jwt", ">= 2.9", "< 3"
 
   s.add_development_dependency "bundler", ">= 2"
   s.add_development_dependency "rake", "~> 13.1"

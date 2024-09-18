@@ -68,7 +68,11 @@ module JWTSessions
   end
 
   def algorithm=(algo)
-    raise Errors::Malconfigured, "algorithm #{algo} is not supported" unless supported_algos.include?(algo)
+    unless algo == NONE
+      algorithm = JWT::JWA.resolve(algo)
+      raise Errors::Malconfigured, "algorithm #{algo} is not supported" unless algorithm
+    end
+
     @algorithm = algo
   end
 
