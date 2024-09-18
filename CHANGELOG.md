@@ -1,4 +1,4 @@
-## 3.2.3 (Septemper 17, 2024)
+## 3.2.3 (Septemper 18, 2024)
 
 Support:
 
