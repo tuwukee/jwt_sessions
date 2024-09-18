@@ -68,7 +68,8 @@ module JWTSessions
   end
 
   def algorithm=(algo)
-    raise Errors::Malconfigured, "algorithm #{algo} is not supported" unless supported_algos.include?(algo)
+    raise Errors::Malconfigured, "algorithm #{algo} is not supported" unless JWT::JWA.resolve(algo)
+
     @algorithm = algo
   end
 
@@ -150,12 +151,5 @@ module JWTSessions
 
   def cookie_by(token_type)
     send("#{token_type}_cookie")
-  end
-
-  private
-
-  def supported_algos
-    algos = JWT::JWA::ALGOS - [JWT::JWA::Unsupported]
-    algos.map { |algo| algo::SUPPORTED }.flatten + [NONE]
   end
 end

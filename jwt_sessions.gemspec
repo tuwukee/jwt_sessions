@@ -7,7 +7,7 @@ require "jwt_sessions/version"
 Gem::Specification.new do |s|
   s.name        = "jwt_sessions"
   s.version     = JWTSessions::VERSION
-  s.date        = "2024-03-05"
+  s.date        = "2024-09-18"
   s.summary     = "JWT Sessions"
   s.description = "XSS/CSRF safe JWT auth designed for SPA"
   s.authors     = ["Julija Alieckaja"]
@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
     "bug_tracker_uri" => "https://github.com/tuwukee/jwt_sessions/issues"
   }
 
-  s.add_dependency "jwt", ">= 2.8", "< 3"
+  s.add_dependency "jwt", ">= 2.9", "< 3"
 
   s.add_development_dependency "bundler", ">= 2"
   s.add_development_dependency "rake", "~> 13.1"

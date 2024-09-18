@@ -1,3 +1,9 @@
+## 3.2.3 (Septemper 18, 2024)
+
+Support:
+
+ - add support for `jwt` to 2.9 version
+
 ## 3.2.2 (March 5, 2024)
 
 Support:
