@@ -1,3 +1,9 @@
+## 3.2.4 (Septemper 21, 2024)
+
+Support:
+
+ - always pass token claims when verifying session
+
 ## 3.2.3 (Septemper 18, 2024)
 
 Support:
