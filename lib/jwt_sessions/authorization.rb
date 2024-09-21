@@ -79,11 +79,11 @@ module JWTSessions
     end
 
     def valid_csrf_token?(csrf_token, token_type)
-      JWTSessions::Session.new(claims).valid_csrf?(found_token, csrf_token, token_type)
+      JWTSessions::Session.new(session_claims).valid_csrf?(found_token, csrf_token, token_type)
     end
 
     def session_exists?(token_type)
-      JWTSessions::Session.new(claims).session_exists?(found_token, token_type)
+      JWTSessions::Session.new(session_claims).session_exists?(found_token, token_type)
     end
 
     def cookieless_auth(token_type)
@@ -151,10 +151,11 @@ module JWTSessions
       check_csrf(token_type)
     end
 
-    def claims
+    def session_claims
+      claims = respond_to?(:token_claims) ? token_claims : {}
       {
-        access_claims: token_claims,
-        refresh_claims: token_claims
+        access_claims: claims,
+        refresh_claims: claims
       }
     end
   end
