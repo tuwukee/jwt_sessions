@@ -49,7 +49,7 @@ All tokens are encoded and decoded by [ruby-jwt](https://github.com/jwt/ruby-jwt
 Put this line in your Gemfile:
 
 ```ruby
-gem "jwt_sessions"
+gem "jwt_sessions", "~> 3.2", ">= 3.2.2"
 ```
 
 Then run:
