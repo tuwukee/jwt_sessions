@@ -5,11 +5,16 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
-
+rails_version = ENV.fetch("RAILS_VERSION", "~> 7.0")
 # Bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem "rails", ENV.fetch("RAILS_VERSION", "~> 6.0")
+gem "rails", rails_version
 # Use sqlite3 as the database for Active Record
-gem "sqlite3", "~> 1.4"
+if rails_version.include?("~> 7.0")
+  gem "sqlite3", "~> 1.4.4"
+else
+  gem "sqlite3", "~> 2.8.1"
+end
+
 # Use Puma as the app server
 gem "puma", ">= 4.0"
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -18,6 +23,7 @@ gem "puma", ">= 4.0"
 # gem "redis", "~> 3.0"
 # Use ActiveModel has_secure_password
 gem "bcrypt", "~> 3.1.7"
+gem "observer", "~> 0.1.2"
 
 gem "jwt"
 gem "redis"
