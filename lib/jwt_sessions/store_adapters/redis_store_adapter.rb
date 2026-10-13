@@ -7,6 +7,15 @@ module JWTSessions
 
       REFRESH_KEYS = %i[csrf access_uid access_expiration expiration].freeze
       DEFAULT_POOL_SIZE = 5
+      # Updates a refresh token only while it exists, so that a refresh which
+      # races a flush cannot write the flushed token back.
+      UPDATE_REFRESH_SCRIPT = <<~LUA
+        if redis.call("EXISTS", KEYS[1]) == 0 then
+          return 0
+        end
+        redis.call("HMSET", KEYS[1], "csrf", ARGV[1], "access_expiration", ARGV[2], "access_uid", ARGV[3])
+        return 1
+      LUA
 
       def initialize(token_prefix: JWTSessions.token_prefix, redis_client: nil, **options)
         @prefix = token_prefix
@@ -51,24 +60,27 @@ module JWTSessions
 
       def persist_refresh(uid:, access_expiration:, access_uid:, csrf:, expiration:, namespace: nil)
         key = full_refresh_key(uid, namespace)
-        update_refresh(
-          uid: uid,
-          access_expiration: access_expiration,
-          access_uid: access_uid,
-          csrf: csrf,
-          namespace: namespace
+        storage.call("HMSET",
+          key,
+          :csrf, csrf,
+          :access_expiration, access_expiration,
+          :access_uid, access_uid,
+          :expiration, expiration
         )
-        storage.call("HSET", key, :expiration, expiration)
         storage.call("EXPIREAT", key, expiration)
       end
 
       def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: nil)
-        storage.call("HMSET",
+        updated = storage.call(
+          "EVAL",
+          UPDATE_REFRESH_SCRIPT,
+          1,
           full_refresh_key(uid, namespace),
-          :csrf, csrf,
-          :access_expiration, access_expiration,
-          :access_uid, access_uid
+          csrf,
+          access_expiration,
+          access_uid
         )
+        updated == 1
       end
 
       def all_refresh_tokens(namespace)

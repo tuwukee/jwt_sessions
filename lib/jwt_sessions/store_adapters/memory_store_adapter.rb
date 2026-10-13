@@ -46,6 +46,8 @@ module JWTSessions
       end
 
       def update_refresh(uid:, access_expiration:, access_uid:, csrf:, namespace: "")
+        return false if value_if_not_expired(uid, "refresh", namespace.to_s).empty?
+
         update_refresh_fields(
           uid,
           namespace.to_s,
@@ -53,6 +55,7 @@ module JWTSessions
           access_expiration: access_expiration,
           access_uid: access_uid
         )
+        true
       end
 
       def all_refresh_tokens(namespace)

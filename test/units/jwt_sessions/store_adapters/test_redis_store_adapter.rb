@@ -11,6 +11,55 @@ class TestRedisStoreAdapter < Minitest::Test
     JWTSessions.remove_instance_variable(:@redis_url) if JWTSessions.instance_variable_defined?(:@redis_url)
   end
 
+  def test_update_refresh
+    store = JWTSessions::StoreAdapters::RedisStoreAdapter.new
+    expiration = Time.now.to_i + 3600
+    store.persist_refresh(
+      uid: "uid",
+      access_expiration: expiration,
+      access_uid: "access_uid",
+      csrf: "csrf",
+      expiration: expiration,
+      namespace: "update_refresh"
+    )
+
+    assert store.update_refresh(
+      uid: "uid",
+      access_expiration: expiration,
+      access_uid: "access_uid",
+      csrf: "csrf2",
+      namespace: "update_refresh"
+    )
+    assert_equal "csrf2", store.fetch_refresh("uid", "update_refresh")[:csrf]
+  ensure
+    store.destroy_refresh("uid", "update_refresh")
+  end
+
+  def test_update_refresh_after_destroy
+    store = JWTSessions::StoreAdapters::RedisStoreAdapter.new
+    expiration = Time.now.to_i + 3600
+    store.persist_refresh(
+      uid: "uid",
+      access_expiration: expiration,
+      access_uid: "access_uid",
+      csrf: "csrf",
+      expiration: expiration,
+      namespace: "update_refresh_after_destroy"
+    )
+    store.destroy_refresh("uid", "update_refresh_after_destroy")
+
+    refute store.update_refresh(
+      uid: "uid",
+      access_expiration: expiration,
+      access_uid: "access_uid",
+      csrf: "csrf2",
+      namespace: "update_refresh_after_destroy"
+    )
+    assert_empty store.storage.call("KEYS", "#{store.prefix}_update_refresh_after_destroy_*")
+  ensure
+    store.destroy_refresh("uid", "update_refresh_after_destroy")
+  end
+
   def test_error_on_mixed_redis_options
     assert_raises ArgumentError do
       JWTSessions::StoreAdapters::RedisStoreAdapter.new(

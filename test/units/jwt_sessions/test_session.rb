@@ -336,6 +336,21 @@ class TestSession < Minitest::Test
     assert_equal 0, session.flush_namespaced_access_tokens
   end
 
+  def test_refresh_after_concurrent_flush
+    refresh_token = tokens[:refresh]
+    racing_store = JWTSessions.token_store.dup
+    racing_store.define_singleton_method(:update_refresh) do |**fields|
+      JWTSessions::Session.new.flush_by_token(refresh_token)
+      super(**fields)
+    end
+    racing_session = JWTSessions::Session.new(payload: payload, store: racing_store)
+
+    assert_raises JWTSessions::Errors::Unauthorized do
+      racing_session.refresh(refresh_token)
+    end
+    assert_empty RedisClient.new.call("KEYS", "jwt_*")
+  end
+
   def test_flush_all
     refresh_token = @session.instance_variable_get(:"@_refresh")
     flushed_count = JWTSessions::Session.flush_all

@@ -20,6 +20,8 @@ module JWTSessions
         raise NotImplementedError
       end
 
+      # Return false when the refresh token no longer exists. A refresh then
+      # fails instead of writing back a token that a flush has just removed.
       def update_refresh(_uid:, _access_expiration:, _access_uid:, _csrf:, _namespace:)
         raise NotImplementedError
       end

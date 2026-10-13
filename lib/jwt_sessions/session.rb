@@ -221,7 +221,12 @@ module JWTSessions
     end
 
     def update_refresh_token
-      @_refresh.update(@_access.uid, @_access.expiration, @_csrf.encoded)
+      updated = @_refresh.update(@_access.uid, @_access.expiration, @_csrf.encoded)
+      if updated == false
+        AccessToken.destroy(@_access.uid, store)
+        raise Errors::Unauthorized, "Refresh token not found"
+      end
+
       @refresh_token = @_refresh.token
       link_access_to_refresh
     end

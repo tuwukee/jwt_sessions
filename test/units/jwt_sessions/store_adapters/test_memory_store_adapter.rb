@@ -60,7 +60,7 @@ class TestMemoryStoreAdapter < Minitest::Test
       expiration: expiration,
       namespace: ""
     )
-    store.update_refresh(
+    assert store.update_refresh(
       uid: "uid",
       access_expiration: expiration,
       access_uid: "access_uid",
@@ -69,6 +69,28 @@ class TestMemoryStoreAdapter < Minitest::Test
     )
     refresh = store.fetch_refresh("uid", "")
     assert_equal "csrf2", refresh[:csrf]
+  end
+
+  def test_update_refresh_after_destroy
+    expiration = Time.now.to_i + 3600
+    store.persist_refresh(
+      uid: "uid",
+      access_expiration: expiration,
+      access_uid: "access_uid",
+      csrf: "csrf",
+      expiration: expiration,
+      namespace: ""
+    )
+    store.destroy_refresh("uid", "")
+
+    refute store.update_refresh(
+      uid: "uid",
+      access_expiration: expiration,
+      access_uid: "access_uid",
+      csrf: "csrf2",
+      namespace: ""
+    )
+    assert_equal({}, store.fetch_refresh("uid", ""))
   end
 
   def test_all_refresh_tokens
