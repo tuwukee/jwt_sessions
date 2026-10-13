@@ -20,6 +20,8 @@ class TestAuthorization < Minitest::Test
   def teardown
     JWTSessions.jwt_options[:verify_iss] = false
     JWTSessions.jwt_options[:verify_aud] = false
+
+    JWTSessions::Session.flush_all
   end
 
   def test_payload_when_token_is_nil
