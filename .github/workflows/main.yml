@@ -10,8 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.3']
-        rails: ['6.1', '7.0']
+        ruby: ['3.3', '4.0']
+        rails: ['7.0', '8.1']
         # exclude:
         #  - ruby: '3.1'
         #    rails: '6.0'
@@ -26,7 +26,7 @@ jobs:
         options: --entrypoint redis-server
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
