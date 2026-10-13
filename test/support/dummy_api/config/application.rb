@@ -19,8 +19,5 @@ require 'jwt_sessions'
 
 module DummyApi
   class Application < Rails::Application
-    if Rails::VERSION::MAJOR == 5
-      config.active_record.sqlite3.represent_boolean_as_integer = true
-    end
   end
 end
