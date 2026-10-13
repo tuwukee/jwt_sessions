@@ -58,28 +58,28 @@ namespace "/api/v1" do
 
   post "/refresh" do
     authorize_refresh_request!
-    access_payload = payload.merge({ key: "reloaded access value" })
+    access_payload = payload.merge({ "key" => "reloaded access value" })
     session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
     session.refresh(found_token).to_json
   end
 
   post "/refresh_by_cookies" do
     authorize_by_refresh_cookie!
-    access_payload = payload.merge({ key: "new access value" })
+    access_payload = payload.merge({ "key" => "new access value" })
     session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
     session.refresh(found_token).to_json
   end
 
   post "/refresh_by_headers" do
     authorize_by_refresh_header!
-    access_payload = payload.merge({ key: "a little shy access value" })
+    access_payload = payload.merge({ "key" => "a little shy access value" })
     session = JWTSessions::Session.new(payload: access_payload, refresh_payload: payload)
     session.refresh(found_token).to_json
   end
 
   post "/refresh_by_access" do
     authorize_refresh_by_access_request!
-    access_payload = payload.merge({ key: "a big brave access value" })
+    access_payload = payload.merge({ "key" => "a big brave access value" })
     session = JWTSessions::Session.new(
       payload: access_payload,
       refresh_payload: payload,
@@ -90,7 +90,7 @@ namespace "/api/v1" do
 
   post "/refresh_by_access_by_cookies" do
     authorize_refresh_by_access_cookie!
-    access_payload = payload.merge({ key: "such many auth methods much wow access value" })
+    access_payload = payload.merge({ "key" => "such many auth methods much wow access value" })
     session = JWTSessions::Session.new(
       payload: access_payload,
       refresh_payload: payload,
@@ -101,7 +101,7 @@ namespace "/api/v1" do
 
   post "/refresh_by_access_by_headers" do
     authorize_refresh_by_access_header!
-    access_payload = payload.merge({ key: "yet another access value" })
+    access_payload = payload.merge({ "key" => "yet another access value" })
     session = JWTSessions::Session.new(
       payload: access_payload,
       refresh_payload: payload,
@@ -126,7 +126,7 @@ namespace "/api/v1" do
 
   post "/refresh_namespaced" do
     authorize_refresh_request!
-    access_payload = payload.merge({ key: "reloaded hellooo" })
+    access_payload = payload.merge({ "key" => "reloaded hellooo" })
 
     namespace = "custom-namespace"
     session = JWTSessions::Session.new(
@@ -153,7 +153,7 @@ namespace "/api/v1" do
 
   post "/refresh_by_access_namespaced" do
     authorize_refresh_by_access_request!
-    access_payload = payload.merge({ key: "reloaded guten tag" })
+    access_payload = payload.merge({ "key" => "reloaded guten tag" })
 
     namespace = "custom-namespace"
     session = JWTSessions::Session.new(

@@ -7,9 +7,9 @@ end
 
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem "rails", ENV.fetch("RAILS_VERSION", "~> 6.0")
+gem "rails", ENV.fetch("RAILS_VERSION", "~> 8.0")
 # Use sqlite3 as the database for Active Record
-gem "sqlite3", "~> 1.4"
+gem "sqlite3", ">= 2.1"
 # Use Puma as the app server
 gem "puma", ">= 4.0"
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -31,19 +31,12 @@ gem "redis"
 eval_gemfile "../dummy_sinatra_api/Gemfile"
 
 group :development, :test do
-  gem "rspec-rails", ">= 4.0"
-  gem "factory_bot_rails", "~> 4.8"
+  gem "rspec-rails", ">= 7.0"
+  gem "factory_bot_rails", "~> 6.4"
   gem "capybara"
   gem "rb-readline"
   gem "minitest"
   gem "rack-test"
-end
-
-group :development do
-  gem "listen", ">= 3.0.5", "< 3.2"
-  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem "spring"
-  gem "spring-watcher-listen", "~> 2.0.0"
 end
 
 group :test do
