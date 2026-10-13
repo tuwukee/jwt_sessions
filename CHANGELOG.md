@@ -1,3 +1,14 @@
+## 3.3.0 (October 13, 2026)
+
+Fixes:
+
+ - do not restore a flushed refresh token during a refresh; a refresh racing a flush now raises `Unauthorized`
+
+Support:
+
+ - `update_refresh` of a store adapter returns `false` when the refresh token no longer exists
+ - test against Ruby 4.0 and Rails 8.0 / 8.1
+
 ## 3.2.4 (Septemper 21, 2024)
 
 Support:
