@@ -20,6 +20,9 @@ class TestAuthorization < Minitest::Test
   def teardown
     JWTSessions.jwt_options[:verify_iss] = false
     JWTSessions.jwt_options[:verify_aud] = false
+
+    redis = RedisClient.new
+    redis.call("KEYS", "jwt_*").each { |k| redis.call("DEL", k) }
   end
 
   def test_payload_when_token_is_nil
