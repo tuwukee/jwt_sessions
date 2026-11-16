@@ -405,7 +405,7 @@ JWTSessions.private_key = "abcd"
 JWTSessions.public_key  = "efjh"
 ```
 
-NOTE: ED25519 and HS512256 require `rbnacl` installation in order to make it work.
+NOTE: with `jwt` 2.x, ED25519 and HS512256 require `rbnacl` installation in order to make it work. `jwt` 3.x drops HS512256, and ED25519 requires the [`jwt-eddsa`](https://github.com/jwt/ruby-jwt-eddsa) gem.
 
 jwt_sessions only uses `exp` claim by default when it decodes tokens and you can specify which additional claims to use by
 setting `jwt_options`. You can also specify leeway to account for clock skew.
