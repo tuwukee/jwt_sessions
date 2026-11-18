@@ -1,3 +1,10 @@
+## 3.4.0 (November 16, 2026)
+
+Support:
+
+ - allow `jwt` 3.x (`>= 2.9, < 4`)
+ - with `jwt` 3.x, HS512256 is not supported and ED25519 requires the `jwt-eddsa` gem; keep `jwt` below 3 to use HS512256
+
 ## 3.3.0 (October 13, 2026)
 
 Fixes:
